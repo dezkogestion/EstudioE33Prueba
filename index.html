@@ -109,7 +109,7 @@ section{padding-block:80px;border-bottom:1px solid var(--rule)}
 .desk{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:32px;align-items:start}
 .desk > *{min-width:0}
 @media (max-width:1080px){.desk{grid-template-columns:1fr}}
-.wiz-nav{list-style:none;margin:0 0 12px;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.wiz-nav{list-style:none;margin:0 0 12px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .wiz-nav button{width:100%;display:flex;align-items:center;gap:10px;background:transparent;border:0;border-top:3px solid var(--rule);padding:10px 2px 4px;cursor:pointer;text-align:left;color:var(--dim)}
 .wiz-nav .n{font-family:var(--font-mono);font-size:12px}
 .wiz-nav .l{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -369,6 +369,20 @@ footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;m
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:520px){.two{grid-template-columns:1fr}}
 .err{color:var(--red);font-size:13px}
+/* Formulario dentro del último paso (antes era una ventana aparte) */
+.req-card.inline{width:auto;max-height:none;overflow:visible;box-shadow:none;padding:20px}
+.sub{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 0 12px;font-size:18px;font-weight:600}
+.sub .mono,.opt summary .mono{color:var(--dim);font-size:12px;font-weight:400}
+.opt{border-top:1px solid var(--rule);margin-top:20px;padding-top:14px}
+.opt summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:18px;font-weight:600}
+.opt summary::-webkit-details-marker{display:none}
+.opt summary::before{content:"+";font-family:var(--font-mono);color:var(--red);margin-right:10px}
+.opt[open] summary::before{content:"−"}
+.opt summary span:first-child{flex:1}
+.opt[open] summary{margin-bottom:14px}
+.nodate{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin-top:12px;padding:12px 14px;border:1.5px dashed var(--rule);border-radius:var(--r-md,10px);background:transparent;color:var(--paper);text-align:left;cursor:pointer}
+.nodate small{color:var(--dim);font-size:13px}
+.nodate[aria-pressed="true"]{border-style:solid;border-color:var(--red);background:var(--panel-2)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100% - 32px);background:var(--red);color:var(--on-red);padding:10px 16px;z-index:40;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 
 /* ===== Controles modernos: formas redondeadas, sin sombra dura ===== */
@@ -490,39 +504,62 @@ footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;m
               <div style="display:flex;gap:8px"><button class="key ghost sm" id="c-prev" type="button" data-t="ag.prev"></button><button class="key ghost sm" id="c-next" type="button" data-t="ag.next"></button></div>
             </div>
             <div class="tl-wrap"><div class="tl" id="cal"></div></div>
+            <button type="button" class="nodate" id="no-date" aria-pressed="false"><b data-t="ag.nodate"></b><small data-t="ag.nodate2"></small></button>
             <div class="legend mono"><span><i style="border:1px dashed var(--soft)"></i><span data-t="ag.libre"></span></span><span><i style="background:repeating-linear-gradient(135deg,var(--panel-2) 0 4px,var(--hatch) 4px 8px);border:1px solid var(--rule)"></i><span data-t="ag.res"></span></span><span><i style="background:var(--red)"></i><span data-t="ag.tu"></span></span></div>
           </div>
         </div>
         <div class="mod" data-step="2">
-          <div class="mod-h"><b data-t="w.2"></b><span class="mono" id="crew-n"></span></div>
+          <div class="mod-h"><b data-t="w.2"></b><span class="mono" data-t="w.2s"></span></div>
           <div class="mod-b">
-            <p class="hint" data-t="crew.hint"></p>
+            <p class="hint" data-t="det.hint"></p>
+            <h4 class="sub"><span data-t="det.crew"></span><span class="mono" id="crew-n"></span></h4>
             <div class="crew" id="crew"></div>
             <div class="room"><div class="seats" id="seats" aria-hidden="true"></div><div class="room-n"><b class="num" id="ppl">0</b><span data-t="crew.personas"></span></div></div>
             <div class="room-msg" id="room-msg"></div>
+            <details class="opt">
+              <summary><span data-t="det.gear"></span><span class="mono" id="ch-count"></span></summary>
+              <p class="hint" data-t="ch.hint"></p>
+              <div class="presets" id="presets" role="group"></div>
+              <div class="strips" id="gear"></div>
+            </details>
+            <details class="opt">
+              <summary><span data-t="det.post"></span><span class="mono" id="post-n"></span></summary>
+              <p class="hint" data-t="post.hint"></p>
+              <div class="sends" id="prod"></div>
+              <div class="combo" id="combo" hidden></div>
+            </details>
           </div>
         </div>
         <div class="mod" data-step="3">
-          <div class="mod-h"><b data-t="w.3"></b><span class="mono" id="ch-count"></span></div>
+          <div class="mod-h"><b data-t="w.3"></b><span class="mono" data-t="w.3s"></span></div>
           <div class="mod-b">
-            <p class="hint" data-t="ch.hint"></p>
-            <div class="presets" id="presets" role="group"></div>
-            <div class="strips" id="gear"></div>
-          </div>
-        </div>
-        <div class="mod" data-step="4">
-          <div class="mod-h"><b data-t="w.4"></b><span class="mono" data-t="mod.d2"></span></div>
-          <div class="mod-b">
-            <p class="hint" data-t="post.hint"></p>
-            <div class="sends" id="prod"></div>
-            <div class="combo" id="combo" hidden></div>
+            <form class="req-card inline" id="req-f" novalidate>
+              <div id="req-form-body" style="display:flex;flex-direction:column;gap:14px">
+                <div class="two">
+                  <label for="r-name"><span data-t="rq.name"></span><input id="r-name" required autocomplete="name"></label>
+                  <label for="r-phone"><span>WhatsApp</span><input id="r-phone" required inputmode="tel" autocomplete="tel" placeholder="+57 300 000 0000"></label>
+                </div>
+                <label for="r-mail"><span data-t="rq.mail"></span><input id="r-mail" type="email" required autocomplete="email"></label>
+                <label for="r-notes"><span data-t="rq.notes"></span><textarea id="r-notes" rows="3"></textarea></label>
+                <!-- Trampa para robots: una persona no ve este campo; si llega lleno, la solicitud se descarta. -->
+                <input id="r-web" name="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+                <div class="wait" data-t="rq.wait"></div>
+                <div class="err" id="r-err" hidden></div>
+                <button class="key" type="submit" id="r-send" style="justify-content:center" data-t="rq.send"></button>
+              </div>
+              <div id="req-done" hidden style="display:flex;flex-direction:column;gap:12px">
+                <p style="margin:0" id="done-msg"></p>
+                <pre id="r-summary"></pre>
+                <div style="display:flex;gap:12px;flex-wrap:wrap"><button class="key" type="button" id="r-copy" data-t="rq.copy"></button><a class="key ghost" id="r-wa" target="_blank" rel="noopener" data-t="rq.wa"></a></div>
+              </div>
+            </form>
           </div>
         </div>
         <div class="wiz-foot"><button class="key ghost" type="button" id="w-prev" data-t="w.prev"></button><span class="mono" id="w-pos"></span><button class="key" type="button" id="w-next"></button></div>
       </div>
 
       <aside class="sheet" aria-live="polite">
-        <div class="sheet-h"><h3>Track sheet</h3><div class="id"><span id="sh-id">E33-—</span><br>Estudio E33 · MDE</div></div>
+        <div class="sheet-h"><h3 data-t="f.h"></h3><div class="id"><span id="sh-id">E33-—</span><br>Estudio E33 · MDE</div></div>
         <div class="fields">
           <div><span data-t="f.formato"></span><b id="fd-mode">—</b></div>
           <div><span data-t="f.ing"></span><b id="fd-eng">—</b></div>
@@ -572,43 +609,26 @@ footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;m
 
 <div class="lb" id="lb" hidden><img id="lb-img" alt=""><button class="key" id="lb-x" type="button" data-t="ui.cerrar"></button></div>
 
-<div class="req" id="req" hidden role="dialog" aria-modal="true" aria-labelledby="req-t">
-  <form class="req-card" id="req-f" novalidate>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3 id="req-t" data-t="rq.h"></h3><button class="key ghost" type="button" id="req-x" data-t="ui.cerrar"></button></div>
-    <div id="req-form-body" style="display:flex;flex-direction:column;gap:14px">
-      <div class="two">
-        <label for="r-name"><span data-t="rq.name"></span><input id="r-name" required autocomplete="name"></label>
-        <label for="r-phone"><span>WhatsApp</span><input id="r-phone" required inputmode="tel" autocomplete="tel" placeholder="+57 300 000 0000"></label>
-      </div>
-      <label for="r-mail"><span data-t="rq.mail"></span><input id="r-mail" type="email" required autocomplete="email"></label>
-      <label for="r-rider"><span data-t="rq.rider"></span><textarea id="r-rider" rows="3" required></textarea></label>
-      <fieldset class="fs"><legend data-t="rq.miss"></legend>
-        <label class="rd" for="m-cot"><input type="radio" name="miss" id="m-cot" value="cot" checked><span data-t="rq.m1"></span></label>
-        <label class="rd" for="m-own"><input type="radio" name="miss" id="m-own" value="own"><span data-t="rq.m2"></span></label>
-        <label class="rd" for="m-ask"><input type="radio" name="miss" id="m-ask" value="ask"><span data-t="rq.m3"></span></label>
-      </fieldset>
-      <label for="r-notes"><span data-t="rq.notes"></span><textarea id="r-notes" rows="2"></textarea></label>
-      <div class="wait" data-t="rq.wait"></div>
-      <div class="err" id="r-err" hidden></div>
-      <button class="key" type="submit" style="justify-content:center" data-t="rq.send"></button>
-    </div>
-    <div id="req-done" hidden style="display:flex;flex-direction:column;gap:12px">
-      <p style="margin:0" id="done-msg"></p>
-      <pre id="r-summary"></pre>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><button class="key" type="button" id="r-copy" data-t="rq.copy"></button><a class="key ghost" id="r-wa" target="_blank" rel="noopener" data-t="rq.wa"></a></div>
-    </div>
-  </form>
-</div>
 
 <script>
 /* ===== Configuración — en producción los datos llegan desde API_URL (Apps Script + Google Sheet) ===== */
-const CONFIG = { API_URL:"", WHATSAPP:"", EMAIL:"", TRM:3158.43, TRM_FECHA:"26/10/2026" };
+const CONFIG = { API_URL:"https://script.google.com/macros/s/AKfycbx9cLHwrPOLAUiXp6sRrLw4YKqUxLonstDrNxrGDsS7ZsBL-yAjZTIlaY4hhpgOfyL-pg/exec", WHATSAPP:"", EMAIL:"", TRM:3158.43, TRM_FECHA:"26/10/2026" };
 const IMAGES = {"control": "assets/img/control.jpg", "sala": "assets/img/sala.jpg", "lounge": "assets/img/lounge.jpg", "terraza": "assets/img/terraza.jpg", "vista": "assets/img/vista.jpg", "barra": "assets/img/barra.jpg"};
 const THUMBS = {"control": "assets/img/thumbs/control.jpg", "sala": "assets/img/thumbs/sala.jpg", "lounge": "assets/img/thumbs/lounge.jpg", "terraza": "assets/img/thumbs/terraza.jpg", "vista": "assets/img/thumbs/vista.jpg", "barra": "assets/img/thumbs/barra.jpg"};
 
 /* ===== Textos ES / EN ===== */
 const I18N = {
 es:{
+ "f.h":"Tu sesión",
+ "w.needdate":"Elige un día libre en la agenda, o toca «Todavía no tengo fecha».",
+ "ag.nodate2":"Envía la solicitud igual y la coordinamos por WhatsApp.",
+ "ag.nodate":"Todavía no tengo fecha",
+ "det.post":"Mezcla y máster",
+ "det.gear":"Equipo que vas a usar",
+ "det.crew":"¿Cuántas personas vienen?",
+ "det.hint":"Todo esto es opcional: nos ayuda a tener la sala lista. Si no lo sabes todavía, sigue al último paso.",
+ "w.3s":"Último paso",
+ "w.2s":"Opcional",
  "nav.consola":"Arma tu sesión","nav.sala":"La sala y rider","nav.agenda":"Agenda","nav.reservar":"Cómo reservar","nav.sala":"La sala","nav.rider":"Rider",
  "hero.eyebrow":"Estudio de grabación y producción",
  "hero.title":"Estudio E33<em>.</em>",
@@ -616,19 +636,19 @@ es:{
  "hero.cta1":"Arma tu sesión","hero.cta2":"Cómo reservar",
  "facts.desde":"Desde","facts.mic":"Micrófono","facts.mon":"Monitoreo",
  "camps.h":"Elige un punto de partida","camps.h2":"3 formatos",
- "cons.mk":"Consola","cons.mk2":"Paso a paso","cons.h":"Arma tu sesión","cons.p":"Cinco pasos cortos. A la derecha ves el resumen y el precio mientras eliges.","w.0":"Formato","w.0s":"Precios sin IVA","w.1":"Fecha y hora","w.2":"Quiénes vienen","w.3":"Equipo","w.4":"Mezcla y máster","w.prev":"Atrás","w.next":"Siguiente","w.nextto":"Siguiente: {s}","w.summary":"Ver resumen","w.then":"Después: {s}","w.last":"Último paso","w.done":"Revisar y enviar","w.of":"Paso {a} de {b}","tab.fotos":"Fotos","tab.rider":"Rider técnico",
+ "cons.mk":"Consola","cons.mk2":"Paso a paso","cons.h":"Arma tu sesión","cons.p":"Cuatro pasos cortos. A la derecha ves el resumen y el precio mientras eliges.","w.0":"¿Qué sesión?","w.0s":"USD · sin IVA","w.1":"¿Cuándo?","w.2":"Detalles","w.3":"Tus datos","w.4":"Mezcla y máster","w.prev":"Atrás","w.next":"Siguiente","w.nextto":"Siguiente: {s}","w.summary":"Ver resumen","w.then":"Después: {s}","w.last":"Último paso","w.done":"Revisar y enviar","w.of":"Paso {a} de {b}","tab.fotos":"Fotos","tab.rider":"Rider técnico",
  "mod.a":"A · Formato","mod.a2":"USD sin / con ingeniero","mod.b":"B · Tiempo","mod.crew":"C · Crew","mod.c":"D · Canales","mod.d":"E · Post","mod.d2":"Por canción",
  "tg.eng":"Con ingeniero","tg.eng2":"Operación y captura","tg.night":"Horario nocturno","tg.night2":"22:00–06:00 · +25 %",
  "time.horas":"Horas","time.extra":"Horas extra","time.paq":"10 horas","time.paqtxt":"Se agendan por separado durante 60 días","time.pick":"Elige un espacio libre en la agenda de abajo","time.change":"cambiar","time.none":"Sin franja",
  "crew.hint":"Cuéntanos cuántas personas vienen a la sesión para preparar el espacio.","crew.personas":"personas",
  "crew.ok":"Cómodo para la sala de control.","crew.lounge":"Más de {c} personas: usaremos también lounge y terraza.","crew.max":"Más de {m} personas: escríbenos antes para confirmar si podemos recibirlos.",
- "ch.hint":"Todo el equipo viene con la sala. Activa los canales que vas a usar y lo dejamos conectado antes de que llegues.","ch.free":"Libre","ch.act":"activos","ch.act1":"activo",
+ "ch.hint":"Todo el equipo viene con la sala. Marca lo que vas a usar y lo dejamos conectado antes de que llegues. Si traes o necesitas algo más, cuéntalo en el último paso.","ch.free":"Libre","ch.act":"elegidos","ch.act1":"elegido",
  "post.hint":"Indica cuántas canciones llevan cada proceso. Las que llevan mezcla y máster pagan el precio combo; el resto se cobra por separado.",
  "post.cancion":"canción","post.combo":"Combo en {n} {c} · {p} c/u","post.ahorro":"ahorras {s}","post.canciones":"canciones","post.solomz":"Solo mezcla","post.soloms":"Solo máster","post.cb":"Mezcla + máster","post.none":"Sin post",
- "f.formato":"Formato","f.ing":"Ingeniero","f.crew":"Crew","f.post":"Post","f.slot":"Fecha / franja","f.canales":"Canales","f.siniva":"SIN IVA","f.go":"Enviar solicitud",
- "f.warn":"Esto no confirma la reserva. Te respondemos en máximo 24 horas hábiles.","f.trm":"Pesos de referencia con TRM {t} ({d}). Se liquida con la TRM del día del pago.","f.anticipo":"Anticipo","f.tbd":"Por definir","f.paq":"10 h en 60 días","f.none":"Sube un canal en la consola.","f.si":"Sí","f.no":"No",
+ "f.formato":"Formato","f.ing":"Ingeniero","f.crew":"Personas","f.post":"Mezcla y máster","f.slot":"Fecha","f.canales":"Equipo","f.siniva":"SIN IVA","f.go":"Revisar y enviar →",
+ "f.warn":"Esto no confirma la reserva. Te respondemos en máximo 24 horas hábiles.","f.trm":"Pesos de referencia con TRM {t} ({d}). Se liquida con la TRM del día del pago.","f.anticipo":"Anticipo","f.tbd":"Por coordinar","f.paq":"10 h en 60 días","f.none":"Sube un canal en la consola.","f.si":"Sí","f.no":"No",
  "ln.horas":"{h} h × {r}","ln.noct":" · nocturno","ln.extra":"{h} h extra",
- "ag.mk":"Agenda","ag.h":"Disponibilidad","ag.p":"Cada franja es una pista. Toca un espacio libre para llevarlo a tu track sheet. La reserva se confirma con el anticipo.","ag.prev":"← Semana","ag.next":"Semana →","ag.libre":"Libre","ag.res":"Reservado","ag.tu":"Tu sesión","ag.pista":"Pista","ag.ej":"Agenda de ejemplo","ag.sync":"Sincronizado con el calendario del estudio","ag.toast":"Franja en tu track sheet","ag.dia":"día completo",
+ "ag.mk":"Agenda","ag.h":"Disponibilidad","ag.p":"Cada franja es una pista. Toca un espacio libre para llevarlo a tu track sheet. La reserva se confirma con el anticipo.","ag.prev":"← Semana","ag.next":"Semana →","ag.libre":"Libre","ag.res":"Reservado","ag.tu":"Tu sesión","ag.pista":"Franja","ag.ej":"Agenda de ejemplo","ag.sync":"Sincronizado con el calendario del estudio","ag.toast":"Fecha elegida","ag.dia":"día completo",
  "rs.mk":"Reservar","rs.mk2":"Paso a paso","rs.h":"Cómo reservar","rs.p":"Sabemos que coordinar una sesión tiene muchas piezas. Así funciona, para que sepas en todo momento en qué va tu solicitud.",
  "rs.s":[["Nos cuentas tu idea","Arma tu sesión, elige una franja y cuéntanos el rider que necesitas. No hace falta tener todo resuelto: si tienes dudas, déjalas en las notas.","Tú","2 min","Solicitud enviada"],["Revisamos con calma","Validamos agenda, ingeniero, espacio y equipo. Mientras tanto, la franja queda apartada para ti y nadie más puede tomarla.","E33","Hasta 24 h hábiles","En revisión"],["Te escribimos","Por WhatsApp y correo, con el valor final. Si algo de tu rider no está en sala, te proponemos cotizarlo o que lo traigas.","E33","Mismo día","Propuesta enviada"],["Confirmas con el anticipo","Envías el 50 % y el comprobante. Tienes 48 h desde nuestra respuesta; si necesitas más tiempo, avísanos.","Tú","48 h","Confirmada"],["Llegas a crear","Todo conectado y listo cuando entres. El saldo se paga antes de empezar.","Tú + E33","Día de sesión","En sesión"]],
  "rs.note":"<b>¿Dudas antes de enviar?</b> Escríbenos por WhatsApp y te ayudamos a armar la sesión.","rs.you":"Tú","rs.us":"Nosotros",
@@ -636,15 +656,25 @@ es:{
  "ri.mk":"Rider","ri.mk2":"Se actualiza con el inventario","ri.h":"Rider técnico","ri.p":"Equipo operativo en sala. Si necesitas algo que no está, inclúyelo en tu solicitud.",
  "co.mk":"Condiciones","co.mk2":"Antes de reservar","co.h":"Reglas claras","co.1":"de anticipo para reservar la franja. El saldo se paga antes de empezar.","co.2":"de aviso para cancelar: el anticipo queda como crédito. Con menos aviso no se reembolsa.","co.3":"Precios en USD sin IVA. En pesos se liquida con la TRM del día del pago.","co.4":"mínimo en el formato por hora. Los bloques y jornadas admiten horas extra.",
  "ui.cerrar":"Cerrar","ui.wa":"WhatsApp por confirmar","ui.mail":"Correo por confirmar",
- "rq.h":"Solicitar reserva","rq.name":"Nombre artístico","rq.mail":"Correo","rq.rider":"Rider que necesitas","rq.miss":"Si algo de tu rider no está en el estudio","rq.m1":"Quiero que E33 me lo cotice","rq.m2":"Lo llevo yo","rq.m3":"Prefiero hablarlo","rq.notes":"Notas para el ingeniero",
+ "rq.h":"Solicitar reserva","rq.name":"Nombre artístico","rq.mail":"Correo","rq.rider":"Rider que necesitas","rq.miss":"Si algo de tu rider no está en el estudio","rq.m1":"Quiero que E33 me lo cotice","rq.m2":"Lo llevo yo","rq.m3":"Prefiero hablarlo","rq.notes":"¿Algo más que debamos saber?",
  "rq.wait":"Al enviar, tu franja queda <b>en espera</b>. No está reservada hasta que te confirmemos (máximo 24 h hábiles) y recibamos el anticipo.","rq.send":"Enviar solicitud","rq.copy":"Copiar resumen","rq.wa":"Abrir WhatsApp",
- "rq.err":"Completa nombre, WhatsApp, un correo válido y el rider que necesitas.","rq.ok":"<b>Solicitud recibida.</b> Tu franja queda en espera. Revisamos agenda y rider y te respondemos por WhatsApp y correo en máximo 24 horas hábiles. La reserva se confirma con el anticipo.","rq.no":"<b>Tu solicitud aún no se envió.</b> Copia este resumen y mándalo por WhatsApp. Te respondemos en máximo 24 horas hábiles; la reserva se confirma con el anticipo.","rq.copied":"Resumen copiado","rq.select":"Selecciona y copia el texto",
- "rq.ph.rider":"Ej.: 2 micrófonos de voz, interfaz con 4 entradas, guitarra…","rq.ph.notes":"Referencias, número de voces, archivos que traes…",
- "sum.sol":"SOLICITUD","sum.art":"Artista","sum.mail":"Correo","sum.fmt":"Formato","sum.con":"con ingeniero","sum.sin":"sin ingeniero","sum.fr":"Franja","sum.crew":"Crew","sum.ch":"Canales","sum.tot":"Total sin IVA","sum.rider":"Rider solicitado","sum.miss":"Si falta equipo","sum.notes":"Notas",
+ "rq.err":"Completa tu nombre, tu WhatsApp y un correo válido.","rq.ok":"<b>Solicitud recibida.</b> Tu franja queda en espera. Revisamos agenda y rider y te respondemos por WhatsApp y correo en máximo 24 horas hábiles. La reserva se confirma con el anticipo.","rq.no":"<b>Tu solicitud aún no se envió.</b> Copia este resumen y mándalo por WhatsApp. Te respondemos en máximo 24 horas hábiles; la reserva se confirma con el anticipo.","rq.copied":"Resumen copiado","rq.select":"Selecciona y copia el texto",
+ "rq.ph.rider":"Ej.: 2 micrófonos de voz, interfaz con 4 entradas, guitarra…","rq.ph.notes":"Equipo que traes o que te falta, referencias, número de voces…",
+ "sum.sol":"SOLICITUD","sum.art":"Artista","sum.mail":"Correo","sum.fmt":"Formato","sum.con":"con ingeniero","sum.sin":"sin ingeniero","sum.fr":"Fecha","sum.crew":"Personas","sum.ch":"Equipo","sum.tot":"Total sin IVA","sum.rider":"Rider solicitado","sum.miss":"Si falta equipo","sum.notes":"Notas",
  "miss.cot":"Cotizarlo con E33","miss.own":"Lo llevo yo","miss.ask":"Lo hablamos",
  "theme":"Cambiar tema"
 },
 en:{
+ "f.h":"Your session",
+ "w.needdate":"Pick an open day in the schedule, or tap “I don't have a date yet”.",
+ "ag.nodate2":"Send the request anyway and we'll set it up on WhatsApp.",
+ "ag.nodate":"I don't have a date yet",
+ "det.post":"Mixing and mastering",
+ "det.gear":"Gear you'll use",
+ "det.crew":"How many people are coming?",
+ "det.hint":"All of this is optional: it helps us get the room ready. If you're not sure yet, skip to the last step.",
+ "w.3s":"Last step",
+ "w.2s":"Optional",
  "nav.consola":"Build your session","nav.sala":"Room and rider","nav.agenda":"Schedule","nav.reservar":"How to book","nav.sala":"The room","nav.rider":"Rider",
  "hero.eyebrow":"Recording and production studio",
  "hero.title":"Estudio E33<em>.</em>",
@@ -652,19 +682,19 @@ en:{
  "hero.cta1":"Build your session","hero.cta2":"How to book",
  "facts.desde":"From","facts.mic":"Microphone","facts.mon":"Monitoring",
  "camps.h":"Pick a starting point","camps.h2":"3 formats",
- "cons.mk":"Console","cons.mk2":"Step by step","cons.h":"Build your session","cons.p":"Five short steps. Your summary and price update on the right as you choose.","w.0":"Format","w.0s":"Prices without VAT","w.1":"Date and time","w.2":"Who's coming","w.3":"Gear","w.4":"Mixing and mastering","w.prev":"Back","w.next":"Next","w.nextto":"Next: {s}","w.summary":"See summary","w.then":"Then: {s}","w.last":"Last step","w.done":"Review and send","w.of":"Step {a} of {b}","tab.fotos":"Photos","tab.rider":"Tech rider",
+ "cons.mk":"Console","cons.mk2":"Step by step","cons.h":"Build your session","cons.p":"Four short steps. Your summary and price update on the right as you choose.","w.0":"Which session?","w.0s":"USD · no VAT","w.1":"When?","w.2":"Details","w.3":"Your details","w.4":"Mixing and mastering","w.prev":"Back","w.next":"Next","w.nextto":"Next: {s}","w.summary":"See summary","w.then":"Then: {s}","w.last":"Last step","w.done":"Review and send","w.of":"Step {a} of {b}","tab.fotos":"Photos","tab.rider":"Tech rider",
  "mod.a":"A · Format","mod.a2":"USD without / with engineer","mod.b":"B · Time","mod.crew":"C · Crew","mod.c":"D · Channels","mod.d":"E · Post","mod.d2":"Per song",
  "tg.eng":"With engineer","tg.eng2":"Session operation and capture","tg.night":"Night hours","tg.night2":"22:00–06:00 · +25 %",
  "time.horas":"Hours","time.extra":"Extra hours","time.paq":"10 hours","time.paqtxt":"Booked separately within 60 days","time.pick":"Pick an open slot in the schedule below","time.change":"change","time.none":"No slot",
  "crew.hint":"Tell us how many people are coming so we can set up the space.","crew.personas":"people",
  "crew.ok":"Comfortable for the control room.","crew.lounge":"More than {c} people: we'll also open the lounge and terrace.","crew.max":"More than {m} people: message us first to confirm we can host you.",
- "ch.hint":"All gear comes with the room. Turn on the channels you'll use and we'll have them connected before you arrive.","ch.free":"Custom","ch.act":"active","ch.act1":"active",
+ "ch.hint":"All gear comes with the room. Tick what you'll use and we'll have it connected before you arrive. If you're bringing or need anything else, tell us in the last step.","ch.free":"Custom","ch.act":"selected","ch.act1":"selected",
  "post.hint":"Set how many songs get each process. Songs with both mixing and mastering get the combo price; the rest are charged separately.",
  "post.cancion":"song","post.combo":"Combo on {n} {c} · {p} each","post.ahorro":"you save {s}","post.canciones":"songs","post.solomz":"Mixing only","post.soloms":"Mastering only","post.cb":"Mix + master","post.none":"No post",
- "f.formato":"Format","f.ing":"Engineer","f.crew":"Crew","f.post":"Post","f.slot":"Date / slot","f.canales":"Channels","f.siniva":"NO VAT","f.go":"Send request",
- "f.warn":"This does not confirm your booking. We reply within 24 business hours.","f.trm":"Peso reference at TRM {t} ({d}). Charged at the rate on the payment date.","f.anticipo":"Deposit","f.tbd":"To be set","f.paq":"10 h within 60 days","f.none":"Turn on a channel in the console.","f.si":"Yes","f.no":"No",
+ "f.formato":"Format","f.ing":"Engineer","f.crew":"People","f.post":"Mixing & mastering","f.slot":"Date","f.canales":"Gear","f.siniva":"NO VAT","f.go":"Review and send →",
+ "f.warn":"This does not confirm your booking. We reply within 24 business hours.","f.trm":"Peso reference at TRM {t} ({d}). Charged at the rate on the payment date.","f.anticipo":"Deposit","f.tbd":"To be arranged","f.paq":"10 h within 60 days","f.none":"Turn on a channel in the console.","f.si":"Yes","f.no":"No",
  "ln.horas":"{h} h × {r}","ln.noct":" · night","ln.extra":"{h} extra h",
- "ag.mk":"Schedule","ag.h":"Availability","ag.p":"Each slot is a track. Tap an open space to add it to your track sheet. Your booking is confirmed with the deposit.","ag.prev":"← Week","ag.next":"Week →","ag.libre":"Open","ag.res":"Booked","ag.tu":"Your session","ag.pista":"Track","ag.ej":"Sample schedule","ag.sync":"Synced with the studio calendar","ag.toast":"Slot added to your track sheet","ag.dia":"full day",
+ "ag.mk":"Schedule","ag.h":"Availability","ag.p":"Each slot is a track. Tap an open space to add it to your track sheet. Your booking is confirmed with the deposit.","ag.prev":"← Week","ag.next":"Week →","ag.libre":"Open","ag.res":"Booked","ag.tu":"Your session","ag.pista":"Slot","ag.ej":"Sample schedule","ag.sync":"Synced with the studio calendar","ag.toast":"Date selected","ag.dia":"full day",
  "rs.mk":"Booking","rs.mk2":"Step by step","rs.h":"How to book","rs.p":"We know a session has a lot of moving parts. Here's how it works, so you always know where your request stands.",
  "rs.s":[["Tell us your idea","Build your session, pick a slot and share the rider you need. You don't need everything figured out: leave any questions in the notes.","You","2 min","Request sent"],["We review it","We check the schedule, engineer, space and gear. Meanwhile the slot is held for you and no one else can take it.","E33","Within 24 business h","Under review"],["We get back to you","By WhatsApp and email, with the final price. If something on your rider isn't in the room, we'll offer a quote or you can bring it.","E33","Same day","Proposal sent"],["Confirm with the deposit","Send 50 % and the receipt. You have 48 h from our reply; if you need more time, just tell us.","You","48 h","Confirmed"],["Walk in and create","Everything patched in and ready when you arrive. The balance is paid before you start.","You + E33","Session day","In session"]],
  "rs.note":"<b>Questions before you send?</b> Message us on WhatsApp and we'll help you put the session together.","rs.you":"You","rs.us":"Us",
@@ -672,11 +702,11 @@ en:{
  "ri.mk":"Rider","ri.mk2":"Updated from inventory","ri.h":"Tech rider","ri.p":"Working gear in the room. If you need something that isn't listed, add it to your request.",
  "co.mk":"Terms","co.mk2":"Before you book","co.h":"Clear rules","co.1":"deposit to hold the slot. The balance is paid before you start.","co.2":"notice to cancel: your deposit stays as credit. With less notice it's non-refundable.","co.3":"Prices in USD, VAT not included. Peso payments use the TRM on the payment date.","co.4":"minimum on the hourly format. Blocks and full days allow extra hours.",
  "ui.cerrar":"Close","ui.wa":"WhatsApp to be confirmed","ui.mail":"Email to be confirmed",
- "rq.h":"Request a booking","rq.name":"Artist name","rq.mail":"Email","rq.rider":"Rider you need","rq.miss":"If something on your rider isn't at the studio","rq.m1":"I'd like E33 to quote it","rq.m2":"I'll bring it","rq.m3":"Let's talk about it","rq.notes":"Notes for the engineer",
+ "rq.h":"Request a booking","rq.name":"Artist name","rq.mail":"Email","rq.rider":"Rider you need","rq.miss":"If something on your rider isn't at the studio","rq.m1":"I'd like E33 to quote it","rq.m2":"I'll bring it","rq.m3":"Let's talk about it","rq.notes":"Anything else we should know?",
  "rq.wait":"Once sent, your slot is <b>on hold</b>. It isn't booked until we confirm (within 24 business hours) and receive your deposit.","rq.send":"Send request","rq.copy":"Copy summary","rq.wa":"Open WhatsApp",
- "rq.err":"Fill in your name, WhatsApp, a valid email and the rider you need.","rq.ok":"<b>Request received.</b> Your slot is on hold. We'll review the schedule and rider and reply by WhatsApp and email within 24 business hours. Your booking is confirmed with the deposit.","rq.no":"<b>Your request hasn't been sent yet.</b> Copy this summary and send it by WhatsApp. We reply within 24 business hours; your booking is confirmed with the deposit.","rq.copied":"Summary copied","rq.select":"Select and copy the text",
- "rq.ph.rider":"E.g. 2 vocal mics, 4-input interface, guitar…","rq.ph.notes":"References, number of vocalists, files you're bringing…",
- "sum.sol":"REQUEST","sum.art":"Artist","sum.mail":"Email","sum.fmt":"Format","sum.con":"with engineer","sum.sin":"without engineer","sum.fr":"Slot","sum.crew":"Crew","sum.ch":"Channels","sum.tot":"Total, no VAT","sum.rider":"Requested rider","sum.miss":"If gear is missing","sum.notes":"Notes",
+ "rq.err":"Fill in your name, your WhatsApp and a valid email.","rq.ok":"<b>Request received.</b> Your slot is on hold. We'll review the schedule and rider and reply by WhatsApp and email within 24 business hours. Your booking is confirmed with the deposit.","rq.no":"<b>Your request hasn't been sent yet.</b> Copy this summary and send it by WhatsApp. We reply within 24 business hours; your booking is confirmed with the deposit.","rq.copied":"Summary copied","rq.select":"Select and copy the text",
+ "rq.ph.rider":"E.g. 2 vocal mics, 4-input interface, guitar…","rq.ph.notes":"Gear you're bringing or missing, references, number of vocalists…",
+ "sum.sol":"REQUEST","sum.art":"Artist","sum.mail":"Email","sum.fmt":"Format","sum.con":"with engineer","sum.sin":"without engineer","sum.fr":"Date","sum.crew":"People","sum.ch":"Gear","sum.tot":"Total, no VAT","sum.rider":"Requested rider","sum.miss":"If gear is missing","sum.notes":"Notes",
  "miss.cot":"Quote it with E33","miss.own":"I'll bring it","miss.ask":"Let's talk",
  "theme":"Switch theme"
 }};
@@ -725,7 +755,7 @@ let DATA = {
 
 /* ===== Estado ===== */
 const S = { lang:"es", mode:"bloque", eng:true, night:false, hours:2, extra:0, crew:{art:1,prod:0,acomp:1},
-  eq:new Set(["MIC-001","MON-001","AUD-003","SOP-001"]), prod:{mezcla:1, master:1}, preset:2, slot:null, week:0, step:0, tab:"fotos" };
+  eq:new Set(["MIC-001","MON-001","AUD-003","SOP-001"]), prod:{mezcla:1, master:1}, preset:2, slot:null, sinFecha:false, week:0, step:0, tab:"fotos" };
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad = n => String(n).padStart(2,"0");
@@ -741,7 +771,7 @@ function applyStatic(){
   document.querySelectorAll("[data-t]").forEach(el => { el.innerHTML = T(el.dataset.t); });
   document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === S.lang));
   $("#theme").setAttribute("aria-label", T("theme"));
-  $("#r-rider").placeholder = T("rq.ph.rider"); $("#r-notes").placeholder = T("rq.ph.notes");
+  $("#r-notes").placeholder = T("rq.ph.notes");
   $("#flow").innerHTML = T("rs.s").map(([b,p,w,tm,st],i)=>{ const us = w === "E33";
     return `<li class="${us?"us":""}"><div class="node" aria-hidden="true">${pad(i+1)}</div><div class="st mono">${esc(st)}</div><div class="card"><div class="meta mono"><span class="who ${us?"us":""}">${us?T("rs.us"):esc(w)}</span><span>${esc(tm)}</span></div><b>${esc(b)}</b><p>${esc(p)}</p></div></li>`; }).join("");
   $("#flow-note").innerHTML = T("rs.note") + (CONFIG.WHATSAPP ? ` <span class="mono">+${esc(CONFIG.WHATSAPP)}</span>` : "");
@@ -793,16 +823,19 @@ function render(){
   $("#hours-l").textContent = S.mode === "hora" ? T("time.horas") : S.mode === "paquete" ? T("time.paq") : T("time.extra");
   $("#hours").textContent = S.mode === "hora" ? S.hours : S.extra;
   const sl = slotLabel();
-  $("#slot-l").innerHTML = S.mode === "paquete" ? T("time.paqtxt") : sl ? `<b>${esc(sl)}</b>` : T("time.pick");
+  $("#slot-l").innerHTML = S.mode === "paquete" ? T("time.paqtxt") : sl ? `<b>${esc(sl)}</b>` : S.sinFecha ? `<b>${T("ag.nodate")}</b>` : T("time.pick");
+  $("#no-date").setAttribute("aria-pressed", S.sinFecha); $("#no-date").hidden = S.mode === "paquete";
   // wizard
   document.querySelectorAll(".mod[data-step]").forEach(m => m.classList.toggle("on", +m.dataset.step === S.step));
-  const steps = [0,1,2,3,4].map(i => T("w."+i));
+  const steps = [0,1,2,3].map(i => T("w."+i)), last = steps.length - 1;
   $("#wiz-nav").innerHTML = steps.map((s,i)=>`<li><button type="button" data-step-go="${i}" aria-current="${i===S.step?"step":"false"}" class="${i<S.step?"done":""}"><span class="n">${i+1}</span><span class="l">${esc(s)}</span></button></li>`).join("");
   $("#w-prev").disabled = S.step === 0;
-  const nxt = S.step === 4 ? T("w.done") : T("w.nextto",{s:steps[S.step+1]}) + " →";
+  const nxt = S.step === last ? T("rq.send") : T("w.nextto",{s:steps[S.step+1]}) + " →";
   $("#w-next").textContent = nxt; $("#mb-next").textContent = nxt;
-  $("#w-pos").textContent = T("w.of",{a:S.step+1,b:5});
-  $("#wiz-cap").innerHTML = `<b>${T("w.of",{a:S.step+1,b:5})} · ${esc(steps[S.step])}</b><span>${S.step<4 ? T("w.then",{s:esc(steps[S.step+1])}) : T("w.last")}</span>`;
+  $("#w-next").hidden = S.step === last; // en el último paso manda el botón del formulario
+  $("#go").hidden = S.step === last;
+  $("#w-pos").textContent = T("w.of",{a:S.step+1,b:steps.length});
+  $("#wiz-cap").innerHTML = `<b>${T("w.of",{a:S.step+1,b:steps.length})} · ${esc(steps[S.step])}</b><span>${S.step<last ? T("w.then",{s:esc(steps[S.step+1])}) : T("w.last")}</span>`;
 
   // crew
   $("#crew").innerHTML = DATA.crew.map(c => `<div class="send"><div><b>${esc(L(c,"label"))}</b><small>${esc(L(c,"desc"))}</small></div><div class="step"><button type="button" data-cr="${c.id}" data-d="-1" aria-label="− ${esc(L(c,"label"))}">−</button><output class="num">${S.crew[c.id]||0}</output><button type="button" data-cr="${c.id}" data-d="1" aria-label="+ ${esc(L(c,"label"))}">+</button></div></div>`).join("");
@@ -847,12 +880,13 @@ function render(){
   $("#fd-eng").textContent = S.eng ? T("f.si") : T("f.no");
   $("#fd-crew").textContent = `${n} ${T("crew.personas")}`;
   $("#fd-post").textContent = c.songs ? `${c.songs} ${c.songs>1?T("post.canciones"):T("post.cancion")}` : T("post.none");
-  $("#fd-slot").textContent = S.mode==="paquete" ? T("f.paq") : sl || T("f.tbd");
+  $("#post-n").textContent = $("#fd-post").textContent;
+  $("#fd-slot").textContent = S.mode==="paquete" ? T("f.paq") : sl || (S.sinFecha ? T("f.tbd") : "—");
   $("#lines").innerHTML = c.lines.map(([l,v])=>`<div class="ln"><span>${esc(l)}</span><span class="num">${fmtUSD(v)}</span></div>`).join("");
   $("#t-usd").textContent = fmtUSD(c.usd); $("#mb-usd").textContent = fmtUSD(c.usd);
   $("#t-cop").innerHTML = `≈ ${fmtCOP(c.usd*CONFIG.TRM)}<br>${T("f.anticipo")} ${fmtUSD(Math.ceil(c.usd/2))}`;
   $("#trm-note").textContent = T("f.trm",{t:CONFIG.TRM.toLocaleString("es-CO"),d:CONFIG.TRM_FECHA});
-  $("#sh-id").textContent = sessionId();
+  $("#sh-id").textContent = ""; // el código lo da la hoja al recibir la solicitud
   $("#f-from").textContent = fmtUSD(DATA.tarifas.hora.sin) + " / h";
   renderCal();
 }
@@ -870,10 +904,12 @@ function renderCal(){
   const dn = d => d.toLocaleDateString(loc(),{weekday:"short"}).replace(".","");
   let html = `<div class="corner mono">${T("ag.pista")}</div>` + days.map(d=>`<div class="ruler ${iso(d)===today?"today":""}"><span class="mono" style="color:var(--dim)">${dn(d)}</span><b class="num">${pad(d.getDate())}</b></div>`).join("");
   DATA.franjas.forEach((f,i) => {
-    html += `<div class="trkname"><b>TR${i+1} · ${esc(L(f,"n"))}</b><small>${esc(f.label)}</small></div>`;
+    html += `<div class="trkname"><b>${esc(L(f,"n"))}</b><small>${esc(f.label)}</small></div>`;
     days.forEach(d => {
-      const ds = iso(d), b = busy(ds,f.id), sel = S.slot && S.slot.date===ds && (S.slot.fr===f.id || S.slot.fr==="dia");
-      html += `<div class="lane"><button type="button" class="rg ${b?"busy":""} ${sel?"sel":""}" ${b?"disabled":""} data-d="${ds}" data-f="${f.id}" aria-label="${dn(d)} ${d.getDate()} ${f.label} ${b?T("ag.res"):T("ag.libre")}">${b?T("ag.res"):sel?T("ag.tu"):T("ag.libre")}</button></div>`;
+      // Hoy, una franja que ya empezó no se puede pedir.
+      const ds = iso(d), pasada = ds===today && new Date().getHours() >= (parseInt(f.label,10)||0), b = pasada || busy(ds,f.id), sel = S.slot && S.slot.date===ds && (S.slot.fr===f.id || S.slot.fr==="dia");
+      const txt = pasada ? "—" : b ? T("ag.res") : sel ? T("ag.tu") : T("ag.libre");
+      html += `<div class="lane"><button type="button" class="rg ${b?"busy":""} ${sel?"sel":""}" ${b?"disabled":""} data-d="${ds}" data-f="${f.id}" aria-label="${dn(d)} ${d.getDate()} ${f.label} ${pasada?"":b?T("ag.res"):T("ag.libre")}">${txt}</button></div>`;
     });
   });
   $("#cal").innerHTML = html;
@@ -912,7 +948,7 @@ function nudge(){ ["#w-next","#mb-next"].forEach(s => { const b = $(s); b.classL
 document.addEventListener("click", e => {
   if (e.target.closest(".mod [data-mode], .mod .rg:not(.busy), .mod [data-cr], .mod [data-eq], .mod [data-preset], .mod [data-pd]")) setTimeout(nudge, 0);
   const sg = e.target.closest("[data-step-go]");
-  if (sg){ S.step = +sg.dataset.stepGo; render(); return; }
+  if (sg){ irA(+sg.dataset.stepGo); return; }
   const tb = e.target.closest("[data-tab]");
   if (tb){ S.tab = tb.dataset.tab; renderTabs(); return; }
   const lg = e.target.closest("[data-lang]");
@@ -932,11 +968,19 @@ document.addEventListener("click", e => {
   const cr = e.target.closest("[data-cr]");
   if (cr){ const id = cr.dataset.cr; S.crew[id] = Math.max(0, Math.min(20, (S.crew[id]||0) + +cr.dataset.d)); render(); return; }
   const sl = e.target.closest(".rg:not(.busy)");
-  if (sl){ S.slot = { date:sl.dataset.d, fr: S.mode==="jornada" ? "dia" : sl.dataset.f }; if (S.mode==="paquete") S.mode = "bloque"; render(); toast(T("ag.toast")); return; }
+  if (sl){ S.slot = { date:sl.dataset.d, fr: S.mode==="jornada" ? "dia" : sl.dataset.f }; S.sinFecha = false; if (S.mode==="paquete") S.mode = "bloque"; render(); toast(T("ag.toast")); return; }
+  if (e.target.closest("#no-date")){ S.sinFecha = !S.sinFecha; if (S.sinFecha) S.slot = null; render(); if (S.sinFecha) nudge(); return; }
   const fig = e.target.closest(".fr");
   if (fig && fig.dataset.tipo !== "video"){ openLb(fig); return; }
 });
-function goNext(){ if (S.step < 4){ S.step++; render(); $(".wiz").scrollIntoView({block:"start"}); } else $("#go").click(); }
+/* Para pasar de «¿Cuándo?» hace falta una fecha o decir que todavía no la hay: sin eso no se aparta nada en la agenda. */
+const fechaLista = () => S.mode === "paquete" || !!S.slot || S.sinFecha;
+function irA(n){
+  if (n > 1 && !fechaLista()){ S.step = 1; render(); $(".wiz").scrollIntoView({block:"start"}); toast(T("w.needdate")); return; }
+  S.step = Math.max(0, Math.min(3, n)); render(); $(".wiz").scrollIntoView({block:"start"});
+  if (S.step === 3 && !$("#req-form-body").hidden) setTimeout(() => $("#r-name").focus({preventScroll:true}), 50);
+}
+function goNext(){ if (S.step < 3) irA(S.step + 1); else $("#req-f").requestSubmit(); }
 $("#w-prev").addEventListener("click", () => { S.step = Math.max(0, S.step-1); render(); $(".wiz").scrollIntoView({block:"start"}); });
 $("#w-next").addEventListener("click", goNext);
 $("#mb-next").addEventListener("click", goNext);
@@ -964,7 +1008,7 @@ $("#theme").addEventListener("click", () => {
 function openLb(fig){ const im = fig.querySelector("img"); if (!im) return; $("#lb-img").src = im.src; $("#lb-img").alt = im.alt; $("#lb").hidden = false; $("#lb-x").focus(); }
 $("#lb").addEventListener("click", e => { if (e.target.id !== "lb-img") $("#lb").hidden = true; });
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape"){ $("#lb").hidden = true; $("#req").hidden = true; }
+  if (e.key === "Escape") $("#lb").hidden = true;
   if (e.key === "Enter" && e.target.matches(".fr")) openLb(e.target);
 });
 
@@ -976,38 +1020,35 @@ function summary(f){
     `${T("sum.fmt")}: ${L(DATA.tarifas[S.mode],"label")} ${S.eng?T("sum.con"):T("sum.sin")}`,
     `${T("sum.fr")}: ${slotLabel() || T("f.tbd")}`, `${T("sum.crew")}: ${people()} (${crew})`, `${T("sum.ch")}: ${sel.join(", ") || "—"}`,
     ...c.lines.map(([l,v])=>`· ${l}: ${fmtUSD(v)}`), `${T("sum.tot")}: ${fmtUSD(c.usd)} (≈ ${fmtCOP(c.usd*CONFIG.TRM)})`,
-    `${T("sum.rider")}: ${f.rider}`, `${T("sum.miss")}: ${T("miss."+f.miss)}`,
     f.notes ? `${T("sum.notes")}: ${f.notes}` : ""].filter(Boolean).join("\n");
 }
-$("#go").addEventListener("click", () => {
-  $("#req").hidden = false; $("#req-form-body").hidden = false; $("#req-done").hidden = true;
-  if (!$("#r-rider").value) $("#r-rider").value = DATA.equipos.filter(e=>S.eq.has(e.id)).map(e=>L(e,"name")).join(", ");
-  $("#r-name").focus();
-});
-$("#req-x").addEventListener("click", () => $("#req").hidden = true);
+$("#go").addEventListener("click", () => irA(3));
 $("#req-f").addEventListener("submit", async e => {
   e.preventDefault();
-  const f = { name:$("#r-name").value.trim(), phone:$("#r-phone").value.trim(), mail:$("#r-mail").value.trim(), rider:$("#r-rider").value.trim(),
-    miss:(document.querySelector('input[name="miss"]:checked')||{}).value||"ask", notes:$("#r-notes").value.trim() };
-  const err = $("#r-err");
-  if (!f.name || !f.phone || !/^\S+@\S+\.\S+$/.test(f.mail) || !f.rider){ err.textContent = T("rq.err"); err.hidden = false; return; }
-  err.hidden = true;
-  const text = summary(f); let sent = false;
+  const f = { name:$("#r-name").value.trim(), phone:$("#r-phone").value.trim(), mail:$("#r-mail").value.trim(), notes:$("#r-notes").value.trim() };
+  const err = $("#r-err"), btn = $("#r-send");
+  if (!fechaLista()){ irA(1); return; }
+  if (!f.name || !f.phone || !/^\S+@\S+\.\S+$/.test(f.mail)){ err.textContent = T("rq.err"); err.hidden = false; return; }
+  err.hidden = true; btn.disabled = true;
+  let text = summary(f), sent = false;
+  const rider = DATA.equipos.filter(x=>S.eq.has(x.id)).map(x=>L(x,"name")).join(", ");
   if (CONFIG.API_URL){
     try {
       const c = calc();
       const r = await fetch(CONFIG.API_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body: JSON.stringify({ action:"solicitud", id:sessionId(), lang:S.lang, name:f.name, phone:f.phone, mail:f.mail, notes:f.notes, rider:f.rider,
-          faltante:I18N.es["miss."+f.miss], modo:S.mode, ingeniero:S.eng, nocturno:S.night, horas:S.mode==="hora"?S.hours:S.extra,
+        body: JSON.stringify({ action:"solicitud", web:$("#r-web").value, lang:S.lang, name:f.name, phone:f.phone, mail:f.mail, notes:f.notes, rider,
+          faltante:"", modo:S.mode, ingeniero:S.eng, nocturno:S.night, horas:S.mode==="hora"?S.hours:S.extra,
           fecha:S.slot?.date||"", franja:S.slot?.fr||"", personas:people(), crew:S.crew, equipos:[...S.eq], produccion:S.prod, totalUSD:c.usd, trm:CONFIG.TRM, resumen:text }) });
       const j = await r.json().catch(()=>({})); sent = r.ok && j.ok !== false;
+      if (sent && j.id) text = text.replace(sessionId(), j.id); // el código definitivo lo da la hoja
     } catch(_){ sent = false; }
   }
   $("#done-msg").innerHTML = sent ? T("rq.ok") : T("rq.no");
   $("#r-summary").textContent = text;
   const wa = $("#r-wa");
   if (CONFIG.WHATSAPP){ wa.href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(text)}`; wa.hidden = false; } else wa.hidden = true;
-  $("#req-form-body").hidden = true; $("#req-done").hidden = false;
+  $("#req-form-body").hidden = true; $("#req-done").hidden = false; btn.disabled = false;
+  $("#mbar").hidden = true; $("#req-done").scrollIntoView({block:"center"});
 });
 $("#r-copy").addEventListener("click", () => {
   navigator.clipboard.writeText($("#r-summary").textContent).then(() => toast(T("rq.copied")), () => { const r = document.createRange(); r.selectNodeContents($("#r-summary")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast(T("rq.select")); });

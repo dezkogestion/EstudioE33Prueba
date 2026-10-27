@@ -12,21 +12,19 @@
 <style>
 /* Layout: "arma tu campamento". Hero tipográfico con tres tipos de campamento (miniaturas pequeñas, nítidas); consola de canales + crew; track sheet como superficie invertida; agenda tipo DAW; hoja de contacto. Sistema E33, claro y oscuro según el dispositivo. */
 :root{
-  /* --ink = fondo de página, --paper = texto; en claro se invierten */
-  --ink:#FFFFFF; --paper:#0A0A0A; --panel:#F5F5F5; --panel-2:#EDEDED; --rule:#D4D4D4; --dim:#6B6B6B; --soft:#4A4A4A;
-  --red:#E4172B; --red-dim:#F3C2C7; --on-red:#FFFFFF; --hatch:#DCDCDC;
-  --sheet-muted:#9A9A9A; --sheet-rule:#2E2E2E; --sheet-field:#1A1A1A; --shade:rgba(0,0,0,.12);
+  /* Negro por defecto. --ink = fondo, --paper = texto; la versión clara solo se activa con el botón de tema */
+  --ink:#0A0A0A; --paper:#FFFFFF; --panel:#121212; --panel-2:#1A1A1A; --rule:#2E2E2E; --dim:#7A7A7A; --soft:#B0B0B0;
+  --red:#E4172B; --red-dim:#5A0A12; --on-red:#FFFFFF; --hatch:#222222;
+  --sheet-muted:#6B6B6B; --sheet-rule:#D4D4D4; --sheet-field:#F5F5F5; --shade:rgba(0,0,0,.6);
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-pill:999px;
   --font-display:'Big Shoulders Display','Arial Narrow',sans-serif;
   --font-body:'Inter',system-ui,sans-serif;
   --font-mono:'JetBrains Mono',ui-monospace,monospace;
-  color-scheme:light;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --ink:#0A0A0A; --paper:#FFFFFF; --panel:#121212; --panel-2:#1A1A1A; --rule:#2E2E2E; --dim:#6B6B6B; --soft:#B0B0B0;
-  --red-dim:#5A0A12; --hatch:#222222; --sheet-muted:#6B6B6B; --sheet-rule:#D4D4D4; --sheet-field:#F5F5F5; --shade:#000; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --ink:#0A0A0A; --paper:#FFFFFF; --panel:#121212; --panel-2:#1A1A1A; --rule:#2E2E2E; --dim:#6B6B6B; --soft:#B0B0B0;
-  --red-dim:#5A0A12; --hatch:#222222; --sheet-muted:#6B6B6B; --sheet-rule:#D4D4D4; --sheet-field:#F5F5F5; --shade:#000; color-scheme:dark}
+:root[data-e33="light"]{
+  --ink:#FFFFFF; --paper:#0A0A0A; --panel:#F5F5F5; --panel-2:#EDEDED; --rule:#D4D4D4; --dim:#6B6B6B; --soft:#4A4A4A;
+  --red-dim:#F3C2C7; --hatch:#DCDCDC; --sheet-muted:#9A9A9A; --sheet-rule:#2E2E2E; --sheet-field:#1A1A1A; --shade:rgba(0,0,0,.12); color-scheme:light}
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -372,6 +370,67 @@ footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;m
 @media (max-width:520px){.two{grid-template-columns:1fr}}
 .err{color:var(--red);font-size:13px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100% - 32px);background:var(--red);color:var(--on-red);padding:10px 16px;z-index:40;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ===== Controles modernos: formas redondeadas, sin sombra dura ===== */
+.key{border-radius:var(--r-pill);box-shadow:none;padding:14px 24px;font-family:var(--font-body);font-size:15px;font-weight:600;letter-spacing:0;text-transform:none;gap:8px;transition:background .15s,color .15s,border-color .15s,transform .15s}
+.key:hover{transform:translateY(-1px);box-shadow:none;background:var(--soft);border-color:var(--soft)}
+.key:active{transform:translateY(0);box-shadow:none}
+.key.ghost{background:transparent;color:var(--paper);border:1.5px solid var(--rule);box-shadow:none}
+.key.ghost:hover{border-color:var(--paper);background:transparent}
+.key.inv{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.key.inv:hover{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.key.sm{padding:8px 14px;font-size:13px;box-shadow:none}
+.key.nudge{animation:pulse 1.2s ease 2}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--red) 70%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
+.ctas .key:first-child,#w-next,.mb-next{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.ctas .key:first-child:hover,#w-next:hover,.mb-next:hover{background:#C41224;border-color:#C41224}
+.seg{border-radius:var(--r-pill);overflow:hidden}
+.seg button{padding:6px 12px}
+.theme{border-radius:50%;width:32px;height:32px}
+.camps{border-radius:var(--r-lg);overflow:hidden;border-color:var(--rule)}
+.camps-h{background:var(--panel-2);color:var(--soft)}
+.camp{border-radius:0}
+.camp img{border-radius:var(--r-sm)}
+.mod{border-radius:var(--r-lg);overflow:hidden}
+.tk{border-radius:var(--r-md);box-shadow:none;padding:16px}
+.tk::before{display:none}
+.tk[aria-pressed="true"]{transform:none;box-shadow:inset 0 0 0 1px var(--red);border-color:var(--red);background:color-mix(in srgb,var(--red) 10%,var(--panel-2))}
+.tg{border-radius:var(--r-md)}
+.tg .sw{width:42px;height:24px;border-radius:var(--r-pill);border:0;background:var(--rule)}
+.tg .sw::after{left:3px;top:3px;bottom:auto;right:auto;width:18px;height:18px;border-radius:50%;background:var(--paper);transition:transform .2s}
+.tg input:checked + .sw{background:var(--red)}
+.tg input:checked + .sw::after{bottom:auto;transform:translateX(18px);background:#FFFFFF}
+.step{border-radius:var(--r-pill);overflow:hidden}
+.step output{color:var(--paper)}
+.send{border-radius:var(--r-md)}
+.pr{border-radius:var(--r-pill);padding:7px 14px;font-family:var(--font-body);font-size:14px;letter-spacing:0;text-transform:none}
+.ch{border-radius:var(--r-md)}
+.scribble{border-radius:6px}
+.combo{border-radius:var(--r-md)}
+.room-msg{border-radius:0 var(--r-sm) var(--r-sm) 0}
+.sheet{border-radius:var(--r-lg);box-shadow:none;overflow:hidden}
+.sheet .gobtn{border-radius:var(--r-pill)}
+.stamp{border-radius:6px}
+.tl-wrap{border-radius:var(--r-md)}
+.rg{border-radius:var(--r-sm)}
+.flow .card{border-radius:var(--r-md)}
+.flow .who{border-radius:var(--r-pill)}
+.flow-note{border-radius:var(--r-md)}
+.cond{border-radius:var(--r-md);overflow:hidden}
+.contact{border-radius:var(--r-lg)}
+.fr .img{border-radius:var(--r-sm)}
+.tabs button{font-family:var(--font-body)}
+.req-card{border-radius:var(--r-lg);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.req-card input,.req-card textarea{border-radius:var(--r-sm);border:1.5px solid transparent;padding:12px}
+.req-card input:focus,.req-card textarea:focus{border-color:var(--red)}
+.req-card .key{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.req-card .key.ghost{background:transparent;color:var(--ink);border-color:var(--sheet-rule);box-shadow:none}
+.wait{border-radius:var(--r-md)}
+.req-card pre{border-radius:var(--r-sm)}
+.toast{border-radius:var(--r-pill);font-family:var(--font-body);font-size:14px;letter-spacing:0;text-transform:none}
+.mb-sum{border-radius:var(--r-md)}
+.mb-next{box-shadow:none!important;font-size:14px}
+.lb img{border-radius:var(--r-md);border-width:0}
 </style>
 </head>
 <body>
@@ -898,9 +957,8 @@ $("#c-next").addEventListener("click", () => { S.week = Math.min(8, S.week+1); r
 /* Tema: sigue al dispositivo; el botón lo invierte */
 $("#theme").addEventListener("click", () => {
   const root = document.documentElement;
-  const cur = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-  root.dataset.theme = cur === "dark" ? "light" : "dark";
-  try{ localStorage.setItem("e33-theme", root.dataset.theme); }catch(_){}
+  if (root.dataset.e33 === "light") delete root.dataset.e33; else root.dataset.e33 = "light";
+  try{ localStorage.setItem("e33-theme", root.dataset.e33 || "dark"); }catch(_){}
 });
 
 function openLb(fig){ const im = fig.querySelector("img"); if (!im) return; $("#lb-img").src = im.src; $("#lb-img").alt = im.alt; $("#lb").hidden = false; $("#lb-x").focus(); }
@@ -972,7 +1030,7 @@ async function load(){
 
 /* Inicio: idioma y tema del dispositivo (o lo último elegido) */
 try{ const l = localStorage.getItem("e33-lang"); S.lang = l || ((navigator.language||"es").toLowerCase().startsWith("en") ? "en" : "es"); }catch(_){ S.lang = (navigator.language||"es").toLowerCase().startsWith("en") ? "en" : "es"; }
-try{ const th = localStorage.getItem("e33-theme"); if (th) document.documentElement.dataset.theme = th; }catch(_){}
+try{ if (localStorage.getItem("e33-theme") === "light") document.documentElement.dataset.e33 = "light"; }catch(_){}
 renderAll(); load();
 </script>
 

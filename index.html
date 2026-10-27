@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estudio E33 Medellín</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Estudio de grabación y producción de Entr3t3nimiento en Medellín. Arma tu sesión, revisa la agenda y solicita tu reserva.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: "arma tu campamento". Hero tipográfico con tres tipos de campamento (miniaturas pequeñas, nítidas); consola de canales + crew; track sheet como superficie invertida; agenda tipo DAW; hoja de contacto. Sistema E33, claro y oscuro según el dispositivo. */
+:root{
+  /* --ink = fondo de página, --paper = texto; en claro se invierten */
+  --ink:#FFFFFF; --paper:#0A0A0A; --panel:#F5F5F5; --panel-2:#EDEDED; --rule:#D4D4D4; --dim:#6B6B6B; --soft:#4A4A4A;
+  --red:#E4172B; --red-dim:#F3C2C7; --on-red:#FFFFFF; --hatch:#DCDCDC;
+  --sheet-muted:#9A9A9A; --sheet-rule:#2E2E2E; --sheet-field:#1A1A1A; --shade:rgba(0,0,0,.12);
+  --font-display:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ink:#0A0A0A; --paper:#FFFFFF; --panel:#121212; --panel-2:#1A1A1A; --rule:#2E2E2E; --dim:#6B6B6B; --soft:#B0B0B0;
+  --red-dim:#5A0A12; --hatch:#222222; --sheet-muted:#6B6B6B; --sheet-rule:#D4D4D4; --sheet-field:#F5F5F5; --shade:#000; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#0A0A0A; --paper:#FFFFFF; --panel:#121212; --panel-2:#1A1A1A; --rule:#2E2E2E; --dim:#6B6B6B; --soft:#B0B0B0;
+  --red-dim:#5A0A12; --hatch:#222222; --sheet-muted:#6B6B6B; --sheet-rule:#D4D4D4; --sheet-field:#F5F5F5; --shade:#000; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+img{max-width:100%}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ink);color:var(--paper);font:400 16px/1.55 var(--font-body);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+.g{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.w{max-width:1280px;margin:0 auto}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.mono{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.02em;line-height:.95}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* Top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--ink);border-bottom:1px solid var(--rule)}
+.bar .w{display:flex;align-items:center;gap:20px;height:56px}
+.wm{font-family:var(--font-display);font-weight:700;letter-spacing:.22em;font-size:13px;text-decoration:none;white-space:nowrap}
+.bar nav{display:flex;gap:22px;margin-left:8px}
+.bar nav a{text-decoration:none;color:var(--dim)}
+.bar nav a:hover{color:var(--paper)}
+.tools{margin-left:auto;display:flex;gap:8px;align-items:center}
+.seg{display:flex;border:1px solid var(--rule)}
+.seg button{border:0;background:transparent;cursor:pointer;padding:6px 10px;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--dim)}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+.theme{width:34px;height:30px;border:1px solid var(--rule);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.theme i{width:14px;height:14px;border-radius:50%;border:2px solid var(--paper);background:linear-gradient(90deg,var(--paper) 50%,transparent 50%)}
+@media (max-width:980px){.bar nav{display:none}}
+@media (max-width:420px){.wm{letter-spacing:.12em;font-size:11px}}
+
+/* Buttons */
+.key{display:inline-flex;align-items:center;gap:10px;border:2px solid var(--paper);background:var(--paper);color:var(--ink);padding:13px 22px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;cursor:pointer;box-shadow:4px 4px 0 var(--red);transition:transform .12s,box-shadow .12s}
+.key:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--red)}
+.key:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--red)}
+.key.ghost{background:transparent;color:var(--paper);box-shadow:4px 4px 0 var(--rule)}
+.key.inv{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.key:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* Hero: campamento */
+.hero{border-bottom:1px solid var(--rule)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:end;padding-block:64px 72px}
+.eyebrow{display:flex;gap:18px;flex-wrap:wrap;color:var(--dim)}
+.eyebrow b{color:var(--red);font-weight:500}
+.h1{font-size:clamp(52px,7.6vw,112px);margin:20px 0 0}
+.h1 em{font-style:normal;color:var(--red)}
+.lead{margin:24px 0 32px;font-size:clamp(17px,1.5vw,20px);line-height:1.5;max-width:44ch;color:var(--soft)}
+.lead strong{color:var(--paper);font-weight:600}
+.ctas{display:flex;gap:14px;flex-wrap:wrap}
+.camps{display:flex;flex-direction:column;border:1px solid var(--paper)}
+.camps-h{display:flex;justify-content:space-between;padding:10px 14px;background:var(--paper);color:var(--ink)}
+.camp{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px;border-top:1px solid var(--rule);text-align:left;background:transparent;cursor:pointer;border-left:0;border-right:0;border-bottom:0;transition:background .15s}
+.camp:first-of-type{border-top:0}
+.camp:hover{background:var(--panel)}
+.camp img{width:88px;height:88px;object-fit:cover;display:block;filter:grayscale(1) contrast(1.05)}
+.camp:hover img{filter:none}
+.camp b{font-family:var(--font-display);font-size:22px;display:block;line-height:1.1}
+.camp p{margin:4px 0 0;color:var(--soft);font-size:14px}
+.camp .gear{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:6px;display:block}
+.camp .go{font-family:var(--font-mono);font-size:18px;color:var(--red)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:44px;border-top:1px solid var(--rule)}
+.facts div{padding:14px 14px 0 0;display:flex;flex-direction:column;gap:4px}
+.facts div + div{padding-left:14px;border-left:1px solid var(--rule)}
+.facts span{color:var(--dim)}
+.facts b{font-family:var(--font-display);font-size:clamp(18px,2vw,26px);font-weight:700}
+@media (max-width:920px){.hero-grid{grid-template-columns:1fr;gap:40px;padding-block:40px 48px}}
+@media (max-width:460px){.camp{grid-template-columns:64px minmax(0,1fr) auto;gap:12px}.camp img{width:64px;height:64px}.camp b{font-size:18px}}
+
+/* Section heads */
+section{padding-block:80px;border-bottom:1px solid var(--rule)}
+.sh{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,360px);gap:24px;align-items:end;margin-bottom:40px}
+.sh .mk{display:flex;flex-direction:column;gap:6px;color:var(--dim)}
+.sh .mk b{display:flex;align-items:center;gap:8px;color:var(--paper);font-weight:500}
+.sh .mk b::before{content:"";width:0;height:0;border-left:8px solid var(--red);border-top:6px solid transparent;border-bottom:6px solid transparent}
+.sh h2{font-size:clamp(40px,6vw,88px)}
+.sh p{margin:0;color:var(--soft);font-size:16px}
+@media (max-width:900px){.sh{grid-template-columns:1fr;gap:12px}}
+
+/* Console */
+.desk{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:32px;align-items:start}
+@media (max-width:1080px){.desk{grid-template-columns:1fr}}
+.mod{border:1px solid var(--rule);background:var(--panel);margin-bottom:16px}
+.mod-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--rule);color:var(--dim)}
+.mod-h b{color:var(--paper);font-weight:500}
+.mod-b{padding:16px}
+.hint{margin:0 0 14px;color:var(--soft);font-size:15px;max-width:64ch}
+
+.transport{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.transport{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tk{position:relative;text-align:left;cursor:pointer;background:var(--panel-2);border:1px solid var(--rule);padding:30px 14px 14px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 var(--shade);transition:transform .1s,box-shadow .1s,border-color .15s}
+.tk::before{content:"";position:absolute;top:12px;left:14px;width:22px;height:4px;background:var(--rule)}
+.tk:hover{border-color:var(--dim)}
+.tk[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 1px 0 var(--shade);border-color:var(--paper)}
+.tk[aria-pressed="true"]::before{background:var(--red);box-shadow:0 0 10px var(--red)}
+.tk .t{font-family:var(--font-display);font-weight:700;font-size:20px;line-height:1.1}
+.tk .p{font-family:var(--font-mono);font-size:12px;color:var(--soft)}
+.tk .d{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+
+.toggles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.tg{display:flex;align-items:center;gap:14px;cursor:pointer;border:1px solid var(--rule);padding:12px 14px;background:var(--panel-2)}
+.tg input{position:absolute;opacity:0;pointer-events:none}
+.tg .sw{width:20px;height:38px;border:2px solid var(--soft);border-radius:3px;position:relative;flex:none}
+.tg .sw::after{content:"";position:absolute;left:2px;right:2px;height:14px;bottom:2px;background:var(--soft);transition:bottom .15s,background .15s}
+.tg input:checked + .sw{border-color:var(--red)}
+.tg input:checked + .sw::after{bottom:18px;background:var(--red)}
+.tg input:focus-visible + .sw{outline:2px solid var(--red);outline-offset:3px}
+.tg b{display:block;font-weight:600}
+.tg small{color:var(--dim);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em}
+.time{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;margin-top:12px}
+.step{display:flex;align-items:stretch;border:1px solid var(--rule);background:var(--ink)}
+.step button{width:42px;border:0;background:transparent;cursor:pointer;font-family:var(--font-mono);font-size:18px}
+.step button:hover{background:var(--panel-2)}
+.step output{min-width:52px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:20px;color:var(--red);border-inline:1px solid var(--rule);padding:6px 8px}
+.slotinfo{color:var(--soft);font-size:15px}
+.slotinfo b{color:var(--paper)}
+
+/* Crew */
+.crew{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.crew{grid-template-columns:1fr}}
+.send{border:1px solid var(--rule);background:var(--panel-2);padding:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.send b{display:block;font-weight:600}
+.send small{font-family:var(--font-mono);font-size:11px;color:var(--dim)}
+.send .step output{min-width:40px;font-size:16px}
+.room{margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center}
+.seats{display:flex;gap:4px;flex-wrap:wrap}
+.seats i{width:18px;height:22px;border:1px solid var(--rule);border-radius:9px 9px 2px 2px;display:block}
+.seats i.on{background:var(--paper);border-color:var(--paper)}
+.seats i.over{background:var(--red);border-color:var(--red)}
+.seats i.cap{border-style:dashed}
+.room-n{font-family:var(--font-mono);font-size:12px;text-align:right;color:var(--soft)}
+.room-n b{font-family:var(--font-display);font-size:28px;color:var(--paper);display:block;line-height:1}
+.room-msg{margin-top:10px;font-size:14px;color:var(--soft);border-left:3px solid var(--rule);padding-left:10px}
+.room-msg.warn{border-color:var(--red);color:var(--paper)}
+
+.presets{display:flex;gap:8px;flex-wrap:wrap}
+.pr{border:1px solid var(--rule);background:transparent;padding:6px 12px;cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
+.pr:hover{border-color:var(--paper);color:var(--paper)}
+.pr[aria-pressed="true"]{background:var(--paper);border-color:var(--paper);color:var(--ink)}
+.strips{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:6px;margin-top:14px}
+.ch{position:relative;cursor:pointer;border:1px solid var(--rule);background:var(--panel-2);padding:8px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:border-color .15s}
+.ch:hover{border-color:var(--dim)}
+.ch[aria-pressed="true"]{border-color:var(--paper)}
+.ch .cn{font-family:var(--font-mono);font-size:10px;color:var(--dim);letter-spacing:.1em;width:100%;display:flex;justify-content:space-between;align-items:center}
+.ch .led{width:8px;height:8px;border-radius:50%;background:var(--red-dim)}
+.ch[aria-pressed="true"] .led{background:var(--red);box-shadow:0 0 8px var(--red)}
+.knob{width:22px;height:22px;border-radius:50%;border:2px solid var(--dim);position:relative;transition:transform .3s}
+.knob::after{content:"";position:absolute;left:50%;top:2px;width:2px;height:6px;margin-left:-1px;background:var(--paper)}
+.ch[aria-pressed="true"] .knob{transform:rotate(110deg);border-color:var(--paper)}
+.scribble{width:100%;background:var(--ink);border:1px solid var(--rule);font-family:var(--font-mono);font-size:11px;font-weight:700;padding:3px 2px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch[aria-pressed="true"] .scribble{color:var(--ink);background:var(--paper);border-color:var(--paper)}
+.fader{position:relative;width:100%;height:44px;display:flex;justify-content:center}
+.fader::before{content:"";width:4px;height:100%;background:var(--ink);border:1px solid var(--rule)}
+.fader .cap{position:absolute;left:50%;width:28px;height:10px;margin-left:-14px;bottom:2px;background:var(--soft);border-top:3px solid var(--ink);transition:bottom .35s cubic-bezier(.2,.8,.2,1)}
+.ch[aria-pressed="true"] .cap{bottom:30px;background:var(--paper)}
+.ch .nm{font-size:11px;line-height:1.25;color:var(--soft);width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch .ct{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.ch .q{position:absolute;top:26px;right:6px;font-family:var(--font-mono);font-size:9px;color:var(--dim)}
+.sends{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.combo{margin-top:10px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--red);padding:10px 12px}
+.combo b{color:var(--red)}
+
+/* Track sheet (superficie invertida) */
+.sheet{position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px);background:var(--paper);color:var(--ink);box-shadow:8px 8px 0 var(--red);font-family:var(--font-mono)}
+.sheet-h{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 18px 14px;border-bottom:3px solid var(--ink)}
+.sheet-h h3{font-family:var(--font-display);font-size:28px;letter-spacing:-.02em}
+.sheet-h .id{font-size:11px;text-align:right;line-height:1.5}
+.fields{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--ink)}
+.fields div{padding:8px 18px;border-bottom:1px solid var(--sheet-rule);display:flex;flex-direction:column;gap:2px;min-width:0}
+.fields div:nth-child(odd){border-right:1px solid var(--sheet-rule)}
+.fields div.full{grid-column:span 2;border-right:0}
+.fields span{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--sheet-muted)}
+.fields b{font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.trk{padding:10px 18px;border-bottom:1px solid var(--ink)}
+.trk-h{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--sheet-muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.trk ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;column-gap:16px}
+.trk li{display:flex;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px dotted var(--sheet-rule);min-width:0}
+.trk li i{font-style:normal;color:var(--red);font-weight:700}
+.trk li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trk .none{font-size:12px;color:var(--sheet-muted)}
+.lines{padding:10px 18px;display:flex;flex-direction:column;gap:6px}
+.ln{display:flex;justify-content:space-between;gap:12px;font-size:12px}
+.ln span:first-child{font-family:var(--font-body);font-size:13px}
+.tot{position:relative;padding:14px 18px 18px;border-top:3px solid var(--ink);display:flex;justify-content:space-between;align-items:end;gap:12px}
+.tot .lbl{font-size:9px;letter-spacing:.12em;color:var(--sheet-muted)}
+.tot .usd{font-family:var(--font-display);font-size:48px;font-weight:700;line-height:.9;letter-spacing:-.03em}
+.tot .cop{font-size:11px;text-align:right;line-height:1.6;color:var(--sheet-muted)}
+.stamp{position:absolute;right:16px;top:-14px;transform:rotate(-6deg);border:2px solid var(--red);color:var(--red);padding:2px 8px;font-size:10px;letter-spacing:.14em;font-weight:700;background:var(--paper)}
+.sheet .gobtn{margin:0 18px 10px;width:calc(100% - 36px);justify-content:center}
+.sheet .warnline{padding:0 18px 8px;font-family:var(--font-body);font-size:12px;font-weight:600}
+.sheet .foot{padding:0 18px 16px;font-size:10px;line-height:1.5;color:var(--sheet-muted);font-family:var(--font-body)}
+
+/* Timeline */
+.tl-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.tl-top .key{padding:9px 14px}
+.tl-wrap{overflow-x:auto;border:1px solid var(--rule);background:var(--panel)}
+.tl{display:grid;grid-template-columns:150px repeat(7,minmax(104px,1fr));min-width:880px}
+.tl .ruler{border-bottom:1px solid var(--rule);border-left:1px solid var(--rule);padding:10px 12px}
+.tl .ruler b{font-family:var(--font-display);font-size:24px;display:block;line-height:1}
+.tl .ruler.today b{color:var(--red)}
+.tl .corner{border-bottom:1px solid var(--rule);padding:10px 12px;color:var(--dim)}
+.tl .trkname{border-bottom:1px solid var(--rule);padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;background:var(--panel-2)}
+.tl .trkname b{font-family:var(--font-mono);font-size:12px;font-weight:500}
+.tl .trkname small{font-family:var(--font-mono);font-size:10px;color:var(--dim);letter-spacing:.08em}
+.tl .lane{border-bottom:1px solid var(--rule);border-left:1px solid var(--rule);padding:6px;min-height:68px}
+.rg{width:100%;height:100%;min-height:54px;border:1px dashed transparent;background:transparent;cursor:pointer;text-align:left;padding:6px 8px;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);display:flex;align-items:flex-end}
+.rg:hover{border-color:var(--soft);color:var(--paper)}
+.rg.busy{cursor:not-allowed;background:repeating-linear-gradient(135deg,var(--panel-2) 0 6px,var(--hatch) 6px 12px);border:1px solid var(--rule)}
+.rg.sel{background:var(--red);border:1px solid var(--red);color:var(--on-red);font-weight:700}
+.legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;color:var(--dim)}
+.legend i{display:inline-block;width:18px;height:10px;margin-right:8px}
+
+/* Contact sheet */
+.contact{background:var(--paper);color:var(--ink);padding:14px;display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.fr{grid-column:span 4;margin:0;cursor:zoom-in;display:flex;flex-direction:column;gap:6px}
+.fr:nth-child(1){grid-column:span 7;grid-row:span 2}
+.fr:nth-child(2),.fr:nth-child(3){grid-column:span 5}
+.fr .img{position:relative;overflow:hidden;background:var(--ink);aspect-ratio:4/3;flex:1}
+.fr:nth-child(1) .img{aspect-ratio:auto}
+.fr img,.fr video{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) contrast(1.1);transition:filter .5s}
+.fr:hover img,.fr:focus-visible img{filter:none}
+.fr figcaption{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.fr figcaption i{font-style:normal;color:var(--red);font-weight:700}
+@media (max-width:760px){.contact{grid-template-columns:1fr 1fr}.fr,.fr:nth-child(n){grid-column:span 1;grid-row:auto}.fr:nth-child(1){grid-column:span 2}.fr:nth-child(1) .img{aspect-ratio:4/3}}
+.lb{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 96%,transparent);z-index:20;display:flex;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) 16px}
+.lb img{max-height:86vh;max-width:100%;border:8px solid var(--paper)}
+.lb button{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:calc(16px + env(safe-area-inset-right,0px))}
+
+/* Flow: línea de tiempo con los estados reales de la solicitud */
+.flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;position:relative}
+.flow::before{content:"";position:absolute;left:22px;right:22px;top:22px;height:2px;background:linear-gradient(90deg,var(--paper) 0 20%,var(--red) 20% 60%,var(--paper) 60%)}
+.flow li{position:relative;display:flex;flex-direction:column;gap:12px}
+.flow .node{width:46px;height:46px;border-radius:50%;background:var(--ink);border:2px solid var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:13px;font-weight:700;position:relative;z-index:1}
+.flow li.us .node{border-color:var(--red);color:var(--red)}
+.flow .st{color:var(--dim)}
+.flow .st::before{content:"● ";color:var(--paper)}
+.flow li.us .st::before{color:var(--red)}
+.flow .card{border:1px solid var(--rule);background:var(--panel);padding:18px;display:flex;flex-direction:column;gap:10px;flex:1}
+.flow li.us .card{background:var(--panel-2)}
+.flow .meta{display:flex;justify-content:space-between;gap:8px;color:var(--dim)}
+.flow .who{border:1px solid var(--paper);color:var(--paper);padding:2px 8px}
+.flow .who.us{border-color:var(--red);background:var(--red);color:var(--on-red)}
+.flow b{font-family:var(--font-display);font-size:22px;line-height:1.1}
+.flow p{margin:0;color:var(--soft);font-size:15px;line-height:1.5}
+.flow-note{margin:28px 0 0;padding:16px 18px;border:1px dashed var(--rule);color:var(--soft);font-size:15px;max-width:72ch}
+.flow-note b{color:var(--paper)}
+@media (max-width:1000px){
+  .flow{grid-template-columns:1fr;gap:0}
+  .flow::before{left:22px;right:auto;top:22px;bottom:22px;width:2px;height:auto;background:linear-gradient(180deg,var(--paper) 0 20%,var(--red) 20% 60%,var(--paper) 60%)}
+  .flow li{display:grid;grid-template-columns:46px minmax(0,1fr);column-gap:16px;padding-bottom:18px}
+  .flow .node{grid-row:span 2}
+  .flow .st{align-self:center}
+  .flow .card{grid-column:2}
+}
+
+/* Rider */
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0 48px}
+.spec h3{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--red);padding:22px 0 8px;border-bottom:2px solid var(--paper)}
+.spec ul{list-style:none;margin:0 0 8px;padding:0}
+.spec li{display:flex;align-items:baseline;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.spec li b{font-weight:500}
+.spec li::after{content:"";order:2;flex:1;border-bottom:1px dotted var(--dim);transform:translateY(-4px)}
+.spec li span{order:3;font-family:var(--font-mono);font-size:12px;color:var(--soft)}
+
+/* Conditions */
+.cond{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule)}
+.cond div{padding:24px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:10px}
+.cond div:last-child{border-right:0}
+.cond .big{font-family:var(--font-display);font-size:56px;font-weight:700;line-height:.9;letter-spacing:-.04em}
+.cond .big em{font-style:normal;color:var(--red)}
+.cond p{margin:0;color:var(--soft);font-size:15px}
+@media (max-width:900px){.cond{grid-template-columns:1fr 1fr}.cond div:nth-child(2){border-right:0}.cond div:nth-child(-n+2){border-bottom:1px solid var(--rule)}}
+@media (max-width:520px){.cond{grid-template-columns:1fr}.cond div{border-right:0;border-bottom:1px solid var(--rule)}}
+
+footer{padding-block:48px 32px}
+footer .huge{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,8.6vw,124px);letter-spacing:.02em;line-height:1;white-space:nowrap;overflow:hidden}
+footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-top:24px;color:var(--dim)}
+
+/* Dialog (superficie invertida) */
+.req{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,var(--ink) 90%,transparent);display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.req-card{background:var(--paper);color:var(--ink);box-shadow:10px 10px 0 var(--red);width:min(580px,100%);max-height:90vh;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:14px}
+.req-card h3{font-size:32px}
+.req-card label{display:flex;flex-direction:column;gap:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.req-card input,.req-card textarea{font:400 16px var(--font-body);letter-spacing:0;text-transform:none;color:var(--ink);background:var(--sheet-field);border:0;border-bottom:2px solid var(--ink);padding:10px 4px}
+.req-card input:focus,.req-card textarea:focus{outline:none;border-bottom-color:var(--red)}
+.req-card pre{white-space:pre-wrap;font-family:var(--font-mono);font-size:12px;background:var(--sheet-field);padding:12px;margin:0}
+.req-card .key{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.req-card .key.ghost{background:transparent;color:var(--ink);border-color:var(--ink);box-shadow:4px 4px 0 var(--sheet-rule)}
+.fs{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.fs legend{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;padding:0}
+.req-card .rd{flex-direction:row;align-items:center;gap:10px;font-family:var(--font-body);font-size:15px;letter-spacing:0;text-transform:none;cursor:pointer}
+.rd input{accent-color:var(--red);width:18px;height:18px;margin:0}
+.wait{background:var(--ink);color:var(--paper);padding:12px 14px;font-size:14px;line-height:1.45}
+.wait b{color:var(--red)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.err{color:var(--red);font-size:13px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100% - 32px);background:var(--red);color:var(--on-red);padding:10px 16px;z-index:40;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+
+<header class="bar g"><div class="w">
+  <a class="wm" href="#top">ENTR3T3NIMIENTO</a>
+  <nav class="mono" aria-label="Secciones">
+    <a href="#consola" data-t="nav.consola"></a><a href="#agenda" data-t="nav.agenda"></a><a href="#reservar" data-t="nav.reservar"></a><a href="#sala" data-t="nav.sala"></a><a href="#rider" data-t="nav.rider"></a>
+  </nav>
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Idioma / Language"><button type="button" data-lang="es">ES</button><button type="button" data-lang="en">EN</button></div>
+    <button type="button" class="theme" id="theme" aria-label="Cambiar tema"><i aria-hidden="true"></i></button>
+  </div>
+</div></header>
+
+<main id="top">
+  <div class="hero g"><div class="w hero-grid">
+    <div>
+      <div class="eyebrow mono"><span><b>●</b> <span data-t="hero.eyebrow"></span></span><span>Medellín, Colombia</span></div>
+      <h1 class="h1" data-t="hero.title"></h1>
+      <p class="lead" data-t="hero.lead"></p>
+      <div class="ctas"><a class="key" href="#consola" data-t="hero.cta1"></a><a class="key ghost" href="#reservar" data-t="hero.cta2"></a></div>
+      <div class="facts">
+        <div><span class="mono" data-t="facts.desde"></span><b class="num" id="f-from">USD 20</b></div>
+        <div><span class="mono" data-t="facts.mic"></span><b>TF51</b></div>
+        <div><span class="mono" data-t="facts.mon"></span><b>ADAM A77H</b></div>
+      </div>
+    </div>
+    <div class="camps" id="camps">
+      <div class="camps-h mono"><span data-t="camps.h"></span><span data-t="camps.h2"></span></div>
+    </div>
+  </div></div>
+
+  <section id="consola" class="g"><div class="w">
+    <div class="sh">
+      <div class="mk mono"><b data-t="cons.mk"></b><span data-t="cons.mk2"></span></div>
+      <h2 data-t="cons.h"></h2>
+      <p data-t="cons.p"></p>
+    </div>
+    <div class="desk">
+      <div>
+        <div class="mod">
+          <div class="mod-h mono"><b data-t="mod.a"></b><span data-t="mod.a2"></span></div>
+          <div class="mod-b"><div class="transport" id="modes" role="group"></div></div>
+        </div>
+        <div class="mod">
+          <div class="mod-h mono"><b data-t="mod.b"></b><span id="slot-short"></span></div>
+          <div class="mod-b">
+            <div class="toggles">
+              <label class="tg" for="eng"><input type="checkbox" id="eng" checked><span class="sw"></span><span><b data-t="tg.eng"></b><small data-t="tg.eng2"></small></span></label>
+              <label class="tg" for="night" id="night-wrap"><input type="checkbox" id="night"><span class="sw"></span><span><b data-t="tg.night"></b><small data-t="tg.night2"></small></span></label>
+            </div>
+            <div class="time">
+              <div class="step" id="hstep"><button type="button" id="h-dec">−</button><output id="hours" class="num">2</output><button type="button" id="h-inc">+</button></div>
+              <div class="slotinfo"><span class="mono" id="hours-l" style="color:var(--dim);display:block"></span><span id="slot-l"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mod">
+          <div class="mod-h mono"><b data-t="mod.crew"></b><span id="crew-n"></span></div>
+          <div class="mod-b">
+            <p class="hint" data-t="crew.hint"></p>
+            <div class="crew" id="crew"></div>
+            <div class="room"><div class="seats" id="seats" aria-hidden="true"></div><div class="room-n"><b class="num" id="ppl">0</b><span data-t="crew.personas"></span></div></div>
+            <div class="room-msg" id="room-msg"></div>
+          </div>
+        </div>
+        <div class="mod">
+          <div class="mod-h mono"><b data-t="mod.c"></b><span id="ch-count"></span></div>
+          <div class="mod-b">
+            <p class="hint" data-t="ch.hint"></p>
+            <div class="presets" id="presets" role="group"></div>
+            <div class="strips" id="gear"></div>
+          </div>
+        </div>
+        <div class="mod">
+          <div class="mod-h mono"><b data-t="mod.d"></b><span data-t="mod.d2"></span></div>
+          <div class="mod-b">
+            <p class="hint" data-t="post.hint"></p>
+            <div class="sends" id="prod"></div>
+            <div class="combo" id="combo" hidden></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sheet" aria-live="polite">
+        <div class="sheet-h"><h3>Track sheet</h3><div class="id"><span id="sh-id">E33-—</span><br>Estudio E33 · MDE</div></div>
+        <div class="fields">
+          <div><span data-t="f.formato"></span><b id="fd-mode">—</b></div>
+          <div><span data-t="f.ing"></span><b id="fd-eng">—</b></div>
+          <div><span data-t="f.crew"></span><b id="fd-crew">—</b></div>
+          <div><span data-t="f.post"></span><b id="fd-post">—</b></div>
+          <div class="full"><span data-t="f.slot"></span><b id="fd-slot">—</b></div>
+        </div>
+        <div class="trk"><div class="trk-h"><span data-t="f.canales"></span><span id="trk-n">00</span></div><ol id="trk"></ol></div>
+        <div class="lines" id="lines"></div>
+        <div class="tot"><span class="stamp" data-t="f.siniva"></span><div><div class="lbl">TOTAL</div><div class="usd num" id="t-usd">USD 0</div></div><div class="cop num" id="t-cop"></div></div>
+        <button class="key inv gobtn" id="go" type="button" data-t="f.go"></button>
+        <div class="warnline" data-t="f.warn"></div>
+        <div class="foot" id="trm-note"></div>
+      </aside>
+    </div>
+  </div></section>
+
+  <section id="agenda" class="g"><div class="w">
+    <div class="sh">
+      <div class="mk mono"><b data-t="ag.mk"></b><span id="cal-range"></span></div>
+      <h2 data-t="ag.h"></h2>
+      <p data-t="ag.p"></p>
+    </div>
+    <div class="tl-top">
+      <span class="mono" style="color:var(--dim)" id="cal-src"></span>
+      <div style="display:flex;gap:10px"><button class="key ghost" id="c-prev" type="button" data-t="ag.prev"></button><button class="key ghost" id="c-next" type="button" data-t="ag.next"></button></div>
+    </div>
+    <div class="tl-wrap"><div class="tl" id="cal"></div></div>
+    <div class="legend mono"><span><i style="border:1px dashed var(--soft)"></i><span data-t="ag.libre"></span></span><span><i style="background:repeating-linear-gradient(135deg,var(--panel-2) 0 4px,var(--hatch) 4px 8px);border:1px solid var(--rule)"></i><span data-t="ag.res"></span></span><span><i style="background:var(--red)"></i><span data-t="ag.tu"></span></span></div>
+  </div></section>
+
+  <section id="reservar" class="g"><div class="w">
+    <div class="sh"><div class="mk mono"><b data-t="rs.mk"></b><span data-t="rs.mk2"></span></div><h2 data-t="rs.h"></h2><p data-t="rs.p"></p></div>
+    <ol class="flow" id="flow"></ol>
+    <p class="flow-note" id="flow-note"></p>
+  </div></section>
+
+  <section id="sala" class="g"><div class="w">
+    <div class="sh">
+      <div class="mk mono"><b data-t="sa.mk"></b><span data-t="sa.mk2"></span></div>
+      <h2 data-t="sa.h"></h2>
+      <p data-t="sa.p"></p>
+    </div>
+    <div class="contact" id="gal"></div>
+  </div></section>
+
+  <section id="rider" class="g"><div class="w">
+    <div class="sh">
+      <div class="mk mono"><b data-t="ri.mk"></b><span data-t="ri.mk2"></span></div>
+      <h2 data-t="ri.h"></h2>
+      <p data-t="ri.p"></p>
+    </div>
+    <div class="spec" id="rider-list"></div>
+  </div></section>
+
+  <section id="condiciones" class="g"><div class="w">
+    <div class="sh"><div class="mk mono"><b data-t="co.mk"></b><span data-t="co.mk2"></span></div><h2 data-t="co.h"></h2><p></p></div>
+    <div class="cond">
+      <div><span class="big">50<em>%</em></span><p data-t="co.1"></p></div>
+      <div><span class="big">48<em>h</em></span><p data-t="co.2"></p></div>
+      <div><span class="big">TRM</span><p data-t="co.3"></p></div>
+      <div><span class="big">2<em>h</em></span><p data-t="co.4"></p></div>
+    </div>
+  </div></section>
+
+  <footer class="g"><div class="w">
+    <div class="huge" aria-hidden="true">ENTR3T3NIMIENTO</div>
+    <div class="row mono"><span>Estudio E33 · Medellín, Colombia</span><span id="contact"></span></div>
+  </div></footer>
+</main>
+
+<div class="lb" id="lb" hidden><img id="lb-img" alt=""><button class="key" id="lb-x" type="button" data-t="ui.cerrar"></button></div>
+
+<div class="req" id="req" hidden role="dialog" aria-modal="true" aria-labelledby="req-t">
+  <form class="req-card" id="req-f" novalidate>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3 id="req-t" data-t="rq.h"></h3><button class="key ghost" type="button" id="req-x" data-t="ui.cerrar"></button></div>
+    <div id="req-form-body" style="display:flex;flex-direction:column;gap:14px">
+      <div class="two">
+        <label for="r-name"><span data-t="rq.name"></span><input id="r-name" required autocomplete="name"></label>
+        <label for="r-phone"><span>WhatsApp</span><input id="r-phone" required inputmode="tel" autocomplete="tel" placeholder="+57 300 000 0000"></label>
+      </div>
+      <label for="r-mail"><span data-t="rq.mail"></span><input id="r-mail" type="email" required autocomplete="email"></label>
+      <label for="r-rider"><span data-t="rq.rider"></span><textarea id="r-rider" rows="3" required></textarea></label>
+      <fieldset class="fs"><legend data-t="rq.miss"></legend>
+        <label class="rd" for="m-cot"><input type="radio" name="miss" id="m-cot" value="cot" checked><span data-t="rq.m1"></span></label>
+        <label class="rd" for="m-own"><input type="radio" name="miss" id="m-own" value="own"><span data-t="rq.m2"></span></label>
+        <label class="rd" for="m-ask"><input type="radio" name="miss" id="m-ask" value="ask"><span data-t="rq.m3"></span></label>
+      </fieldset>
+      <label for="r-notes"><span data-t="rq.notes"></span><textarea id="r-notes" rows="2"></textarea></label>
+      <div class="wait" data-t="rq.wait"></div>
+      <div class="err" id="r-err" hidden></div>
+      <button class="key" type="submit" style="justify-content:center" data-t="rq.send"></button>
+    </div>
+    <div id="req-done" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p style="margin:0" id="done-msg"></p>
+      <pre id="r-summary"></pre>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><button class="key" type="button" id="r-copy" data-t="rq.copy"></button><a class="key ghost" id="r-wa" target="_blank" rel="noopener" data-t="rq.wa"></a></div>
+    </div>
+  </form>
+</div>
+
+<script>
+/* ===== Configuración — en producción los datos llegan desde API_URL (Apps Script + Google Sheet) ===== */
+const CONFIG = { API_URL:"", WHATSAPP:"", EMAIL:"", TRM:3158.43, TRM_FECHA:"26/10/2026" };
+const IMAGES = {"control": "assets/img/control.jpg", "sala": "assets/img/sala.jpg", "lounge": "assets/img/lounge.jpg", "terraza": "assets/img/terraza.jpg", "vista": "assets/img/vista.jpg", "barra": "assets/img/barra.jpg"};
+const THUMBS = {"control": "assets/img/thumbs/control.jpg", "sala": "assets/img/thumbs/sala.jpg", "lounge": "assets/img/thumbs/lounge.jpg", "terraza": "assets/img/thumbs/terraza.jpg", "vista": "assets/img/thumbs/vista.jpg", "barra": "assets/img/thumbs/barra.jpg"};
+
+/* ===== Textos ES / EN ===== */
+const I18N = {
+es:{
+ "nav.consola":"Consola","nav.agenda":"Agenda","nav.reservar":"Cómo reservar","nav.sala":"La sala","nav.rider":"Rider",
+ "hero.eyebrow":"Estudio de grabación y producción",
+ "hero.title":"Estudio E33<em>.</em>",
+ "hero.lead":"<strong>Sala de grabación y producción en Medellín.</strong> Elige cómo trabajar, cuántos vienen y qué necesitas en sala. Dejamos todo conectado para que llegues a crear.",
+ "hero.cta1":"Arma tu sesión","hero.cta2":"Cómo reservar",
+ "facts.desde":"Desde","facts.mic":"Micrófono","facts.mon":"Monitoreo",
+ "camps.h":"Elige un punto de partida","camps.h2":"3 formatos",
+ "cons.mk":"Consola","cons.mk2":"Paso a paso","cons.h":"Arma tu sesión","cons.p":"Formato, crew, canales y post. El track sheet se llena solo y te da el precio.",
+ "mod.a":"A · Formato","mod.a2":"USD sin / con ingeniero","mod.b":"B · Tiempo","mod.crew":"C · Crew","mod.c":"D · Canales","mod.d":"E · Post","mod.d2":"Por canción",
+ "tg.eng":"Con ingeniero","tg.eng2":"Operación y captura","tg.night":"Horario nocturno","tg.night2":"22:00–06:00 · +25 %",
+ "time.horas":"Horas","time.extra":"Horas extra","time.paq":"10 horas","time.paqtxt":"Se agendan por separado durante 60 días","time.pick":"Elige fecha y franja en la <a href=\"#agenda\">agenda</a>","time.change":"cambiar","time.none":"Sin franja",
+ "crew.hint":"Cuéntanos cuántas personas vienen a la sesión para preparar el espacio.","crew.personas":"personas",
+ "crew.ok":"Cómodo para la sala de control.","crew.lounge":"Más de {c} personas: usaremos también lounge y terraza.","crew.max":"Más de {m} personas: escríbenos antes para confirmar si podemos recibirlos.",
+ "ch.hint":"Todo el equipo viene con la sala. Activa los canales que vas a usar y lo dejamos conectado antes de que llegues.","ch.free":"Libre","ch.act":"activos","ch.act1":"activo",
+ "post.hint":"Indica cuántas canciones llevan cada proceso. Las que llevan mezcla y máster pagan el precio combo; el resto se cobra por separado.",
+ "post.cancion":"canción","post.combo":"Combo en {n} {c} · {p} c/u","post.ahorro":"ahorras {s}","post.canciones":"canciones","post.solomz":"Solo mezcla","post.soloms":"Solo máster","post.cb":"Mezcla + máster","post.none":"Sin post",
+ "f.formato":"Formato","f.ing":"Ingeniero","f.crew":"Crew","f.post":"Post","f.slot":"Fecha / franja","f.canales":"Canales","f.siniva":"SIN IVA","f.go":"Enviar solicitud",
+ "f.warn":"Esto no confirma la reserva. Te respondemos en máximo 24 horas hábiles.","f.trm":"Pesos de referencia con TRM {t} ({d}). Se liquida con la TRM del día del pago.","f.anticipo":"Anticipo","f.tbd":"Por definir","f.paq":"10 h en 60 días","f.none":"Sube un canal en la consola.","f.si":"Sí","f.no":"No",
+ "ln.horas":"{h} h × {r}","ln.noct":" · nocturno","ln.extra":"{h} h extra",
+ "ag.mk":"Agenda","ag.h":"Disponibilidad","ag.p":"Cada franja es una pista. Toca un espacio libre para llevarlo a tu track sheet. La reserva se confirma con el anticipo.","ag.prev":"← Semana","ag.next":"Semana →","ag.libre":"Libre","ag.res":"Reservado","ag.tu":"Tu sesión","ag.pista":"Pista","ag.ej":"Agenda de ejemplo","ag.sync":"Sincronizado con el calendario del estudio","ag.toast":"Franja en tu track sheet","ag.dia":"día completo",
+ "rs.mk":"Reservar","rs.mk2":"Paso a paso","rs.h":"Cómo reservar","rs.p":"Sabemos que coordinar una sesión tiene muchas piezas. Así funciona, para que sepas en todo momento en qué va tu solicitud.",
+ "rs.s":[["Nos cuentas tu idea","Arma tu sesión, elige una franja y cuéntanos el rider que necesitas. No hace falta tener todo resuelto: si tienes dudas, déjalas en las notas.","Tú","2 min","Solicitud enviada"],["Revisamos con calma","Validamos agenda, ingeniero, espacio y equipo. Mientras tanto, la franja queda apartada para ti y nadie más puede tomarla.","E33","Hasta 24 h hábiles","En revisión"],["Te escribimos","Por WhatsApp y correo, con el valor final. Si algo de tu rider no está en sala, te proponemos cotizarlo o que lo traigas.","E33","Mismo día","Propuesta enviada"],["Confirmas con el anticipo","Envías el 50 % y el comprobante. Tienes 48 h desde nuestra respuesta; si necesitas más tiempo, avísanos.","Tú","48 h","Confirmada"],["Llegas a crear","Todo conectado y listo cuando entres. El saldo se paga antes de empezar.","Tú + E33","Día de sesión","En sesión"]],
+ "rs.note":"<b>¿Dudas antes de enviar?</b> Escríbenos por WhatsApp y te ayudamos a armar la sesión.","rs.you":"Tú","rs.us":"Nosotros",
+ "sa.mk":"La sala","sa.mk2":"Hoja de contacto","sa.h":"El espacio","sa.p":"Madera, luz natural y vista al valle. Sala de control, lounge, barra y terraza en el mismo piso.",
+ "ri.mk":"Rider","ri.mk2":"Se actualiza con el inventario","ri.h":"Rider técnico","ri.p":"Equipo operativo en sala. Si necesitas algo que no está, inclúyelo en tu solicitud.",
+ "co.mk":"Condiciones","co.mk2":"Antes de reservar","co.h":"Reglas claras","co.1":"de anticipo para reservar la franja. El saldo se paga antes de empezar.","co.2":"de aviso para cancelar: el anticipo queda como crédito. Con menos aviso no se reembolsa.","co.3":"Precios en USD sin IVA. En pesos se liquida con la TRM del día del pago.","co.4":"mínimo en el formato por hora. Los bloques y jornadas admiten horas extra.",
+ "ui.cerrar":"Cerrar","ui.wa":"WhatsApp por confirmar","ui.mail":"Correo por confirmar",
+ "rq.h":"Solicitar reserva","rq.name":"Nombre artístico","rq.mail":"Correo","rq.rider":"Rider que necesitas","rq.miss":"Si algo de tu rider no está en el estudio","rq.m1":"Quiero que E33 me lo cotice","rq.m2":"Lo llevo yo","rq.m3":"Prefiero hablarlo","rq.notes":"Notas para el ingeniero",
+ "rq.wait":"Al enviar, tu franja queda <b>en espera</b>. No está reservada hasta que te confirmemos (máximo 24 h hábiles) y recibamos el anticipo.","rq.send":"Enviar solicitud","rq.copy":"Copiar resumen","rq.wa":"Abrir WhatsApp",
+ "rq.err":"Completa nombre, WhatsApp, un correo válido y el rider que necesitas.","rq.ok":"<b>Solicitud recibida.</b> Tu franja queda en espera. Revisamos agenda y rider y te respondemos por WhatsApp y correo en máximo 24 horas hábiles. La reserva se confirma con el anticipo.","rq.no":"<b>Tu solicitud aún no se envió.</b> Copia este resumen y mándalo por WhatsApp. Te respondemos en máximo 24 horas hábiles; la reserva se confirma con el anticipo.","rq.copied":"Resumen copiado","rq.select":"Selecciona y copia el texto",
+ "rq.ph.rider":"Ej.: 2 micrófonos de voz, interfaz con 4 entradas, guitarra…","rq.ph.notes":"Referencias, número de voces, archivos que traes…",
+ "sum.sol":"SOLICITUD","sum.art":"Artista","sum.mail":"Correo","sum.fmt":"Formato","sum.con":"con ingeniero","sum.sin":"sin ingeniero","sum.fr":"Franja","sum.crew":"Crew","sum.ch":"Canales","sum.tot":"Total sin IVA","sum.rider":"Rider solicitado","sum.miss":"Si falta equipo","sum.notes":"Notas",
+ "miss.cot":"Cotizarlo con E33","miss.own":"Lo llevo yo","miss.ask":"Lo hablamos",
+ "theme":"Cambiar tema"
+},
+en:{
+ "nav.consola":"Console","nav.agenda":"Schedule","nav.reservar":"How to book","nav.sala":"The room","nav.rider":"Rider",
+ "hero.eyebrow":"Recording and production studio",
+ "hero.title":"Estudio E33<em>.</em>",
+ "hero.lead":"<strong>Recording and production room in Medellín.</strong> Choose how you want to work, who's coming and what you need in the room. We'll have everything patched in so you can walk in and create.",
+ "hero.cta1":"Build your session","hero.cta2":"How to book",
+ "facts.desde":"From","facts.mic":"Microphone","facts.mon":"Monitoring",
+ "camps.h":"Pick a starting point","camps.h2":"3 formats",
+ "cons.mk":"Console","cons.mk2":"Step by step","cons.h":"Build your session","cons.p":"Format, crew, channels and post. The track sheet fills in as you go and shows your price.",
+ "mod.a":"A · Format","mod.a2":"USD without / with engineer","mod.b":"B · Time","mod.crew":"C · Crew","mod.c":"D · Channels","mod.d":"E · Post","mod.d2":"Per song",
+ "tg.eng":"With engineer","tg.eng2":"Session operation and capture","tg.night":"Night hours","tg.night2":"22:00–06:00 · +25 %",
+ "time.horas":"Hours","time.extra":"Extra hours","time.paq":"10 hours","time.paqtxt":"Booked separately within 60 days","time.pick":"Pick a date and slot in the <a href=\"#agenda\">schedule</a>","time.change":"change","time.none":"No slot",
+ "crew.hint":"Tell us how many people are coming so we can set up the space.","crew.personas":"people",
+ "crew.ok":"Comfortable for the control room.","crew.lounge":"More than {c} people: we'll also open the lounge and terrace.","crew.max":"More than {m} people: message us first to confirm we can host you.",
+ "ch.hint":"All gear comes with the room. Turn on the channels you'll use and we'll have them connected before you arrive.","ch.free":"Custom","ch.act":"active","ch.act1":"active",
+ "post.hint":"Set how many songs get each process. Songs with both mixing and mastering get the combo price; the rest are charged separately.",
+ "post.cancion":"song","post.combo":"Combo on {n} {c} · {p} each","post.ahorro":"you save {s}","post.canciones":"songs","post.solomz":"Mixing only","post.soloms":"Mastering only","post.cb":"Mix + master","post.none":"No post",
+ "f.formato":"Format","f.ing":"Engineer","f.crew":"Crew","f.post":"Post","f.slot":"Date / slot","f.canales":"Channels","f.siniva":"NO VAT","f.go":"Send request",
+ "f.warn":"This does not confirm your booking. We reply within 24 business hours.","f.trm":"Peso reference at TRM {t} ({d}). Charged at the rate on the payment date.","f.anticipo":"Deposit","f.tbd":"To be set","f.paq":"10 h within 60 days","f.none":"Turn on a channel in the console.","f.si":"Yes","f.no":"No",
+ "ln.horas":"{h} h × {r}","ln.noct":" · night","ln.extra":"{h} extra h",
+ "ag.mk":"Schedule","ag.h":"Availability","ag.p":"Each slot is a track. Tap an open space to add it to your track sheet. Your booking is confirmed with the deposit.","ag.prev":"← Week","ag.next":"Week →","ag.libre":"Open","ag.res":"Booked","ag.tu":"Your session","ag.pista":"Track","ag.ej":"Sample schedule","ag.sync":"Synced with the studio calendar","ag.toast":"Slot added to your track sheet","ag.dia":"full day",
+ "rs.mk":"Booking","rs.mk2":"Step by step","rs.h":"How to book","rs.p":"We know a session has a lot of moving parts. Here's how it works, so you always know where your request stands.",
+ "rs.s":[["Tell us your idea","Build your session, pick a slot and share the rider you need. You don't need everything figured out: leave any questions in the notes.","You","2 min","Request sent"],["We review it","We check the schedule, engineer, space and gear. Meanwhile the slot is held for you and no one else can take it.","E33","Within 24 business h","Under review"],["We get back to you","By WhatsApp and email, with the final price. If something on your rider isn't in the room, we'll offer a quote or you can bring it.","E33","Same day","Proposal sent"],["Confirm with the deposit","Send 50 % and the receipt. You have 48 h from our reply; if you need more time, just tell us.","You","48 h","Confirmed"],["Walk in and create","Everything patched in and ready when you arrive. The balance is paid before you start.","You + E33","Session day","In session"]],
+ "rs.note":"<b>Questions before you send?</b> Message us on WhatsApp and we'll help you put the session together.","rs.you":"You","rs.us":"Us",
+ "sa.mk":"The room","sa.mk2":"Contact sheet","sa.h":"The space","sa.p":"Wood, daylight and a view of the valley. Control room, lounge, bar and terrace on the same floor.",
+ "ri.mk":"Rider","ri.mk2":"Updated from inventory","ri.h":"Tech rider","ri.p":"Working gear in the room. If you need something that isn't listed, add it to your request.",
+ "co.mk":"Terms","co.mk2":"Before you book","co.h":"Clear rules","co.1":"deposit to hold the slot. The balance is paid before you start.","co.2":"notice to cancel: your deposit stays as credit. With less notice it's non-refundable.","co.3":"Prices in USD, VAT not included. Peso payments use the TRM on the payment date.","co.4":"minimum on the hourly format. Blocks and full days allow extra hours.",
+ "ui.cerrar":"Close","ui.wa":"WhatsApp to be confirmed","ui.mail":"Email to be confirmed",
+ "rq.h":"Request a booking","rq.name":"Artist name","rq.mail":"Email","rq.rider":"Rider you need","rq.miss":"If something on your rider isn't at the studio","rq.m1":"I'd like E33 to quote it","rq.m2":"I'll bring it","rq.m3":"Let's talk about it","rq.notes":"Notes for the engineer",
+ "rq.wait":"Once sent, your slot is <b>on hold</b>. It isn't booked until we confirm (within 24 business hours) and receive your deposit.","rq.send":"Send request","rq.copy":"Copy summary","rq.wa":"Open WhatsApp",
+ "rq.err":"Fill in your name, WhatsApp, a valid email and the rider you need.","rq.ok":"<b>Request received.</b> Your slot is on hold. We'll review the schedule and rider and reply by WhatsApp and email within 24 business hours. Your booking is confirmed with the deposit.","rq.no":"<b>Your request hasn't been sent yet.</b> Copy this summary and send it by WhatsApp. We reply within 24 business hours; your booking is confirmed with the deposit.","rq.copied":"Summary copied","rq.select":"Select and copy the text",
+ "rq.ph.rider":"E.g. 2 vocal mics, 4-input interface, guitar…","rq.ph.notes":"References, number of vocalists, files you're bringing…",
+ "sum.sol":"REQUEST","sum.art":"Artist","sum.mail":"Email","sum.fmt":"Format","sum.con":"with engineer","sum.sin":"without engineer","sum.fr":"Slot","sum.crew":"Crew","sum.ch":"Channels","sum.tot":"Total, no VAT","sum.rider":"Requested rider","sum.miss":"If gear is missing","sum.notes":"Notes",
+ "miss.cot":"Quote it with E33","miss.own":"I'll bring it","miss.ask":"Let's talk",
+ "theme":"Switch theme"
+}};
+
+/* ===== Datos (campos *_en para inglés) ===== */
+let DATA = {
+  tarifas: {
+    hora:    { label:"Por hora", label_en:"Hourly", horas:2, min:2, max:12, sin:20, con:35, desc:"Mínimo 2 h", desc_en:"2 h minimum" },
+    bloque:  { label:"Bloque 4 h", label_en:"4 h block", horas:4, sin:70, con:120, extraSin:18, extraCon:30, desc:"Franja fija", desc_en:"Fixed slot" },
+    jornada: { label:"Jornada 8 h", label_en:"8 h day", horas:8, sin:130, con:220, extraSin:18, extraCon:30, desc:"Día completo", desc_en:"Full day" },
+    paquete: { label:"Paquete 10 h", label_en:"10 h pack", horas:10, sin:180, con:300, desc:"Vence en 60 días", desc_en:"Valid 60 days" }
+  },
+  nocturno: 0.25,
+  capacidad: { comoda:6, max:10 },
+  produccion: [ { id:"mezcla", label:"Mezcla", label_en:"Mixing", usd:80 }, { id:"master", label:"Máster", label_en:"Mastering", usd:30 }, { id:"mixmaster", label:"Mezcla + máster", label_en:"Mix + master", usd:100 } ],
+  crew: [ { id:"art", label:"Artistas", label_en:"Artists", desc:"Voces, MCs, músicos", desc_en:"Vocalists, MCs, players" },
+          { id:"prod", label:"Productores", label_en:"Producers", desc:"Beatmakers, compositores", desc_en:"Beatmakers, writers" },
+          { id:"acomp", label:"Acompañantes", label_en:"Guests", desc:"Equipo, manager, amigos", desc_en:"Team, manager, friends" } ],
+  equipos: [
+    { id:"MIC-001", cat:"Micrófono", cat_en:"Mic", short:"TF51", name:"Telefunken TF51", chain:"mic", qty:1 },
+    { id:"MON-001", cat:"Monitores", cat_en:"Monitors", short:"A77H", name:"ADAM Audio A77H · par", name_en:"ADAM Audio A77H · pair", chain:"out", qty:1 },
+    { id:"MON-003", cat:"Sub", cat_en:"Sub", short:"S10.4", name:"KRK S10.4 · 10\"", chain:"out", qty:1 },
+    { id:"AUD-002", cat:"Audífonos", cat_en:"Headphones", short:"DT 990", name:"Beyerdynamic · abiertos", name_en:"Beyerdynamic · open-back", chain:"hp", qty:1 },
+    { id:"AUD-003", cat:"Audífonos", cat_en:"Headphones", short:"M50x", name:"Audio-Technica · cerrados", name_en:"Audio-Technica · closed-back", chain:"hp", qty:1 },
+    { id:"INS-001", cat:"MIDI", cat_en:"MIDI", short:"V49", name:"Alesis · 49 teclas", name_en:"Alesis · 49 keys", chain:"in", qty:1 },
+    { id:"INS-002", cat:"Control", cat_en:"Control", short:"JAM", name:"NI Maschine JAM", chain:"in", qty:1 },
+    { id:"SOP-001", cat:"Soporte", cat_en:"Stand", short:"STAND", name:"Base de mic + antipop", name_en:"Mic stand + pop filter", chain:"acc", qty:3 }
+  ],
+  presets: [
+    { label:"Writing camp", desc:"Composición en grupo: voces, teclado y referencias.", desc_en:"Group songwriting: vocals, keys and references.", img:"lounge", mode:"jornada", crew:{art:3,prod:2,acomp:0}, eq:["MIC-001","MON-001","INS-001","AUD-003","SOP-001"], prod:{mezcla:0,master:0} },
+    { label:"Beat camp", desc:"Producción con pads, MIDI y sub para el low end.", desc_en:"Production with pads, MIDI and a sub for the low end.", img:"control", mode:"bloque", crew:{art:0,prod:2,acomp:1}, eq:["MON-001","MON-003","INS-001","INS-002","AUD-002"], prod:{mezcla:0,master:0} },
+    { label:"Sesión de voz", label_en:"Vocal session", desc:"Grabación con el TF51 y mezcla + máster de la canción.", desc_en:"Tracking on the TF51 plus mix and master of the song.", img:"sala", mode:"bloque", crew:{art:1,prod:0,acomp:1}, eq:["MIC-001","MON-001","AUD-003","SOP-001"], prod:{mezcla:1,master:1} }
+  ],
+  rider: [
+    { g:"Monitoreo", g_en:"Monitoring", items:[["ADAM Audio A77H","2 ×"],["KRK S10.4 · subwoofer","1 ×"]] },
+    { g:"Microfonía", g_en:"Microphones", items:[["Telefunken TF51 · válvula","1 ×","Telefunken TF51 · tube"],["Bases de micrófono","3 ×","Mic stands"],["Filtros antipop","2 ×","Pop filters"]] },
+    { g:"Audífonos", g_en:"Headphones", items:[["Beyerdynamic DT 990 PRO","1 ×"],["Audio-Technica ATH-M50x","1 ×"]] },
+    { g:"Instrumentos", g_en:"Instruments", items:[["Alesis V49 · MIDI","1 ×"],["NI Maschine JAM","1 ×"]] },
+    { g:"Cableado", g_en:"Cabling", items:[["XLR","2 ×"],["Línea TRS","2 ×","TRS line"],["Línea TS","1 ×","TS line"],["USB-C","1 ×"]] },
+    { g:"Espacio", g_en:"Space", items:[["Ingeniero de grabación","Opcional","Recording engineer","Optional"],["Wifi y parqueadero","Incluido","Wi-Fi and parking","Included"],["Terraza, lounge y barra","Incluido","Terrace, lounge and bar","Included"],["Nevera y agua","Incluido","Fridge and water","Included"]] }
+  ],
+  media: [ { k:"control", cap:"Sala de control", cap_en:"Control room" }, { k:"sala", cap:"Sala", cap_en:"Live room" }, { k:"lounge", cap:"Lounge", cap_en:"Lounge" }, { k:"terraza", cap:"Terraza", cap_en:"Terrace" }, { k:"vista", cap:"Vista al valle", cap_en:"Valley view" }, { k:"barra", cap:"Barra", cap_en:"Bar" } ],
+  franjas: [ { id:"m", label:"10:00–14:00", n:"Mañana", n_en:"Morning" }, { id:"t", label:"14:00–18:00", n:"Tarde", n_en:"Afternoon" }, { id:"n", label:"18:00–22:00", n:"Noche", n_en:"Evening" } ],
+  ocupado: null
+};
+
+/* ===== Estado ===== */
+const S = { lang:"es", mode:"bloque", eng:true, night:false, hours:2, extra:0, crew:{art:1,prod:0,acomp:1},
+  eq:new Set(["MIC-001","MON-001","AUD-003","SOP-001"]), prod:{mezcla:1, master:1}, preset:2, slot:null, week:0 };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const T = (k, v={}) => { let s = (I18N[S.lang][k] ?? I18N.es[k] ?? k); if (typeof s === "string") for (const [a,b] of Object.entries(v)) s = s.replaceAll("{"+a+"}", b); return s; };
+const L = (o, f) => (S.lang === "en" && o[f+"_en"]) ? o[f+"_en"] : o[f];
+const loc = () => S.lang === "en" ? "en-US" : "es-CO";
+const fmtUSD = n => "USD " + n.toLocaleString(loc(),{maximumFractionDigits:0});
+const fmtCOP = n => "$" + (Math.round(n/1000)*1000).toLocaleString("es-CO") + " COP";
+const people = () => Object.values(S.crew).reduce((a,b)=>a+b,0);
+
+function applyStatic(){
+  document.documentElement.lang = S.lang;
+  document.querySelectorAll("[data-t]").forEach(el => { el.innerHTML = T(el.dataset.t); });
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === S.lang));
+  $("#theme").setAttribute("aria-label", T("theme"));
+  $("#r-rider").placeholder = T("rq.ph.rider"); $("#r-notes").placeholder = T("rq.ph.notes");
+  $("#flow").innerHTML = T("rs.s").map(([b,p,w,tm,st],i)=>{ const us = w === "E33";
+    return `<li class="${us?"us":""}"><div class="node" aria-hidden="true">${pad(i+1)}</div><div class="st mono">${esc(st)}</div><div class="card"><div class="meta mono"><span class="who ${us?"us":""}">${us?T("rs.us"):esc(w)}</span><span>${esc(tm)}</span></div><b>${esc(b)}</b><p>${esc(p)}</p></div></li>`; }).join("");
+  $("#flow-note").innerHTML = T("rs.note") + (CONFIG.WHATSAPP ? ` <span class="mono">+${esc(CONFIG.WHATSAPP)}</span>` : "");
+}
+
+function calc(){
+  const t = DATA.tarifas[S.mode], lines = []; let usd = 0;
+  const base = S.eng ? t.con : t.sin;
+  if (S.mode === "hora"){
+    const rate = Math.round(base * (S.night ? 1 + DATA.nocturno : 1));
+    lines.push([T("ln.horas",{h:S.hours,r:fmtUSD(rate)}) + (S.night?T("ln.noct"):""), rate*S.hours]); usd += rate*S.hours;
+  } else {
+    lines.push([L(t,"label"), base]); usd += base;
+    if (S.extra > 0 && t.extraSin){ const r = S.eng ? t.extraCon : t.extraSin; lines.push([T("ln.extra",{h:S.extra}), r*S.extra]); usd += r*S.extra; }
+  }
+  const P = id => DATA.produccion.find(p => p.id === id);
+  const a = S.prod.mezcla||0, m = S.prod.master||0, cb = P("mixmaster"), both = cb ? Math.min(a,m) : 0;
+  if (both){ lines.push([`${T("post.cb")} × ${both}`, cb.usd*both]); usd += cb.usd*both; }
+  if (a-both > 0){ lines.push([`${T("post.solomz")} × ${a-both}`, P("mezcla").usd*(a-both)]); usd += P("mezcla").usd*(a-both); }
+  if (m-both > 0){ lines.push([`${T("post.soloms")} × ${m-both}`, P("master").usd*(m-both)]); usd += P("master").usd*(m-both); }
+  return { usd, lines, songs: Math.max(a,m) };
+}
+function sessionId(){ return "E33-" + (S.slot ? S.slot.date.replaceAll("-","").slice(2) + S.slot.fr.toUpperCase() : "XXXXXX"); }
+function shortOf(e){ return e.short || String(e.name).split(" ").pop(); }
+function slotLabel(){
+  if (!S.slot) return null;
+  const d = new Date(S.slot.date+"T12:00:00");
+  const dl = d.toLocaleDateString(loc(),{weekday:"short",day:"numeric",month:"short"}).replaceAll(".","");
+  const f = DATA.franjas.find(x=>x.id===S.slot.fr);
+  return `${dl} · ${S.slot.fr==="dia" ? T("ag.dia") : f ? f.label : ""}`;
+}
+
+function renderCamps(){
+  const head = $("#camps").firstElementChild.outerHTML;
+  $("#camps").innerHTML = head + DATA.presets.map((p,i)=>{
+    const eq = p.eq.map(id => DATA.equipos.find(e=>e.id===id)).filter(Boolean).map(shortOf).join(" · ");
+    return `<button type="button" class="camp" data-camp="${i}"><img src="${THUMBS[p.img]||THUMBS.control}" alt=""><span><b>${esc(L(p,"label"))}</b><p>${esc(L(p,"desc"))}</p><span class="gear">${esc(eq)}</span></span><span class="go" aria-hidden="true">→</span></button>`;
+  }).join("");
+}
+
+function render(){
+  const t = DATA.tarifas[S.mode];
+  $("#modes").innerHTML = Object.entries(DATA.tarifas).map(([k,x]) =>
+    `<button type="button" class="tk" aria-pressed="${S.mode===k}" data-mode="${k}"><span class="t">${esc(L(x,"label"))}</span><span class="p num">${x.sin} / ${x.con}</span><span class="d">${esc(L(x,"desc"))}</span></button>`).join("");
+  $("#eng").checked = S.eng; $("#night").checked = S.night;
+  $("#night-wrap").hidden = S.mode !== "hora";
+  $("#hstep").hidden = S.mode === "paquete";
+  $("#h-dec").setAttribute("aria-label","−"); $("#h-inc").setAttribute("aria-label","+");
+  $("#hours-l").textContent = S.mode === "hora" ? T("time.horas") : S.mode === "paquete" ? T("time.paq") : T("time.extra");
+  $("#hours").textContent = S.mode === "hora" ? S.hours : S.extra;
+  const sl = slotLabel();
+  $("#slot-l").innerHTML = S.mode === "paquete" ? T("time.paqtxt") : sl ? `<b>${esc(sl)}</b> · <a href="#agenda">${T("time.change")}</a>` : T("time.pick");
+  $("#slot-short").textContent = sl ? sl.split(" · ")[0] : T("time.none");
+
+  // crew
+  $("#crew").innerHTML = DATA.crew.map(c => `<div class="send"><div><b>${esc(L(c,"label"))}</b><small>${esc(L(c,"desc"))}</small></div><div class="step"><button type="button" data-cr="${c.id}" data-d="-1" aria-label="− ${esc(L(c,"label"))}">−</button><output class="num">${S.crew[c.id]||0}</output><button type="button" data-cr="${c.id}" data-d="1" aria-label="+ ${esc(L(c,"label"))}">+</button></div></div>`).join("");
+  const n = people(), cap = DATA.capacidad;
+  const slots = Math.max(cap.max, n);
+  $("#seats").innerHTML = [...Array(slots)].map((_,i)=>`<i class="${i<n ? (i>=cap.comoda ? "on over":"on") : ""} ${i===cap.comoda-1||i===cap.max-1?"cap":""}"></i>`).join("");
+  $("#ppl").textContent = n;
+  $("#crew-n").textContent = `${n} ${T("crew.personas")}`;
+  const msg = $("#room-msg");
+  msg.className = "room-msg" + (n > cap.comoda ? " warn" : "");
+  msg.textContent = n > cap.max ? T("crew.max",{m:cap.max}) : n > cap.comoda ? T("crew.lounge",{c:cap.comoda}) : T("crew.ok");
+
+  // channels
+  $("#presets").innerHTML = DATA.presets.map((p,i)=>`<button type="button" class="pr" aria-pressed="${S.preset===i}" data-preset="${i}">${esc(L(p,"label"))}</button>`).join("") +
+    `<button type="button" class="pr" aria-pressed="${S.preset===-1}" data-preset="-1">${T("ch.free")}</button>`;
+  $("#gear").innerHTML = DATA.equipos.map((e,i) =>
+    `<button type="button" class="ch" aria-pressed="${S.eq.has(e.id)}" data-eq="${esc(e.id)}" aria-label="${esc(L(e,"cat"))} ${esc(L(e,"name"))}">
+      <span class="cn"><span>CH ${pad(i+1)}</span><span class="led"></span></span>
+      <span class="knob" aria-hidden="true"></span>
+      <span class="scribble">${esc(shortOf(e))}</span>
+      <span class="fader" aria-hidden="true"><span class="cap"></span></span>
+      <span class="nm">${esc(L(e,"name"))}</span>
+      <span class="ct">${esc(L(e,"cat"))}</span>
+      ${e.qty>1?`<span class="q">×${e.qty}</span>`:""}
+    </button>`).join("");
+
+  // post
+  $("#prod").innerHTML = DATA.produccion.filter(p => p.id !== "mixmaster").map(p =>
+    `<div class="send"><div><b>${esc(L(p,"label"))}</b><small>${fmtUSD(p.usd)} / ${T("post.cancion")}</small></div><div class="step"><button type="button" data-pd="${esc(p.id)}" data-d="-1" aria-label="− ${esc(L(p,"label"))}">−</button><output class="num">${S.prod[p.id]||0}</output><button type="button" data-pd="${esc(p.id)}" data-d="1" aria-label="+ ${esc(L(p,"label"))}">+</button></div></div>`).join("");
+  const P = id => DATA.produccion.find(p => p.id === id), cb = P("mixmaster");
+  const both = cb ? Math.min(S.prod.mezcla||0, S.prod.master||0) : 0;
+  $("#combo").hidden = !both;
+  if (both){ const sv = (P("mezcla").usd + P("master").usd - cb.usd) * both;
+    $("#combo").innerHTML = T("post.combo",{n:both,c:both>1?T("post.canciones"):T("post.cancion"),p:fmtUSD(cb.usd)}) + (sv>0?` · <b>${T("post.ahorro",{s:fmtUSD(sv)})}</b>`:""); }
+
+  // sheet
+  const sel = DATA.equipos.map((e,i)=>({...e,n:i+1})).filter(e => S.eq.has(e.id));
+  $("#ch-count").textContent = `${sel.length} ${sel.length===1?T("ch.act1"):T("ch.act")}`;
+  $("#trk-n").textContent = pad(sel.length);
+  $("#trk").innerHTML = sel.length ? sel.map(e=>`<li><i>${pad(e.n)}</i><span>${esc(shortOf(e))} · ${esc(L(e,"cat"))}</span></li>`).join("") : `<li class="none">${T("f.none")}</li>`;
+  const c = calc();
+  $("#fd-mode").textContent = L(t,"label");
+  $("#fd-eng").textContent = S.eng ? T("f.si") : T("f.no");
+  $("#fd-crew").textContent = `${n} ${T("crew.personas")}`;
+  $("#fd-post").textContent = c.songs ? `${c.songs} ${c.songs>1?T("post.canciones"):T("post.cancion")}` : T("post.none");
+  $("#fd-slot").textContent = S.mode==="paquete" ? T("f.paq") : sl || T("f.tbd");
+  $("#lines").innerHTML = c.lines.map(([l,v])=>`<div class="ln"><span>${esc(l)}</span><span class="num">${fmtUSD(v)}</span></div>`).join("");
+  $("#t-usd").textContent = fmtUSD(c.usd);
+  $("#t-cop").innerHTML = `≈ ${fmtCOP(c.usd*CONFIG.TRM)}<br>${T("f.anticipo")} ${fmtUSD(Math.ceil(c.usd/2))}`;
+  $("#trm-note").textContent = T("f.trm",{t:CONFIG.TRM.toLocaleString("es-CO"),d:CONFIG.TRM_FECHA});
+  $("#sh-id").textContent = sessionId();
+  $("#f-from").textContent = fmtUSD(DATA.tarifas.hora.sin) + " / h";
+  renderCal();
+}
+
+/* ===== Agenda ===== */
+function busy(ds, fr){
+  if (Array.isArray(DATA.ocupado)) return DATA.ocupado.includes(ds+"|"+fr);
+  let h = 0; for (const ch of ds+fr) h = (h*31 + ch.charCodeAt(0)) % 997; return h % 3 === 0;
+}
+function iso(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function renderCal(){
+  const start = new Date(); start.setHours(0,0,0,0); start.setDate(start.getDate() + S.week*7);
+  const days = [...Array(7)].map((_,i)=>{ const d = new Date(start); d.setDate(start.getDate()+i); return d; });
+  const today = iso(new Date());
+  const dn = d => d.toLocaleDateString(loc(),{weekday:"short"}).replace(".","");
+  let html = `<div class="corner mono">${T("ag.pista")}</div>` + days.map(d=>`<div class="ruler ${iso(d)===today?"today":""}"><span class="mono" style="color:var(--dim)">${dn(d)}</span><b class="num">${pad(d.getDate())}</b></div>`).join("");
+  DATA.franjas.forEach((f,i) => {
+    html += `<div class="trkname"><b>TR${i+1} · ${esc(L(f,"n"))}</b><small>${esc(f.label)}</small></div>`;
+    days.forEach(d => {
+      const ds = iso(d), b = busy(ds,f.id), sel = S.slot && S.slot.date===ds && (S.slot.fr===f.id || S.slot.fr==="dia");
+      html += `<div class="lane"><button type="button" class="rg ${b?"busy":""} ${sel?"sel":""}" ${b?"disabled":""} data-d="${ds}" data-f="${f.id}" aria-label="${dn(d)} ${d.getDate()} ${f.label} ${b?T("ag.res"):T("ag.libre")}">${b?T("ag.res"):sel?T("ag.tu"):T("ag.libre")}</button></div>`;
+    });
+  });
+  $("#cal").innerHTML = html;
+  const fmt = d => d.toLocaleDateString(loc(),{day:"2-digit",month:"short"});
+  $("#cal-range").textContent = `${fmt(days[0])} — ${fmt(days[6])}`;
+  $("#c-prev").disabled = S.week === 0;
+  $("#cal-src").textContent = Array.isArray(DATA.ocupado) ? T("ag.sync") : T("ag.ej");
+}
+
+/* ===== Galería / rider ===== */
+function renderGal(){
+  const media = m => m.tipo === "video"
+    ? (/\.(mp4|webm)(\?|$)/i.test(m.src) ? `<video src="${esc(m.src)}" muted loop playsinline autoplay aria-label="${esc(L(m,"cap"))}"></video>`
+                                         : `<iframe src="${esc(m.src)}" title="${esc(L(m,"cap"))}" loading="lazy" allow="autoplay" style="border:0;width:100%;height:100%"></iframe>`)
+    : `<img src="${esc(m.src||IMAGES[m.k])}" alt="${esc(L(m,"cap"))}, Estudio E33">`;
+  $("#gal").innerHTML = DATA.media.map((m,i) => `<figure class="fr" tabindex="0" data-tipo="${m.tipo||"foto"}"><div class="img">${media(m)}</div><figcaption><span><i>${pad(i+1)}A</i> &nbsp;${esc(L(m,"cap"))}</span><span>E33 · MDE</span></figcaption></figure>`).join("");
+}
+function renderRider(){
+  const en = S.lang === "en";
+  $("#rider-list").innerHTML = DATA.rider.map(g => `<div><h3>${esc(L(g,"g"))}</h3><ul>${g.items.map(it=>`<li><b>${esc(en && it[2] ? it[2] : it[0])}</b><span>${esc(en && it[3] ? it[3] : it[1])}</span></li>`).join("")}</ul></div>`).join("");
+  $("#contact").textContent = (CONFIG.WHATSAPP ? `WhatsApp +${CONFIG.WHATSAPP}` : T("ui.wa")) + " · " + (CONFIG.EMAIL || T("ui.mail"));
+}
+function renderAll(){ applyStatic(); renderCamps(); renderGal(); renderRider(); render(); }
+
+/* ===== Eventos ===== */
+function applyPreset(i){
+  const p = DATA.presets[i]; S.preset = i;
+  S.eq = new Set(p.eq); S.prod = { ...p.prod }; if (p.crew) S.crew = { ...p.crew };
+  if (p.mode && DATA.tarifas[p.mode]){ S.mode = p.mode; S.extra = 0; S.night = false; }
+}
+document.addEventListener("click", e => {
+  const lg = e.target.closest("[data-lang]");
+  if (lg){ S.lang = lg.dataset.lang; try{ localStorage.setItem("e33-lang", S.lang); }catch(_){} renderAll(); return; }
+  const cp = e.target.closest("[data-camp]");
+  if (cp){ applyPreset(+cp.dataset.camp); render(); $("#consola").scrollIntoView(); return; }
+  const m = e.target.closest("[data-mode]");
+  if (m){ S.mode = m.dataset.mode; S.extra = 0; if (S.mode!=="hora") S.night = false; else S.hours = Math.max(S.hours, DATA.tarifas.hora.min||2);
+    if (S.slot && S.mode==="jornada") S.slot = { ...S.slot, fr:"dia" };
+    render(); return; }
+  const p = e.target.closest("[data-preset]");
+  if (p){ const i = +p.dataset.preset; if (i>=0) applyPreset(i); else S.preset = -1; render(); return; }
+  const g = e.target.closest("[data-eq]");
+  if (g){ const id = g.dataset.eq; S.eq.has(id) ? S.eq.delete(id) : S.eq.add(id); S.preset = -1; render(); return; }
+  const pd = e.target.closest("[data-pd]");
+  if (pd){ const id = pd.dataset.pd; S.prod[id] = Math.max(0, Math.min(30, (S.prod[id]||0) + +pd.dataset.d)); render(); return; }
+  const cr = e.target.closest("[data-cr]");
+  if (cr){ const id = cr.dataset.cr; S.crew[id] = Math.max(0, Math.min(20, (S.crew[id]||0) + +cr.dataset.d)); render(); return; }
+  const sl = e.target.closest(".rg:not(.busy)");
+  if (sl){ S.slot = { date:sl.dataset.d, fr: S.mode==="jornada" ? "dia" : sl.dataset.f }; if (S.mode==="paquete") S.mode = "bloque"; render(); toast(T("ag.toast")); return; }
+  const fig = e.target.closest(".fr");
+  if (fig && fig.dataset.tipo !== "video"){ openLb(fig); return; }
+});
+$("#eng").addEventListener("change", e => { S.eng = e.target.checked; render(); });
+$("#night").addEventListener("change", e => { S.night = e.target.checked; render(); });
+$("#h-inc").addEventListener("click", () => { if (S.mode==="hora") S.hours = Math.min(DATA.tarifas.hora.max||12, S.hours+1); else S.extra = Math.min(8, S.extra+1); render(); });
+$("#h-dec").addEventListener("click", () => { if (S.mode==="hora") S.hours = Math.max(DATA.tarifas.hora.min||2, S.hours-1); else S.extra = Math.max(0, S.extra-1); render(); });
+$("#c-prev").addEventListener("click", () => { S.week = Math.max(0, S.week-1); renderCal(); });
+$("#c-next").addEventListener("click", () => { S.week = Math.min(8, S.week+1); renderCal(); });
+
+/* Tema: sigue al dispositivo; el botón lo invierte */
+$("#theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  const cur = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  root.dataset.theme = cur === "dark" ? "light" : "dark";
+  try{ localStorage.setItem("e33-theme", root.dataset.theme); }catch(_){}
+});
+
+function openLb(fig){ const im = fig.querySelector("img"); if (!im) return; $("#lb-img").src = im.src; $("#lb-img").alt = im.alt; $("#lb").hidden = false; $("#lb-x").focus(); }
+$("#lb").addEventListener("click", e => { if (e.target.id !== "lb-img") $("#lb").hidden = true; });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape"){ $("#lb").hidden = true; $("#req").hidden = true; }
+  if (e.key === "Enter" && e.target.matches(".fr")) openLb(e.target);
+});
+
+/* ===== Solicitud ===== */
+function summary(f){
+  const c = calc(), sel = DATA.equipos.filter(e=>S.eq.has(e.id)).map(e=>L(e,"name"));
+  const crew = DATA.crew.map(x=>`${L(x,"label")} ${S.crew[x.id]||0}`).join(", ");
+  return [`${T("sum.sol")} ${sessionId()}`, `${T("sum.art")}: ${f.name}`, `WhatsApp: ${f.phone}`, `${T("sum.mail")}: ${f.mail}`,
+    `${T("sum.fmt")}: ${L(DATA.tarifas[S.mode],"label")} ${S.eng?T("sum.con"):T("sum.sin")}`,
+    `${T("sum.fr")}: ${slotLabel() || T("f.tbd")}`, `${T("sum.crew")}: ${people()} (${crew})`, `${T("sum.ch")}: ${sel.join(", ") || "—"}`,
+    ...c.lines.map(([l,v])=>`· ${l}: ${fmtUSD(v)}`), `${T("sum.tot")}: ${fmtUSD(c.usd)} (≈ ${fmtCOP(c.usd*CONFIG.TRM)})`,
+    `${T("sum.rider")}: ${f.rider}`, `${T("sum.miss")}: ${T("miss."+f.miss)}`,
+    f.notes ? `${T("sum.notes")}: ${f.notes}` : ""].filter(Boolean).join("\n");
+}
+$("#go").addEventListener("click", () => {
+  $("#req").hidden = false; $("#req-form-body").hidden = false; $("#req-done").hidden = true;
+  if (!$("#r-rider").value) $("#r-rider").value = DATA.equipos.filter(e=>S.eq.has(e.id)).map(e=>L(e,"name")).join(", ");
+  $("#r-name").focus();
+});
+$("#req-x").addEventListener("click", () => $("#req").hidden = true);
+$("#req-f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = { name:$("#r-name").value.trim(), phone:$("#r-phone").value.trim(), mail:$("#r-mail").value.trim(), rider:$("#r-rider").value.trim(),
+    miss:(document.querySelector('input[name="miss"]:checked')||{}).value||"ask", notes:$("#r-notes").value.trim() };
+  const err = $("#r-err");
+  if (!f.name || !f.phone || !/^\S+@\S+\.\S+$/.test(f.mail) || !f.rider){ err.textContent = T("rq.err"); err.hidden = false; return; }
+  err.hidden = true;
+  const text = summary(f); let sent = false;
+  if (CONFIG.API_URL){
+    try {
+      const c = calc();
+      const r = await fetch(CONFIG.API_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body: JSON.stringify({ action:"solicitud", id:sessionId(), lang:S.lang, name:f.name, phone:f.phone, mail:f.mail, notes:f.notes, rider:f.rider,
+          faltante:I18N.es["miss."+f.miss], modo:S.mode, ingeniero:S.eng, nocturno:S.night, horas:S.mode==="hora"?S.hours:S.extra,
+          fecha:S.slot?.date||"", franja:S.slot?.fr||"", personas:people(), crew:S.crew, equipos:[...S.eq], produccion:S.prod, totalUSD:c.usd, trm:CONFIG.TRM, resumen:text }) });
+      const j = await r.json().catch(()=>({})); sent = r.ok && j.ok !== false;
+    } catch(_){ sent = false; }
+  }
+  $("#done-msg").innerHTML = sent ? T("rq.ok") : T("rq.no");
+  $("#r-summary").textContent = text;
+  const wa = $("#r-wa");
+  if (CONFIG.WHATSAPP){ wa.href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(text)}`; wa.hidden = false; } else wa.hidden = true;
+  $("#req-form-body").hidden = true; $("#req-done").hidden = false;
+});
+$("#r-copy").addEventListener("click", () => {
+  navigator.clipboard.writeText($("#r-summary").textContent).then(() => toast(T("rq.copied")), () => { const r = document.createRange(); r.selectNodeContents($("#r-summary")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast(T("rq.select")); });
+});
+let tt; function toast(m){ let el = $(".toast"); if (!el){ el = document.createElement("div"); el.className = "toast"; el.setAttribute("role","status"); document.body.appendChild(el); } el.textContent = m; el.hidden = false; clearTimeout(tt); tt = setTimeout(()=>el.hidden = true, 2200); }
+
+/* ===== Carga desde el Google Sheet ===== */
+async function load(){
+  if (!CONFIG.API_URL) return;
+  try {
+    const j = await (await fetch(CONFIG.API_URL + "?action=datos")).json();
+    ["tarifas","produccion","equipos","rider","ocupado","nocturno","capacidad"].forEach(k => { if (j[k] != null) DATA[k] = j[k]; });
+    if (j.media && j.media.length) DATA.media = j.media;
+    if (j.trm){ CONFIG.TRM = j.trm; CONFIG.TRM_FECHA = j.trmFecha || CONFIG.TRM_FECHA; }
+    if (j.whatsapp) CONFIG.WHATSAPP = j.whatsapp;
+    if (j.email) CONFIG.EMAIL = j.email;
+    renderAll();
+  } catch(_){}
+}
+
+/* Inicio: idioma y tema del dispositivo (o lo último elegido) */
+try{ const l = localStorage.getItem("e33-lang"); S.lang = l || ((navigator.language||"es").toLowerCase().startsWith("en") ? "en" : "es"); }catch(_){ S.lang = (navigator.language||"es").toLowerCase().startsWith("en") ? "en" : "es"; }
+try{ const th = localStorage.getItem("e33-theme"); if (th) document.documentElement.dataset.theme = th; }catch(_){}
+renderAll(); load();
+</script>
+
+</body>
+</html>

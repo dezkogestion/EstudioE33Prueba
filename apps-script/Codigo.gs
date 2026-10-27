@@ -49,6 +49,10 @@ function limpiarCache() { CacheService.getScriptCache().remove('datos'); }
 
 /* ---------- API para la landing ---------- */
 function doGet(e) {
+  if (e && e.parameter && e.parameter.app === 'admin') {
+    return HtmlService.createHtmlOutputFromFile('Admin').setTitle('E33 · Gestión del estudio')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  }
   const cache = CacheService.getScriptCache();
   const hit = cache.get('datos');
   if (hit) return ContentService.createTextOutput(hit).setMimeType(ContentService.MimeType.JSON);

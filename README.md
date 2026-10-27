@@ -48,3 +48,20 @@ Sin `API_URL`, la página funciona con los datos de ejemplo incluidos en el HTML
 | Solicitudes | Cada solicitud recibida; el estado actualiza el calendario |
 
 Los cambios aparecen en la página en unos 5 minutos (caché del script). Para verlos al instante: menú **E33 Estudio → Limpiar caché de la landing**.
+
+## App de gestión (Santi, Isis, Pepe)
+
+Vista previa con datos de ejemplo: `gestion/index.html` (en Pages: `/gestion/`).
+
+La app real corre en el mismo Apps Script de la hoja y usa las pestañas **Inventario, Compras, Ingresos, Usuarios y Solicitudes**.
+
+1. En el proyecto de Apps Script agrega dos archivos: **Admin.gs** (Archivo → Nuevo → Script) y **Admin** (Archivo → Nuevo → HTML; nombre exacto `Admin`). Pega `apps-script/Admin.gs` y `apps-script/Admin.html`. Reemplaza también `Codigo.gs` por la versión de esta carpeta.
+2. En la pestaña **Usuarios** completa el correo de Google de cada persona y su rol:
+   - `admin`: todo, incluido aprobar compras (Pepe)
+   - `operaciones`: reservas, inventario, compras e ingresos (Isis)
+   - `local`: ver todo, marcar sesiones realizadas, estado de equipos, solicitar compras (Santi)
+3. Comparte la hoja y el calendario "Reserva de Estudio" con esos correos (como editores).
+4. Implementar → **Nueva implementación** → Aplicación web · Ejecutar como: **Usuario que accede** · Acceso: **Cualquier usuario con cuenta de Google**.
+5. Abre la URL de esa implementación agregando `?app=admin` al final. Guárdala como acceso directo en el celular.
+
+La implementación de la landing (Ejecutar como: yo · Acceso: cualquier usuario) sigue funcionando igual; son dos implementaciones del mismo proyecto.

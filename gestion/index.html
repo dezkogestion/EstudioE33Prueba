@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>E33 Gestión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: herramienta de trabajo. Barra lateral (escritorio) / barra inferior (celular); cada vista abre con lo que requiere atención y luego la lista; el detalle se edita en un panel lateral. Sistema E33 en negro. */
+:root{
+  --ink:#0A0A0A; --paper:#FFFFFF; --panel:#121212; --panel-2:#1A1A1A; --panel-3:#232323; --rule:#2A2A2A; --dim:#7A7A7A; --soft:#B5B5B5;
+  --red:#E4172B; --red-soft:rgba(228,23,43,.14); --on-red:#FFFFFF; --ok:#FFFFFF;
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  --font-display:'Big Shoulders Display','Arial Narrow',sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font:400 15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em}
+h1,h2,h3{font-family:var(--font-display);font-weight:900;margin:0;line-height:.95;letter-spacing:.01em}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+.side{position:sticky;top:0;height:100vh;border-right:1px solid var(--rule);padding:20px 14px;display:flex;flex-direction:column;gap:6px;background:var(--ink)}
+.brand{font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:.14em;padding:4px 10px 18px}
+.brand small{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--dim);font-weight:400;margin-top:6px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;border:0;border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;color:var(--soft);font-weight:500}
+.nav button:hover{background:var(--panel-2);color:var(--paper)}
+.nav button[aria-current="page"]{background:var(--panel-2);color:var(--paper)}
+.nav button[aria-current="page"] .ic{background:var(--red);border-color:var(--red)}
+.nav .ic{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--dim);flex:none}
+.nav .badge{margin-left:auto;background:var(--red);color:var(--on-red);border-radius:var(--r-pill);font-size:11px;font-weight:700;padding:1px 7px}
+.me{margin-top:auto;border-top:1px solid var(--rule);padding:14px 10px 0;display:flex;flex-direction:column;gap:2px}
+.me b{font-weight:600}
+.me span{color:var(--dim);font-size:13px}
+
+main{padding:28px max(20px,env(safe-area-inset-right,0px)) 80px max(20px,env(safe-area-inset-left,0px));min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.top h1{font-size:clamp(40px,5vw,64px)}
+.top p{margin:6px 0 0;color:var(--dim)}
+.demo{background:var(--red-soft);border:1px solid var(--red);border-radius:var(--r-md);padding:10px 14px;margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:14px}
+.demo select{background:var(--panel-2);border:1px solid var(--rule);border-radius:var(--r-pill);padding:4px 10px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--r-pill);border:1.5px solid var(--rule);background:transparent;padding:9px 16px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--paper)}
+.btn.pri{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.btn.pri:hover{background:#C41224;border-color:#C41224}
+.btn.light{background:var(--paper);border-color:var(--paper);color:var(--ink)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:24px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.kpi .l{color:var(--dim);font-size:13px}
+.kpi .v{font-family:var(--font-display);font-weight:900;font-size:40px;line-height:1}
+.kpi .s{color:var(--soft);font-size:13px}
+.kpi.neg .v{color:var(--red)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+@media (max-width:1100px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--rule)}
+.card-h h2{font-size:26px}
+.card-h span{color:var(--dim);font-size:13px}
+.card-b{padding:6px 0}
+.empty{padding:22px 18px;color:var(--dim)}
+
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 18px;border-top:1px solid var(--rule);cursor:pointer;background:transparent;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left}
+.row:first-child{border-top:0}
+.row:hover{background:var(--panel-2)}
+.row b{font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row small{color:var(--dim);font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .r{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.row .amt{font-family:var(--font-mono);font-size:13px}
+.flag{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin-right:6px;vertical-align:1px}
+
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:var(--r-pill);padding:3px 10px;font-size:12px;font-weight:600;border:1px solid var(--rule);white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-nueva{color:var(--red);border-color:var(--red)}
+.p-tentativa{color:var(--soft)}
+.p-anticipo{color:var(--paper);border-color:var(--paper)}
+.p-confirmada{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.p-realizada{color:var(--dim)}
+.p-cancelada{color:var(--dim);text-decoration:line-through}
+.p-ok{color:var(--paper)}
+.p-warn{color:var(--red);border-color:var(--red)}
+.p-off{background:var(--red);border-color:var(--red);color:var(--on-red)}
+
+/* Chart */
+.chart{padding:16px 18px 10px}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:16px;padding:0 18px 14px;color:var(--soft);font-size:13px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:0}
+
+/* Toolbar */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);background:transparent;border-radius:var(--r-pill);padding:6px 12px;cursor:pointer;font-size:13px;color:var(--soft)}
+.chip:hover{border-color:var(--soft)}
+.chip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.chip .n{opacity:.6;margin-left:4px}
+.search{flex:1 1 220px;min-width:0;background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-pill);padding:9px 16px}
+.search:focus{outline:none;border-color:var(--paper)}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--panel)}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th{text-align:left;font-weight:500;color:var(--dim);font-size:13px;padding:12px 14px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--panel-2)}
+td.code{font-family:var(--font-mono);font-size:13px;white-space:nowrap}
+td.muted{color:var(--dim)}
+td.r{text-align:right;font-family:var(--font-mono);font-size:13px;white-space:nowrap}
+.sum{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sum .pill{font-size:13px;padding:5px 12px}
+
+/* Drawer */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:30}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:var(--panel);border-left:1px solid var(--rule);z-index:31;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.dr-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:20px 22px;border-bottom:1px solid var(--rule)}
+.dr-h h2{font-size:32px}
+.dr-h p{margin:6px 0 0;color:var(--dim);font-size:13px}
+.dr-b{padding:18px 22px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:16px}
+.dr-f{padding:14px 22px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.x{border:0;background:var(--panel-2);border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:18px;flex:none}
+.kv{display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px 14px;font-size:14px}
+.kv dt{color:var(--dim)}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.block{background:var(--panel-2);border-radius:var(--r-md);padding:12px 14px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.block.mono{font-size:12px;line-height:1.6}
+.steps{display:flex;gap:4px}
+.steps i{flex:1;height:4px;border-radius:2px;background:var(--rule)}
+.steps i.on{background:var(--paper)}
+.steps i.cur{background:var(--red)}
+.lbl{color:var(--dim);font-size:13px;margin-bottom:6px;display:block}
+.form{display:flex;flex-direction:column;gap:14px}
+.form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dim)}
+.form input,.form select,.form textarea{background:var(--ink);border:1px solid var(--rule);border-radius:var(--r-sm);padding:10px 12px;color:var(--paper);font-size:15px}
+.form input:focus,.form select:focus,.form textarea:focus{outline:none;border-color:var(--paper)}
+.form input:disabled,.form select:disabled,.form textarea:disabled{opacity:.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check{flex-direction:row!important;align-items:center;gap:10px!important;color:var(--paper)!important;font-size:14px!important}
+.check input{width:18px;height:18px;accent-color:var(--red)}
+.note{font-size:13px;color:var(--dim)}
+.err{color:var(--red);font-size:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--paper);color:var(--ink);border-radius:var(--r-pill);padding:10px 18px;z-index:40;font-weight:600;font-size:14px;max-width:calc(100% - 32px)}
+.loading{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--dim)}
+
+/* Mobile */
+.tabbar{display:none}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  main{padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);border-top:1px solid var(--rule);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  .tabbar button{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;color:var(--dim);font-size:11px;cursor:pointer;position:relative}
+  .tabbar .ic{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--dim)}
+  .tabbar button[aria-current="page"]{color:var(--paper)}
+  .tabbar button[aria-current="page"] .ic{background:var(--red);border-color:var(--red)}
+  .tabbar .badge{position:absolute;top:2px;right:18%;background:var(--red);color:var(--on-red);border-radius:var(--r-pill);font-size:10px;font-weight:700;padding:0 5px}
+  .kpi .v{font-size:32px}
+  .two{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">E33<small>Gestión del estudio</small></div>
+    <nav class="nav" id="nav" aria-label="Secciones"></nav>
+    <div class="me" id="me"></div>
+  </aside>
+  <main id="main"><div class="loading">Cargando…</div></main>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="Secciones"></nav>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true"></aside>
+
+<script>
+/* ============ Capa de datos: Apps Script en producción, ejemplo en vista previa ============ */
+const LIVE = !!(window.google && google.script && google.script.run);
+function call(fn, ...args){
+  if (LIVE) return new Promise((ok, ko) => google.script.run.withSuccessHandler(ok).withFailureHandler(e => ko(e && e.message ? e : new Error(String(e))))[fn](...args));
+  return Promise.resolve().then(() => MOCK[fn](...args));
+}
+
+/* Datos de ejemplo (solo vista previa) */
+const DEMO_USERS = [
+  { email:"pepe@entr3t3nimiento.com", nombre:"Pepe", rol:"admin" },
+  { email:"isiselinor@entr3t3nimiento.com", nombre:"Isis", rol:"operaciones" },
+  { email:"santi@entr3t3nimiento.com", nombre:"Santi", rol:"local" } ];
+const PERM = { admin:["*"], operaciones:["reservas","inventario","inventario.estado","compras.solicitar","compras.registrar","ingresos","reservas.sesion"], local:["reservas.sesion","inventario.estado","compras.solicitar"] };
+const dISO = (d) => { const x = new Date(); x.setDate(x.getDate()+d); return x.toISOString().slice(0,10); };
+const DB = {
+  user: DEMO_USERS[1],
+  solicitudes: [
+    { id:"E33-2610M", recibido:dISO(-1)+"T18:20", estado:"Nueva", artista:"Ejemplo · Luna Roja", whatsapp:"+57 300 000 0001", correo:"luna@ejemplo.com", modo:"bloque", ingeniero:"Sí", horas:0, fecha:dISO(3), franja:"m", total_usd:220, trm:3158.43, personas:3, rider_solicitado:"TF51, A77H, M50x, base de mic", si_falta_equipo:"Cotizarlo con E33", notas:"Dos voces, traemos pistas en WAV", resumen:"Bloque 4 h con ingeniero\nMezcla + máster × 1" },
+    { id:"E33-2810T", recibido:dISO(-2)+"T10:05", estado:"Tentativa", artista:"Ejemplo · Kairo", whatsapp:"+57 300 000 0002", correo:"kairo@ejemplo.com", modo:"jornada", ingeniero:"Sí", horas:0, fecha:dISO(5), franja:"dia", total_usd:220, trm:3158.43, personas:5, rider_solicitado:"V49, Maschine JAM, sub, guitarra eléctrica", si_falta_equipo:"Lo llevo yo", notas:"", resumen:"Jornada 8 h con ingeniero" },
+    { id:"E33-2410N", recibido:dISO(-4)+"T21:40", estado:"Confirmada", artista:"Ejemplo · Dúo Norte", whatsapp:"+57 300 000 0003", correo:"norte@ejemplo.com", modo:"hora", ingeniero:"No", horas:3, fecha:dISO(1), franja:"n", total_usd:60, trm:3158.43, personas:2, rider_solicitado:"A77H, DT 990", si_falta_equipo:"Lo hablamos", notas:"", resumen:"3 h sin ingeniero" },
+    { id:"E33-2010T", recibido:dISO(-9)+"T12:00", estado:"Realizada", artista:"Ejemplo · Sara V.", whatsapp:"+57 300 000 0004", correo:"sara@ejemplo.com", modo:"bloque", ingeniero:"Sí", horas:1, fecha:dISO(-6), franja:"t", total_usd:150, trm:3158.43, personas:2, rider_solicitado:"TF51", si_falta_equipo:"Cotizarlo con E33", notas:"", resumen:"Bloque 4 h + 1 h extra" }
+  ],
+  inventario: [], compras: [
+    { id:"C-1", fecha:dISO(-1), item:"Base shock mount para MXL 2006", categoria:"Micrófonos", proveedor:"Por definir", monto:120000, moneda:"COP", solicitado_por:"Santi", estado:"Solicitada", aprobado_por:"", comprobante:"", notas:"Sin base no se puede usar el mic" },
+    { id:"C-2", fecha:dISO(-6), item:"Cables XLR 5 m (×2)", categoria:"Cables", proveedor:"Tienda local", monto:90000, moneda:"COP", solicitado_por:"Isis", estado:"Comprada", aprobado_por:"Pepe", comprobante:"", notas:"" },
+    { id:"C-3", fecha:dISO(-35), item:"Limpieza y mantenimiento aire acondicionado", categoria:"Mantenimiento", proveedor:"Técnico", monto:250000, moneda:"COP", solicitado_por:"Santi", estado:"Comprada", aprobado_por:"Pepe", comprobante:"", notas:"" } ],
+  ingresos: [
+    { id:"I-1", fecha:dISO(-6), concepto:"Sesión completa", reserva_id:"E33-2010T", cliente:"Ejemplo · Sara V.", monto:150, moneda:"USD", metodo:"Transferencia", comprobante:"", registrado_por:"Isis", notas:"" },
+    { id:"I-2", fecha:dISO(-3), concepto:"Anticipo 50 %", reserva_id:"E33-2410N", cliente:"Ejemplo · Dúo Norte", monto:30, moneda:"USD", metodo:"Nequi", comprobante:"", registrado_por:"Isis", notas:"" },
+    { id:"I-3", fecha:dISO(-38), concepto:"Sesión completa", reserva_id:"", cliente:"Ejemplo · Cliente anterior", monto:1200000, moneda:"COP", metodo:"Efectivo", comprobante:"", registrado_por:"Santi", notas:"" } ]
+};
+const MOCK = {
+  apiInicio(){ return JSON.parse(JSON.stringify({ usuario:DB.user, permisos:PERM[DB.user.rol], config:{ trm:3158.43, trmFecha:"26/10/2026", capacidad:6 },
+    solicitudes:DB.solicitudes, inventario:DB.inventario, compras:DB.compras, ingresos:DB.ingresos, eventos:[], prefijos:PREFIJOS_DEMO })); },
+  apiReservaEstado(id, estado){ chk(estado==="Realizada"?"reservas.sesion":"reservas"); const r = DB.solicitudes.find(x=>x.id===id); r.estado = estado; return {...r}; },
+  apiInventarioGuardar(it){ const ex = DB.inventario.find(x=>x.codigo===it.codigo);
+    if (!ex) chk("inventario"); else if (!can("inventario")) { chk("inventario.estado"); Object.keys(it).forEach(k=>{ if(!["codigo","estado","ubicacion","ultima_revision","observaciones"].includes(k)) delete it[k]; }); }
+    if (!ex){ const p = PREFIJOS_DEMO[it.categoria]; const n = DB.inventario.filter(x=>x.codigo.startsWith(p+"-")).map(x=>+x.codigo.split("-")[1]); it.codigo = p+"-"+String((n.length?Math.max(...n):0)+1).padStart(3,"0"); DB.inventario.push(it); return {...it}; }
+    Object.assign(ex, it); return {...ex}; },
+  apiCompraGuardar(c){ if (!c.id){ chk("compras.solicitar"); c.id = "C-"+Date.now(); c.fecha = dISO(0); c.estado = "Solicitada"; c.solicitado_por = DB.user.nombre; DB.compras.unshift(c); return {...c}; }
+    const p = DB.compras.find(x=>x.id===c.id);
+    if (c.estado==="Aprobada"||c.estado==="Rechazada"){ chk("compras.aprobar"); c.aprobado_por = DB.user.nombre; }
+    else { chk("compras.registrar"); if (c.estado==="Comprada" && p.estado!=="Aprobada") throw new Error("Primero debe estar aprobada"); }
+    Object.assign(p, c); return {...p}; },
+  apiIngresoGuardar(i){ chk("ingresos"); if (!i.id){ i.id = "I-"+Date.now(); i.registrado_por = DB.user.nombre; DB.ingresos.unshift(i); } else Object.assign(DB.ingresos.find(x=>x.id===i.id), i);
+    if (i.reserva_id && i.es_anticipo){ const r = DB.solicitudes.find(x=>x.id===i.reserva_id); if (r && ["Nueva","Tentativa"].includes(r.estado)) r.estado = "Anticipo recibido"; } return {...i}; }
+};
+const PREFIJOS_DEMO = { "Monitoreo":"MON","Micrófonos":"MIC","Audífonos":"AUD","Instrumentos":"INS","Cables":"CAB","Adaptadores":"ADP","Soportes":"SOP","Accesorios":"ACC","Energía":"ENE","Red":"RED","Mobiliario":"MOB","Hospitalidad":"HOS" };
+const can = a => { const p = PERM[DB.user.rol]; return p.includes("*") || p.includes(a); };
+const chk = a => { if (!can(a)) throw new Error("Tu rol ("+DB.user.rol+") no permite esta acción."); };
+DB.inventario = [{"codigo": "MON-001", "codigo_anterior": "M001", "equipo": "Monitor de estudio", "categoria": "Monitoreo", "marca": "ADAM Audio", "modelo": "A77H", "serie": "CF4700113", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable de poder, cable XLR", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MON-002", "codigo_anterior": "M002", "equipo": "Monitor de estudio", "categoria": "Monitoreo", "marca": "ADAM Audio", "modelo": "A77H", "serie": "CF4700114", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable de poder, cable XLR", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MON-003", "codigo_anterior": "B001", "equipo": "Subwoofer", "categoria": "Monitoreo", "marca": "KRK", "modelo": "S10.4 G", "serie": "HBNS015135", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable de poder", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Limpiar carcasa"}, {"codigo": "MIC-001", "codigo_anterior": "MC001", "equipo": "Micrófono de válvula", "categoria": "Micrófonos", "marca": "Telefunken", "modelo": "TF51", "serie": "3749", "estado": "Nuevo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Fuente de poder, cable caja–mic", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MIC-002", "codigo_anterior": "MC002", "equipo": "Micrófono de condensador", "categoria": "Micrófonos", "marca": "MXL", "modelo": "2006", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Falta base (shock mount)"}, {"codigo": "AUD-001", "codigo_anterior": "D001", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "ICON", "modelo": "HP-360", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Probar"}, {"codigo": "AUD-002", "codigo_anterior": "D002", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "Beyerdynamic", "modelo": "DT 990 PRO LE", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "AUD-003", "codigo_anterior": "D003", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "Audio-Technica", "modelo": "ATH-M50x", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "AUD-004", "codigo_anterior": "D004", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "Audio-Technica", "modelo": "AVC200", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Probar"}, {"codigo": "INS-001", "codigo_anterior": "MD001", "equipo": "Teclado MIDI", "categoria": "Instrumentos", "marca": "Alesis", "modelo": "V49", "serie": "BA1906161704923", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable USB", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "INS-002", "codigo_anterior": "MS001", "equipo": "Controlador", "categoria": "Instrumentos", "marca": "Native Instruments", "modelo": "Maschine JAM", "serie": "MAJ06021825383AA", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Comparte cable con INS-001", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-001", "codigo_anterior": "C001", "equipo": "Cable XLR", "categoria": "Cables", "marca": "REAN", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-002", "codigo_anterior": "C002", "equipo": "Cable de línea TS", "categoria": "Cables", "marca": "Fender", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "De colores"}, {"codigo": "CAB-003", "codigo_anterior": "C003", "equipo": "Cable de línea TRS", "categoria": "Cables", "marca": "Proel", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-004", "codigo_anterior": "C004", "equipo": "Cable de línea TRS", "categoria": "Cables", "marca": "Proel", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-005", "codigo_anterior": "C005", "equipo": "Cable USB-C a USB-C", "categoria": "Cables", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-006", "codigo_anterior": "C006", "equipo": "Cable XLR", "categoria": "Cables", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Negro, dos cintas en los extremos"}, {"codigo": "CAB-007", "codigo_anterior": "C007", "equipo": "Cable de poder", "categoria": "Cables", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ADP-001", "codigo_anterior": "A001", "equipo": "Adaptador múltiple USB-C", "categoria": "Adaptadores", "marca": "Infinito", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ADP-002", "codigo_anterior": "A002", "equipo": "Adaptador USB-C", "categoria": "Adaptadores", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ADP-003", "codigo_anterior": "A003", "equipo": "Adaptador doble plug", "categoria": "Adaptadores", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "SOP-001", "codigo_anterior": "BM001", "equipo": "Base de micrófono", "categoria": "Soportes", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "SOP-002", "codigo_anterior": "BM002", "equipo": "Base de micrófono", "categoria": "Soportes", "marca": "König & Meyer", "modelo": "", "serie": "", "estado": "Fuera de servicio", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Reparar o descartar"}, {"codigo": "SOP-003", "codigo_anterior": "BM003", "equipo": "Base de micrófono", "categoria": "Soportes", "marca": "König & Meyer", "modelo": "", "serie": "702332", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "SOP-004", "codigo_anterior": "AC003", "equipo": "Soporte de micrófono", "categoria": "Soportes", "marca": "Scala", "modelo": "", "serie": "", "estado": "Nuevo", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "No corresponde a ningún mic del estudio"}, {"codigo": "SOP-005", "codigo_anterior": "BM004", "equipo": "Base de monitor", "categoria": "Soportes", "marca": "Jamstands", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Sin uso"}, {"codigo": "SOP-006", "codigo_anterior": "BM005", "equipo": "Base de monitor", "categoria": "Soportes", "marca": "Jamstands", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Sin uso"}, {"codigo": "ACC-001", "codigo_anterior": "AC001", "equipo": "Antipop", "categoria": "Accesorios", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ACC-002", "codigo_anterior": "AC002", "equipo": "Antipop", "categoria": "Accesorios", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ENE-001", "codigo_anterior": "E001", "equipo": "Regleta", "categoria": "Energía", "marca": "Avelec", "modelo": "", "serie": "F62372345", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Negra"}, {"codigo": "ENE-002", "codigo_anterior": "E002", "equipo": "Regleta", "categoria": "Energía", "marca": "Avelec", "modelo": "", "serie": "D42144288", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Blanca"}, {"codigo": "ENE-003", "codigo_anterior": "E003", "equipo": "Regleta industrial", "categoria": "Energía", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Detrás de la mesa de control; alimenta monitores"}, {"codigo": "ENE-004", "codigo_anterior": "E004", "equipo": "Extensión", "categoria": "Energía", "marca": "Halux", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Amarilla"}, {"codigo": "RED-001", "codigo_anterior": "TP001", "equipo": "Router / repetidor", "categoria": "Red", "marca": "TP-Link", "modelo": "", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Confirmar modelo y función"}, {"codigo": "MOB-001", "codigo_anterior": "S001", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-002", "codigo_anterior": "S002", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-003", "codigo_anterior": "S003", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-004", "codigo_anterior": "S004", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-005", "codigo_anterior": "S005", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-006", "codigo_anterior": "S006", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Fuera del estudio"}, {"codigo": "MOB-007", "codigo_anterior": "S007", "equipo": "Sillón", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-008", "codigo_anterior": "S008", "equipo": "Silla de cuero", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-009", "codigo_anterior": "S009", "equipo": "Silla de diseño", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-010", "codigo_anterior": "S010", "equipo": "Silla de diseño", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-011", "codigo_anterior": "MM001", "equipo": "Mesa de control", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-012", "codigo_anterior": "MM002", "equipo": "Mesa de centro", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "4 libros del BIME y una historieta"}, {"codigo": "MOB-013", "codigo_anterior": "MM003", "equipo": "Barra", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Teléfono antiguo decorativo"}, {"codigo": "MOB-014", "codigo_anterior": "MM004", "equipo": "Barra de hosting", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-015", "codigo_anterior": "D001", "equipo": "Vitrina", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Máquina de escribir, cámara Brownie, amplificador de madera, radio antiguo"}, {"codigo": "MOB-016", "codigo_anterior": "D002", "equipo": "Cajón acústico móvil", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-017", "codigo_anterior": "D003", "equipo": "Organizador de madera", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Decorativo"}, {"codigo": "HOS-001", "codigo_anterior": "J005", "equipo": "Jarra calentadora", "categoria": "Hospitalidad", "marca": "Cuisinart", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "HOS-002", "codigo_anterior": "D001", "equipo": "Dispensador de agua", "categoria": "Hospitalidad", "marca": "Electrolux", "modelo": "ED30SRBL", "serie": "52804395", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "HOS-003", "codigo_anterior": "N001", "equipo": "Nevera", "categoria": "Hospitalidad", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}];
+
+/* ============ Estado y utilidades ============ */
+let D = null, VIEW = "tablero";
+const F = { res:"activas", inv:"todos", invq:"", com:"abiertas", ing:"mes" };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const P = a => D.permisos.includes("*") || D.permisos.includes(a);
+const cop = n => "$" + Math.round(n).toLocaleString("es-CO");
+const usd = n => "USD " + Math.round(n).toLocaleString("es-CO");
+const toCOP = (m, mon) => mon === "USD" ? m * D.config.trm : +m || 0;
+const money = (m, mon) => mon === "USD" ? usd(m) : cop(m);
+const today = () => new Date().toISOString().slice(0,10);
+const fdate = s => { if (!s) return "—"; const d = new Date(String(s).slice(0,10)+"T12:00:00"); return d.toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"}).replaceAll(".",""); };
+const FRANJA = { m:"10:00–14:00", t:"14:00–18:00", n:"18:00–22:00", dia:"Día completo" };
+const MODO = { hora:"Por hora", bloque:"Bloque 4 h", jornada:"Jornada 8 h", paquete:"Paquete 10 h" };
+const RES_FLOW = ["Nueva","Tentativa","Anticipo recibido","Confirmada","Realizada"];
+const pillRes = e => ({ "Nueva":"p-nueva","Tentativa":"p-tentativa","Anticipo recibido":"p-anticipo","Confirmada":"p-confirmada","Realizada":"p-realizada","Cancelada":"p-cancelada" }[e] || "");
+const pillInv = e => ({ "Nuevo":"p-ok","Operativo":"p-ok","Revisar":"p-warn","Fuera de servicio":"p-off" }[e] || "");
+const pillCom = e => ({ "Solicitada":"p-nueva","Aprobada":"p-anticipo","Comprada":"p-realizada","Rechazada":"p-cancelada" }[e] || "");
+const ageH = s => s ? (Date.now() - new Date(s).getTime()) / 36e5 : 0;
+function toast(m){ let t = $(".toast"); if (!t){ t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status"); document.body.appendChild(t); } t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(()=>t.hidden = true, 2400); }
+async function act(p, okMsg){ try { const r = await p; if (okMsg) toast(okMsg); return r; } catch(e){ toast(e.message || "No se pudo guardar"); throw e; } }
+
+/* ============ Navegación ============ */
+const VIEWS = [ ["tablero","Tablero"], ["reservas","Reservas"], ["inventario","Inventario"], ["compras","Compras"], ["ingresos","Ingresos"] ];
+function badges(){ return {
+  reservas: D.solicitudes.filter(s=>s.estado==="Nueva").length,
+  inventario: D.inventario.filter(i=>["Revisar","Fuera de servicio"].includes(i.estado)).length,
+  compras: P("compras.aprobar") ? D.compras.filter(c=>c.estado==="Solicitada").length : 0 }; }
+function renderNav(){
+  const b = badges();
+  const btn = ([k,l]) => `<button type="button" data-view="${k}" aria-current="${VIEW===k?"page":"false"}"><span class="ic"></span>${l}${b[k]?`<span class="badge">${b[k]}</span>`:""}</button>`;
+  $("#nav").innerHTML = VIEWS.map(btn).join("");
+  $("#tabbar").innerHTML = VIEWS.map(btn).join("");
+  $("#me").innerHTML = `<b>${esc(D.usuario.nombre)}</b><span>${esc({admin:"Administración",operaciones:"Operaciones",local:"Operación local"}[D.usuario.rol]||D.usuario.rol)}</span><span>TRM ${D.config.trm.toLocaleString("es-CO")} · ${esc(D.config.trmFecha)}</span>`;
+}
+function go(v){ VIEW = v; renderNav(); render(); window.scrollTo(0,0); }
+function demoBar(){
+  if (LIVE) return "";
+  return `<div class="demo"><b>Vista previa con datos de ejemplo.</b> Cambia de usuario para ver qué puede hacer cada rol:
+    <select id="demo-user" aria-label="Usuario de ejemplo">${DEMO_USERS.map((u,i)=>`<option value="${i}" ${u.email===D.usuario.email?"selected":""}>${u.nombre} · ${u.rol}</option>`).join("")}</select></div>`;
+}
+
+/* ============ Vistas ============ */
+function render(){
+  const m = $("#main");
+  m.innerHTML = demoBar() + ({ tablero:vTablero, reservas:vReservas, inventario:vInventario, compras:vCompras, ingresos:vIngresos }[VIEW])();
+}
+
+function monthKey(s){ return String(s||"").slice(0,7); }
+function vTablero(){
+  const mk = today().slice(0,7);
+  const ing = D.ingresos.filter(i=>monthKey(i.fecha)===mk).reduce((a,i)=>a+toCOP(i.monto,i.moneda),0);
+  const gas = D.compras.filter(c=>c.estado==="Comprada" && monthKey(c.fecha)===mk).reduce((a,c)=>a+toCOP(c.monto,c.moneda),0);
+  const ses = D.solicitudes.filter(s=>["Confirmada","Anticipo recibido","Realizada"].includes(s.estado) && monthKey(s.fecha)===mk).length;
+  const nuevas = D.solicitudes.filter(s=>s.estado==="Nueva");
+  const pend = D.solicitudes.filter(s=>s.estado==="Tentativa");
+  const porAprobar = D.compras.filter(c=>c.estado==="Solicitada");
+  const revisar = D.inventario.filter(i=>["Revisar","Fuera de servicio"].includes(i.estado));
+  const prox = D.solicitudes.filter(s=>["Confirmada","Anticipo recibido"].includes(s.estado) && s.fecha >= today()).sort((a,b)=>a.fecha<b.fecha?-1:1).slice(0,6);
+
+  const att = [
+    ...nuevas.map(s=>({ t:`Responder a ${s.artista}`, s:`Solicitud ${s.id} · ${fdate(s.fecha)} · ${ageH(s.recibido)>24?"más de 24 h esperando":"recibida hace "+Math.max(1,Math.round(ageH(s.recibido)))+" h"}`, hot:ageH(s.recibido)>24, go:`reserva:${s.id}`, tag:"Reserva" })),
+    ...pend.map(s=>({ t:`Esperando anticipo de ${s.artista}`, s:`${s.id} · ${usd(Math.ceil((+s.total_usd||0)/2))} · ${fdate(s.fecha)}`, go:`reserva:${s.id}`, tag:"Anticipo" })),
+    ...(P("compras.aprobar") ? porAprobar.map(c=>({ t:`Aprobar compra: ${c.item}`, s:`${c.solicitado_por} · ${money(c.monto,c.moneda)}`, go:`compra:${c.id}`, tag:"Compra" })) : []),
+    ...revisar.map(i=>({ t:`${i.estado}: ${i.equipo} ${i.marca?"· "+i.marca:""}`, s:`${i.codigo}${i.observaciones?" · "+i.observaciones:""}`, go:`inv:${i.codigo}`, tag:"Equipo" }))
+  ];
+  return `
+  <div class="top"><div><h1>Hola, ${esc(D.usuario.nombre)}</h1><p>${new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"})}</p></div></div>
+  <div class="kpis">
+    <div class="kpi"><span class="l">Ingresos del mes</span><span class="v num">${cop(ing)}</span><span class="s">COP · USD convertidos con la TRM</span></div>
+    <div class="kpi"><span class="l">Gastos del mes</span><span class="v num">${cop(gas)}</span><span class="s">Compras marcadas como compradas</span></div>
+    <div class="kpi ${ing-gas<0?"neg":""}"><span class="l">Balance</span><span class="v num">${cop(ing-gas)}</span><span class="s">Ingresos menos gastos</span></div>
+    <div class="kpi"><span class="l">Sesiones del mes</span><span class="v num">${ses}</span><span class="s">${nuevas.length} solicitud${nuevas.length===1?"":"es"} por responder</span></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="card-h"><h2>Requiere atención</h2><span>${att.length} pendiente${att.length===1?"":"s"}</span></div>
+      <div class="card-b">${att.length ? att.map(a=>`<button type="button" class="row" data-open="${esc(a.go)}"><span><b>${a.hot?'<span class="flag"></span>':""}${esc(a.t)}</b><small>${esc(a.s)}</small></span><span class="r"><span class="pill">${a.tag}</span></span></button>`).join("") : `<div class="empty">Todo al día.</div>`}</div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div class="card"><div class="card-h"><h2>Próximas sesiones</h2><span>Confirmadas</span></div>
+        <div class="card-b">${prox.length ? prox.map(s=>`<button type="button" class="row" data-open="reserva:${s.id}"><span><b>${esc(s.artista)}</b><small>${fdate(s.fecha)} · ${FRANJA[s.franja]||""} · ${s.personas||"?"} personas</small></span><span class="r"><span class="pill ${pillRes(s.estado)}">${s.estado}</span></span></button>`).join("") : `<div class="empty">No hay sesiones confirmadas próximas.</div>`}</div></div>
+      <div class="card"><div class="card-h"><h2>Últimos 6 meses</h2><span>COP</span></div>${chart()}
+        <div class="legend"><span><i style="background:var(--paper)"></i>Ingresos</span><span><i style="background:var(--red)"></i>Gastos</span></div></div>
+    </div>
+  </div>`;
+}
+function chart(){
+  const months = [...Array(6)].map((_,i)=>{ const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-5+i); return d.toISOString().slice(0,7); });
+  const ing = months.map(m=>D.ingresos.filter(i=>monthKey(i.fecha)===m).reduce((a,i)=>a+toCOP(i.monto,i.moneda),0));
+  const gas = months.map(m=>D.compras.filter(c=>c.estado==="Comprada"&&monthKey(c.fecha)===m).reduce((a,c)=>a+toCOP(c.monto,c.moneda),0));
+  const max = Math.max(1, ...ing, ...gas), W = 520, H = 180, pl = 54, pb = 26, cw = (W-pl)/6, bw = Math.min(22, cw/3);
+  const y = v => H - pb - (v/max)*(H-pb-14);
+  const ticks = [0, max/2, max];
+  const fmt = v => v>=1e6 ? (v/1e6).toFixed(1).replace(".0","")+" M" : v>=1e3 ? Math.round(v/1e3)+" k" : "0";
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ingresos y gastos por mes">`;
+  ticks.forEach(t=>{ s += `<line x1="${pl}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="var(--rule)"/><text x="${pl-8}" y="${y(t)+4}" fill="var(--dim)" font-size="11" text-anchor="end" font-family="JetBrains Mono, monospace">${fmt(t)}</text>`; });
+  months.forEach((m,i)=>{ const x = pl + cw*i + cw/2;
+    s += `<rect x="${x-bw-2}" y="${y(ing[i])}" width="${bw}" height="${H-pb-y(ing[i])}" rx="3" fill="var(--paper)"><title>${cop(ing[i])}</title></rect>`;
+    s += `<rect x="${x+2}" y="${y(gas[i])}" width="${bw}" height="${H-pb-y(gas[i])}" rx="3" fill="var(--red)"><title>${cop(gas[i])}</title></rect>`;
+    const lab = new Date(m+"-15").toLocaleDateString("es-CO",{month:"short"}).replace(".","");
+    s += `<text x="${x}" y="${H-8}" fill="var(--soft)" font-size="12" text-anchor="middle">${lab}</text>`; });
+  return `<div class="chart">${s}</svg></div>`;
+}
+
+function vReservas(){
+  const grupos = { activas:s=>["Nueva","Tentativa","Anticipo recibido","Confirmada"].includes(s.estado), nuevas:s=>s.estado==="Nueva", confirmadas:s=>["Anticipo recibido","Confirmada"].includes(s.estado), cerradas:s=>["Realizada","Cancelada"].includes(s.estado), todas:()=>true };
+  const names = { activas:"Activas", nuevas:"Por responder", confirmadas:"Confirmadas", cerradas:"Cerradas", todas:"Todas" };
+  const list = D.solicitudes.filter(grupos[F.res]).sort((a,b)=>String(a.fecha)<String(b.fecha)?-1:1);
+  return `<div class="top"><div><h1>Reservas</h1><p>Solicitudes que llegan desde la landing. Cambiar el estado actualiza el calendario.</p></div></div>
+  <div class="tools"><div class="chips">${Object.keys(grupos).map(k=>`<button type="button" class="chip" data-f="res:${k}" aria-pressed="${F.res===k}">${names[k]}<span class="n">${D.solicitudes.filter(grupos[k]).length}</span></button>`).join("")}</div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Artista</th><th>Formato</th><th>Personas</th><th style="text-align:right">Total</th><th>Estado</th></tr></thead><tbody>
+  ${list.length ? list.map(s=>`<tr data-open="reserva:${s.id}"><td><b>${fdate(s.fecha)}</b><br><span class="note">${FRANJA[s.franja]||"Por definir"}</span></td><td>${s.estado==="Nueva"&&ageH(s.recibido)>24?'<span class="flag"></span>':""}${esc(s.artista)}<br><span class="note mono">${esc(s.id)}</span></td><td class="muted">${MODO[s.modo]||s.modo}${s.ingeniero==="Sí"?" · ingeniero":""}</td><td class="muted">${s.personas||"—"}</td><td class="r">${usd(+s.total_usd||0)}</td><td><span class="pill ${pillRes(s.estado)}">${esc(s.estado)}</span></td></tr>`).join("") : `<tr><td colspan="6" class="muted">No hay reservas en este filtro.</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function vInventario(){
+  const ests = ["todos","Operativo","Nuevo","Revisar","Fuera de servicio"];
+  const q = F.invq.toLowerCase();
+  const list = D.inventario.filter(i => (F.inv==="todos" || i.estado===F.inv) && (!q || [i.codigo,i.equipo,i.marca,i.modelo,i.categoria].join(" ").toLowerCase().includes(q)));
+  const cnt = e => D.inventario.filter(i=>e==="todos"||i.estado===e).length;
+  return `<div class="top"><div><h1>Inventario</h1><p>${D.inventario.length} ítems · ${D.inventario.filter(i=>i.visible_rider===true||i.visible_rider==="TRUE").length} visibles en el rider público</p></div>${P("inventario")?'<button class="btn pri" type="button" data-open="inv:new">+ Nuevo equipo</button>':""}</div>
+  <div class="tools"><input class="search" id="inv-q" type="search" placeholder="Buscar por código, equipo o marca" value="${esc(F.invq)}" aria-label="Buscar en inventario">
+  <div class="chips">${ests.map(e=>`<button type="button" class="chip" data-f="inv:${e}" aria-pressed="${F.inv===e}">${e==="todos"?"Todos":e}<span class="n">${cnt(e)}</span></button>`).join("")}</div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Equipo</th><th>Marca / modelo</th><th>Ubicación</th><th>Rider</th><th>Estado</th></tr></thead><tbody>
+  ${list.length ? list.map(i=>`<tr data-open="inv:${i.codigo}"><td class="code">${esc(i.codigo)}</td><td>${esc(i.equipo)}<br><span class="note">${esc(i.categoria)}</span></td><td class="muted">${esc([i.marca,i.modelo].filter(Boolean).join(" · ")||"—")}</td><td class="muted">${esc(i.ubicacion||"—")}</td><td class="muted">${(i.visible_rider===true||i.visible_rider==="TRUE")?"Sí":"—"}</td><td><span class="pill ${pillInv(i.estado)}">${esc(i.estado)}</span></td></tr>`).join("") : `<tr><td colspan="6" class="muted">Sin resultados.</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function vCompras(){
+  const g = { abiertas:c=>["Solicitada","Aprobada"].includes(c.estado), compradas:c=>c.estado==="Comprada", rechazadas:c=>c.estado==="Rechazada", todas:()=>true };
+  const n = { abiertas:"Abiertas", compradas:"Compradas", rechazadas:"Rechazadas", todas:"Todas" };
+  const list = D.compras.filter(g[F.com]).sort((a,b)=>String(a.fecha)>String(b.fecha)?-1:1);
+  const mk = today().slice(0,7), mes = D.compras.filter(c=>c.estado==="Comprada"&&monthKey(c.fecha)===mk).reduce((a,c)=>a+toCOP(c.monto,c.moneda),0);
+  return `<div class="top"><div><h1>Compras</h1><p>Solicitud → aprobación de Pepe → compra con comprobante. Gastado este mes: ${cop(mes)}</p></div>${P("compras.solicitar")?'<button class="btn pri" type="button" data-open="compra:new">+ Solicitar compra</button>':""}</div>
+  <div class="tools"><div class="chips">${Object.keys(g).map(k=>`<button type="button" class="chip" data-f="com:${k}" aria-pressed="${F.com===k}">${n[k]}<span class="n">${D.compras.filter(g[k]).length}</span></button>`).join("")}</div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Compra</th><th>Solicitó</th><th style="text-align:right">Monto</th><th>Estado</th></tr></thead><tbody>
+  ${list.length ? list.map(c=>`<tr data-open="compra:${c.id}"><td class="muted">${fdate(c.fecha)}</td><td>${esc(c.item)}<br><span class="note">${esc(c.categoria||"")}${c.proveedor?" · "+esc(c.proveedor):""}</span></td><td class="muted">${esc(c.solicitado_por)}</td><td class="r">${money(+c.monto||0,c.moneda)}</td><td><span class="pill ${pillCom(c.estado)}">${esc(c.estado)}</span></td></tr>`).join("") : `<tr><td colspan="5" class="muted">No hay compras en este filtro.</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function vIngresos(){
+  const mk = today().slice(0,7);
+  const g = { mes:i=>monthKey(i.fecha)===mk, todos:()=>true };
+  const list = D.ingresos.filter(g[F.ing]).sort((a,b)=>String(a.fecha)>String(b.fecha)?-1:1);
+  const tot = list.reduce((a,i)=>a+toCOP(i.monto,i.moneda),0);
+  return `<div class="top"><div><h1>Ingresos</h1><p>Total ${F.ing==="mes"?"del mes":"histórico"}: ${cop(tot)} COP (USD convertidos a TRM ${D.config.trm.toLocaleString("es-CO")})</p></div>${P("ingresos")?'<button class="btn pri" type="button" data-open="ing:new">+ Registrar ingreso</button>':""}</div>
+  <div class="tools"><div class="chips"><button type="button" class="chip" data-f="ing:mes" aria-pressed="${F.ing==="mes"}">Este mes</button><button type="button" class="chip" data-f="ing:todos" aria-pressed="${F.ing==="todos"}">Todos</button></div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Cliente</th><th>Método</th><th style="text-align:right">Monto</th></tr></thead><tbody>
+  ${list.length ? list.map(i=>`<tr data-open="ing:${i.id}"><td class="muted">${fdate(i.fecha)}</td><td>${esc(i.concepto)}${i.reserva_id?`<br><span class="note mono">${esc(i.reserva_id)}</span>`:""}</td><td class="muted">${esc(i.cliente||"—")}</td><td class="muted">${esc(i.metodo)}</td><td class="r">${money(+i.monto||0,i.moneda)}</td></tr>`).join("") : `<tr><td colspan="5" class="muted">Sin ingresos en este periodo.</td></tr>`}
+  </tbody></table></div>`;
+}
+
+/* ============ Paneles de detalle ============ */
+function openDrawer(html){ $("#drawer").innerHTML = html; $("#drawer").hidden = false; $("#scrim").hidden = false; const f = $("#drawer").querySelector("input,select,textarea,button.btn"); if (f) f.focus(); }
+function closeDrawer(){ $("#drawer").hidden = true; $("#scrim").hidden = true; }
+const head = (t, sub) => `<div class="dr-h"><div><h2>${t}</h2>${sub?`<p>${sub}</p>`:""}</div><button class="x" type="button" data-close aria-label="Cerrar">×</button></div>`;
+
+function drReserva(id){
+  const s = D.solicitudes.find(x=>x.id===id); if (!s) return;
+  const idx = RES_FLOW.indexOf(s.estado);
+  const next = { "Nueva":["Tentativa","Marcar propuesta enviada"], "Tentativa":["Anticipo recibido","Anticipo recibido"], "Anticipo recibido":["Confirmada","Confirmar reserva"], "Confirmada":["Realizada","Marcar sesión realizada"] }[s.estado];
+  const canNext = next && (next[0]==="Realizada" ? P("reservas.sesion") : P("reservas"));
+  const wa = String(s.whatsapp||"").replace(/\D/g,"");
+  openDrawer(head(esc(s.artista), `${esc(s.id)} · recibida ${fdate(s.recibido)}`) + `<div class="dr-b">
+    <div><span class="lbl">Estado · ${esc(s.estado)}</span><div class="steps">${RES_FLOW.map((e,i)=>`<i class="${s.estado==="Cancelada"?"":i<idx?"on":i===idx?"cur":""}"></i>`).join("")}</div></div>
+    <dl class="kv"><dt>Fecha</dt><dd>${fdate(s.fecha)} · ${FRANJA[s.franja]||"Por definir"}</dd><dt>Formato</dt><dd>${MODO[s.modo]||s.modo} · ${s.ingeniero==="Sí"?"con ingeniero":"sin ingeniero"}${+s.horas?` · ${s.horas} h`:""}</dd>
+    <dt>Personas</dt><dd>${s.personas||"—"}${+s.personas>D.config.capacidad?" · usar lounge y terraza":""}</dd><dt>Total</dt><dd>${usd(+s.total_usd||0)} · anticipo ${usd(Math.ceil((+s.total_usd||0)/2))}</dd>
+    <dt>WhatsApp</dt><dd>${esc(s.whatsapp)}${wa?` · <a href="https://wa.me/${wa}" target="_blank" rel="noopener">abrir</a>`:""}</dd><dt>Correo</dt><dd>${esc(s.correo)}</dd></dl>
+    <div><span class="lbl">Rider que pidió</span><div class="block">${esc(s.rider_solicitado||"—")}</div></div>
+    <div><span class="lbl">Si falta equipo</span><div class="block">${esc(s.si_falta_equipo||"—")}</div></div>
+    ${s.notas?`<div><span class="lbl">Notas</span><div class="block">${esc(s.notas)}</div></div>`:""}
+    ${s.resumen?`<div><span class="lbl">Resumen de la solicitud</span><div class="block mono">${esc(s.resumen)}</div></div>`:""}
+  </div><div class="dr-f">
+    ${P("reservas") && !["Realizada","Cancelada"].includes(s.estado)?`<button class="btn" type="button" data-res="${s.id}|Cancelada">Cancelar</button>`:""}
+    ${P("ingresos") && ["Nueva","Tentativa","Anticipo recibido","Confirmada"].includes(s.estado)?`<button class="btn" type="button" data-open="ing:new:${s.id}">Registrar pago</button>`:""}
+    ${canNext?`<button class="btn pri" type="button" data-res="${s.id}|${next[0]}">${next[1]}</button>`:""}
+  </div>`);
+}
+
+const CATS = Object.keys(PREFIJOS_DEMO), ESTADOS_INV = ["Nuevo","Operativo","Revisar","Fuera de servicio"], UBIC = ["Sala de control","Lounge","Terraza","Depósito"];
+function drInv(code){
+  const nuevo = code === "new", i = nuevo ? { estado:"Operativo", ubicacion:"Sala de control", visible_rider:false, categoria:"Micrófonos" } : D.inventario.find(x=>x.codigo===code);
+  if (!i) return;
+  const full = P("inventario"), lim = !full && P("inventario.estado");
+  const dis = k => (full || (lim && ["estado","ubicacion","ultima_revision","observaciones"].includes(k))) ? "" : "disabled";
+  const sel = (id, opts, v, k) => `<select id="${id}" ${dis(k)}>${opts.map(o=>`<option ${o===v?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+  openDrawer(head(nuevo?"Nuevo equipo":esc(i.equipo), nuevo?"El código se asigna solo según la categoría":`${esc(i.codigo)}${i.codigo_anterior?" · antes "+esc(i.codigo_anterior):""}`) + `<div class="dr-b"><form class="form" id="f-inv">
+    <div class="two"><label>Equipo<input id="i-equipo" value="${esc(i.equipo||"")}" ${dis("equipo")} required></label><label>Categoría${sel("i-cat",CATS,i.categoria,nuevo?"categoria":"x")}</label></div>
+    <div class="two"><label>Marca<input id="i-marca" value="${esc(i.marca||"")}" ${dis("marca")}></label><label>Modelo<input id="i-modelo" value="${esc(i.modelo||"")}" ${dis("modelo")}></label></div>
+    <div class="two"><label>N.º de serie<input id="i-serie" value="${esc(i.serie||"")}" ${dis("serie")}></label><label>Ubicación${sel("i-ubic",UBIC,i.ubicacion,"ubicacion")}</label></div>
+    <div class="two"><label>Estado${sel("i-estado",ESTADOS_INV,i.estado,"estado")}</label><label>Última revisión<input id="i-rev" type="date" value="${esc(String(i.ultima_revision||"").slice(0,10))}" ${dis("ultima_revision")}></label></div>
+    <label>Incluye<input id="i-incluye" value="${esc(i.incluye||"")}" ${dis("incluye")} placeholder="Cables y piezas que acompañan al equipo"></label>
+    <label>Observaciones<textarea id="i-obs" rows="3" ${dis("observaciones")}>${esc(i.observaciones||"")}</textarea></label>
+    <label class="check"><input type="checkbox" id="i-rider" ${(i.visible_rider===true||i.visible_rider==="TRUE")?"checked":""} ${dis("visible_rider")}>Mostrar en el rider público</label>
+    ${lim?'<p class="note">Con tu rol puedes cambiar estado, ubicación, revisión y observaciones.</p>':""}
+    ${!full&&!lim?'<p class="note">Solo lectura para tu rol.</p>':""}
+  </form></div><div class="dr-f"><button class="btn" type="button" data-close>Cancelar</button>${(full||(lim&&!nuevo))?`<button class="btn pri" type="button" id="save-inv" data-code="${esc(nuevo?"":i.codigo)}">Guardar</button>`:""}</div>`);
+}
+
+function drCompra(id){
+  const nuevo = id === "new", c = nuevo ? { moneda:"COP", categoria:"Equipo" } : D.compras.find(x=>x.id===id); if (!c) return;
+  const ro = nuevo ? "" : "disabled";
+  openDrawer(head(nuevo?"Solicitar compra":esc(c.item), nuevo?"Pepe recibe un aviso para aprobarla":`${esc(c.id)} · ${fdate(c.fecha)} · pidió ${esc(c.solicitado_por)}`) + `<div class="dr-b">
+    ${nuevo?"":`<div><span class="lbl">Estado</span><span class="pill ${pillCom(c.estado)}">${esc(c.estado)}</span>${c.aprobado_por?` <span class="note">· ${c.estado==="Rechazada"?"rechazó":"aprobó"} ${esc(c.aprobado_por)}</span>`:""}</div>`}
+    <form class="form" id="f-com">
+      <label>Qué hay que comprar<input id="c-item" value="${esc(c.item||"")}" ${ro} required></label>
+      <div class="two"><label>Categoría<select id="c-cat" ${ro}>${["Equipo","Cables","Micrófonos","Mantenimiento","Hospitalidad","Mobiliario","Otro"].map(o=>`<option ${o===c.categoria?"selected":""}>${o}</option>`).join("")}</select></label><label>Proveedor<input id="c-prov" value="${esc(c.proveedor||"")}" ${nuevo||c.estado==="Aprobada"?"":"disabled"}></label></div>
+      <div class="two"><label>${nuevo?"Monto estimado":"Monto"}<input id="c-monto" type="number" min="0" step="1000" value="${esc(c.monto||"")}" ${nuevo||c.estado==="Aprobada"?"":"disabled"}></label><label>Moneda<select id="c-mon" ${nuevo||c.estado==="Aprobada"?"":"disabled"}><option ${c.moneda==="COP"?"selected":""}>COP</option><option ${c.moneda==="USD"?"selected":""}>USD</option></select></label></div>
+      ${!nuevo && c.estado==="Aprobada" ? `<label>Link del comprobante<input id="c-comp" type="url" placeholder="Foto o PDF en Drive" value="${esc(c.comprobante||"")}"></label>` : (c.comprobante?`<label>Comprobante<a href="${esc(c.comprobante)}" target="_blank" rel="noopener">${esc(c.comprobante)}</a></label>`:"")}
+      <label>Para qué / notas<textarea id="c-notas" rows="3" ${ro}>${esc(c.notas||"")}</textarea></label>
+    </form></div><div class="dr-f">
+    ${nuevo ? `<button class="btn" type="button" data-close>Cancelar</button><button class="btn pri" type="button" id="save-com" data-id="">Enviar solicitud</button>` : ""}
+    ${!nuevo && c.estado==="Solicitada" && P("compras.aprobar") ? `<button class="btn" type="button" data-com="${c.id}|Rechazada">Rechazar</button><button class="btn pri" type="button" data-com="${c.id}|Aprobada">Aprobar</button>` : ""}
+    ${!nuevo && c.estado==="Solicitada" && !P("compras.aprobar") ? `<span class="note">Esperando aprobación de administración.</span>` : ""}
+    ${!nuevo && c.estado==="Aprobada" && P("compras.registrar") ? `<button class="btn pri" type="button" data-com="${c.id}|Comprada">Marcar como comprada</button>` : ""}
+  </div>`);
+}
+
+function drIngreso(arg){
+  const [id, resId] = String(arg).split(":").length > 1 && arg.startsWith("new") ? ["new", arg.split(":")[1]] : [arg, ""];
+  const nuevo = id === "new", r = resId ? D.solicitudes.find(s=>s.id===resId) : null;
+  const i = nuevo ? { fecha:today(), moneda:"USD", metodo:"Transferencia", concepto: r ? (["Nueva","Tentativa"].includes(r.estado)?"Anticipo 50 %":"Saldo de sesión") : "", reserva_id: resId||"", cliente: r?r.artista:"", monto: r ? (["Nueva","Tentativa"].includes(r.estado)?Math.ceil((+r.total_usd||0)/2):Math.floor((+r.total_usd||0)/2)) : "" } : D.ingresos.find(x=>x.id===id);
+  if (!i) return;
+  const ro = P("ingresos") ? "" : "disabled";
+  openDrawer(head(nuevo?"Registrar ingreso":esc(i.concepto), nuevo?(r?`Para ${esc(r.artista)} · ${esc(r.id)}`:"Pago recibido por el estudio"):`${esc(i.id)} · registró ${esc(i.registrado_por)}`) + `<div class="dr-b"><form class="form" id="f-ing">
+    <div class="two"><label>Fecha<input id="g-fecha" type="date" value="${esc(String(i.fecha).slice(0,10))}" ${ro}></label><label>Método<select id="g-met" ${ro}>${["Transferencia","Nequi","Daviplata","Efectivo","PayPal","Zelle","Otro"].map(o=>`<option ${o===i.metodo?"selected":""}>${o}</option>`).join("")}</select></label></div>
+    <label>Concepto<input id="g-conc" value="${esc(i.concepto)}" ${ro} required placeholder="Anticipo, saldo, mezcla…"></label>
+    <div class="two"><label>Monto<input id="g-monto" type="number" min="0" value="${esc(i.monto)}" ${ro} required></label><label>Moneda<select id="g-mon" ${ro}><option ${i.moneda==="USD"?"selected":""}>USD</option><option ${i.moneda==="COP"?"selected":""}>COP</option></select></label></div>
+    <div class="two"><label>Cliente<input id="g-cli" value="${esc(i.cliente||"")}" ${ro}></label><label>Reserva<input id="g-res" value="${esc(i.reserva_id||"")}" ${ro} placeholder="E33-…"></label></div>
+    <label>Link del comprobante<input id="g-comp" type="url" value="${esc(i.comprobante||"")}" ${ro} placeholder="Foto o PDF en Drive"></label>
+    ${r && ["Nueva","Tentativa"].includes(r.estado) ? '<label class="check"><input type="checkbox" id="g-ant" checked>Es el anticipo: pasar la reserva a "Anticipo recibido"</label>' : ""}
+    <p class="note" id="g-cop"></p>
+  </form></div><div class="dr-f"><button class="btn" type="button" data-close>Cerrar</button>${P("ingresos")?`<button class="btn pri" type="button" id="save-ing" data-id="${nuevo?"":esc(i.id)}">Guardar</button>`:""}</div>`);
+  const upd = () => { const m = +$("#g-monto").value||0; $("#g-cop").textContent = $("#g-mon").value==="USD" ? `≈ ${cop(m*D.config.trm)} COP con TRM ${D.config.trm.toLocaleString("es-CO")}` : ""; };
+  $("#g-monto").addEventListener("input", upd); $("#g-mon").addEventListener("change", upd); upd();
+}
+
+/* ============ Eventos ============ */
+function replace(list, key, obj){ const k = list.findIndex(x=>x[key]===obj[key]); if (k>=0) list[k] = obj; else list.unshift(obj); }
+document.addEventListener("click", async e => {
+  const v = e.target.closest("[data-view]"); if (v){ go(v.dataset.view); return; }
+  if (e.target.closest("[data-close]") || e.target.id === "scrim"){ closeDrawer(); return; }
+  const f = e.target.closest("[data-f]"); if (f){ const [k,val] = f.dataset.f.split(":"); F[k] = val; render(); return; }
+  const o = e.target.closest("[data-open]");
+  if (o){ const [t, ...rest] = o.dataset.open.split(":"); const id = rest.join(":");
+    if (t==="reserva") drReserva(id); if (t==="inv") drInv(id); if (t==="compra") drCompra(id); if (t==="ing") drIngreso(id); return; }
+  const r = e.target.closest("[data-res]");
+  if (r){ const [id, est] = r.dataset.res.split("|"); r.disabled = true;
+    try { const s = await act(call("apiReservaEstado", id, est), "Reserva: " + est); replace(D.solicitudes, "id", s); renderNav(); render(); drReserva(id); } catch(_){ r.disabled = false; } return; }
+  const c = e.target.closest("[data-com]");
+  if (c){ const [id, est] = c.dataset.com.split("|"); const prev = D.compras.find(x=>x.id===id); const obj = { ...prev, estado:est };
+    if (est==="Comprada"){ obj.monto = +$("#c-monto").value||prev.monto; obj.moneda = $("#c-mon").value; obj.proveedor = $("#c-prov").value; obj.comprobante = ($("#c-comp")||{}).value||""; }
+    c.disabled = true;
+    try { const s = await act(call("apiCompraGuardar", obj), "Compra " + est.toLowerCase()); replace(D.compras, "id", s); renderNav(); render(); closeDrawer(); } catch(_){ c.disabled = false; } return; }
+  if (e.target.id === "save-inv"){ const code = e.target.dataset.code;
+    const it = { codigo:code||"", equipo:$("#i-equipo").value.trim(), categoria:$("#i-cat").value, marca:$("#i-marca").value.trim(), modelo:$("#i-modelo").value.trim(), serie:$("#i-serie").value.trim(),
+      ubicacion:$("#i-ubic").value, estado:$("#i-estado").value, ultima_revision:$("#i-rev").value, incluye:$("#i-incluye").value.trim(), observaciones:$("#i-obs").value.trim(), visible_rider:$("#i-rider").checked };
+    if (!code && !it.equipo){ toast("Escribe el nombre del equipo"); return; }
+    if (!code) delete it.codigo;
+    e.target.disabled = true;
+    try { const s = await act(call("apiInventarioGuardar", it), code ? "Equipo actualizado" : "Equipo creado"); replace(D.inventario, "codigo", s); renderNav(); render(); closeDrawer(); } catch(_){ e.target.disabled = false; } return; }
+  if (e.target.id === "save-com"){ const obj = { item:$("#c-item").value.trim(), categoria:$("#c-cat").value, proveedor:$("#c-prov").value.trim(), monto:+$("#c-monto").value||0, moneda:$("#c-mon").value, notas:$("#c-notas").value.trim() };
+    if (!obj.item){ toast("Escribe qué hay que comprar"); return; }
+    e.target.disabled = true;
+    try { const s = await act(call("apiCompraGuardar", obj), "Solicitud enviada a aprobación"); replace(D.compras, "id", s); renderNav(); render(); closeDrawer(); } catch(_){ e.target.disabled = false; } return; }
+  if (e.target.id === "save-ing"){ const obj = { id:e.target.dataset.id||"", fecha:$("#g-fecha").value, metodo:$("#g-met").value, concepto:$("#g-conc").value.trim(), monto:+$("#g-monto").value||0, moneda:$("#g-mon").value,
+      cliente:$("#g-cli").value.trim(), reserva_id:$("#g-res").value.trim(), comprobante:$("#g-comp").value.trim(), es_anticipo: !!($("#g-ant")&&$("#g-ant").checked) };
+    if (!obj.id) delete obj.id;
+    if (!obj.concepto || !obj.monto){ toast("Completa concepto y monto"); return; }
+    e.target.disabled = true;
+    try { const s = await act(call("apiIngresoGuardar", obj), "Ingreso registrado"); replace(D.ingresos, "id", s);
+      if (obj.es_anticipo){ const rr = D.solicitudes.find(x=>x.id===obj.reserva_id); if (rr && ["Nueva","Tentativa"].includes(rr.estado)) rr.estado = "Anticipo recibido"; }
+      renderNav(); render(); closeDrawer(); } catch(_){ e.target.disabled = false; } return; }
+});
+document.addEventListener("input", e => { if (e.target.id === "inv-q"){ F.invq = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#inv-q"); q.focus(); q.setSelectionRange(pos,pos); } });
+document.addEventListener("change", async e => { if (e.target.id === "demo-user"){ DB.user = DEMO_USERS[+e.target.value]; D = await call("apiInicio"); renderNav(); render(); toast("Ahora ves la app como " + DB.user.nombre); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+/* ============ Inicio ============ */
+(async function(){
+  try { D = await call("apiInicio"); renderNav(); render(); }
+  catch(e){ $("#main").innerHTML = `<div class="loading"><div style="max-width:440px;text-align:center"><h1 style="font-size:44px;margin-bottom:12px">Sin acceso</h1><p class="err">${esc(e.message)}</p></div></div>`; }
+})();
+</script>
+</body>
+</html>

@@ -10,8 +10,8 @@
 
 const PERMISOS = {
   admin:       ['*'],
-  operaciones: ['reservas', 'inventario', 'inventario.estado', 'compras.solicitar', 'compras.registrar', 'ingresos', 'reservas.sesion'],
-  local:       ['reservas.sesion', 'inventario.estado', 'compras.solicitar']
+  operaciones: ['reservas', 'inventario', 'inventario.estado', 'compras.solicitar', 'compras.registrar', 'ingresos', 'reservas.sesion', 'insumos', 'insumos.stock'],
+  local:       ['reservas.sesion', 'inventario.estado', 'compras.solicitar', 'insumos.stock']
 };
 const PREFIJOS = { 'Monitoreo':'MON', 'Micrófonos':'MIC', 'Audífonos':'AUD', 'Instrumentos':'INS', 'Cables':'CAB', 'Adaptadores':'ADP',
                    'Soportes':'SOP', 'Accesorios':'ACC', 'Energía':'ENE', 'Red':'RED', 'Mobiliario':'MOB', 'Hospitalidad':'HOS' };
@@ -63,7 +63,7 @@ function apiInicio() {
     usuario: u, permisos: PERMISOS[u.rol] || [],
     config: { trm: +c.trm, trmFecha: fmtFecha_(c.trm_fecha), capacidad: +c.capacidad_comoda || 6 },
     solicitudes: leer_('Solicitudes'), inventario: leer_('Inventario'),
-    compras: leer_('Compras'), ingresos: leer_('Ingresos'), eventos, prefijos: PREFIJOS
+    compras: leer_('Compras'), ingresos: leer_('Ingresos'), insumos: leer_('Insumos'), eventos, prefijos: PREFIJOS
   };
 }
 
@@ -110,11 +110,17 @@ function siguienteCodigo_(cat) {
 
 /* ---------- Compras ---------- */
 function apiCompraGuardar(c) {
+  const lock = LockService.getScriptLock(); lock.waitLock(10000);
+  try { return compraGuardar_(c); } finally { lock.releaseLock(); }
+}
+function compraGuardar_(c) {
   const u = usuario_(), hoy = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
   delete c._row;
   if (!c.id) {
     exigir_(u, 'compras.solicitar');
-    c.id = 'C-' + Utilities.formatDate(new Date(), TZ, 'yyMMdd-HHmmss');
+    const pre = 'C-' + Utilities.formatDate(new Date(), TZ, 'yyMMdd') + '-';
+    const n = leer_('Compras').map(r => String(r.id)).filter(x => x.startsWith(pre)).map(x => +x.slice(pre.length) || 0);
+    c.id = pre + String((n.length ? Math.max(...n) : 0) + 1).padStart(2, '0');
     c.fecha = hoy; c.estado = 'Solicitada'; c.solicitado_por = u.nombre;
     const r = guardar_('Compras', 'id', c);
     avisar_(config_(), 'Compra por aprobar · ' + c.item, u.nombre + ' solicitó: ' + c.item + '\nMonto estimado: ' + c.monto + ' ' + c.moneda + '\n' + (c.notas || ''));
@@ -124,18 +130,73 @@ function apiCompraGuardar(c) {
   if (c.estado === 'Aprobada' || c.estado === 'Rechazada') { exigir_(u, 'compras.aprobar'); c.aprobado_por = u.nombre; }
   else if (c.estado === 'Comprada') { exigir_(u, 'compras.registrar'); if (prev.estado !== 'Aprobada') throw new Error('Primero debe estar aprobada'); }
   else exigir_(u, 'compras.registrar');
-  return guardar_('Compras', 'id', c);
+  const r = guardar_('Compras', 'id', c);
+  // Al comprar un insumo: sube el stock y se actualiza el precio de referencia con el precio real
+  if (c.estado === 'Comprada' && prev.estado !== 'Comprada' && (c.insumo_id || prev.insumo_id)) {
+    const id = c.insumo_id || prev.insumo_id, cant = +(c.cantidad || prev.cantidad) || 0;
+    const ins = leer_('Insumos').find(x => x.id === id);
+    if (ins && cant) {
+      const totalCOP = (c.moneda === 'USD' ? (+c.monto || 0) * (+config_().trm || 0) : (+c.monto || 0));
+      guardar_('Insumos', 'id', { id, stock_actual: (+ins.stock_actual || 0) + cant, precio_ref_cop: totalCOP ? Math.round(totalCOP / cant) : ins.precio_ref_cop });
+    }
+  }
+  return r;
 }
 
 /* ---------- Ingresos ---------- */
+/** Correlativo ligado a la reserva: E33-2610M-P1, -P2… Sin reserva: I-261027-01, -02… */
+function idIngreso_(reservaId) {
+  const ids = leer_('Ingresos').map(r => String(r.id));
+  if (reservaId) {
+    if (!leer_('Solicitudes').some(s => s.id === reservaId)) throw new Error('No existe la reserva ' + reservaId);
+    const n = ids.filter(x => x.startsWith(reservaId + '-P')).map(x => +x.split('-P').pop() || 0);
+    return reservaId + '-P' + ((n.length ? Math.max(...n) : 0) + 1);
+  }
+  const pre = 'I-' + Utilities.formatDate(new Date(), TZ, 'yyMMdd') + '-';
+  const n = ids.filter(x => x.startsWith(pre)).map(x => +x.slice(pre.length) || 0);
+  return pre + String((n.length ? Math.max(...n) : 0) + 1).padStart(2, '0');
+}
 function apiIngresoGuardar(i) {
   const u = usuario_(); exigir_(u, 'ingresos');
   delete i._row;
-  if (!i.id) { i.id = 'I-' + Utilities.formatDate(new Date(), TZ, 'yyMMdd-HHmmss'); i.registrado_por = u.nombre; }
+  if (!i.id) { i.id = idIngreso_(i.reserva_id); i.registrado_por = u.nombre; }
   const r = guardar_('Ingresos', 'id', i);
   if (i.reserva_id && i.es_anticipo) {
     const f = leer_('Solicitudes').find(s => s.id === i.reserva_id);
     if (f && ['Nueva', 'Tentativa'].includes(f.estado)) apiReservaEstado(i.reserva_id, 'Anticipo recibido');
   }
   return r;
+}
+
+/* ---------- Reportes y hojas de sesión en PDF ---------- */
+/** Recibe el HTML imprimible que arma la app, lo convierte a PDF y lo guarda en Drive (carpeta "E33 Reportes"). */
+function apiGuardarPDF(nombre, html) {
+  usuario_();
+  const it = DriveApp.getFoldersByName('E33 Reportes');
+  const carpeta = it.hasNext() ? it.next() : DriveApp.createFolder('E33 Reportes');
+  const pdf = Utilities.newBlob(html, 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf');
+  const f = carpeta.createFile(pdf);
+  return { url: f.getUrl(), nombre: f.getName() };
+}
+
+/* ---------- Insumos ---------- */
+function apiInsumoGuardar(it) {
+  const u = usuario_(); delete it._row;
+  const existe = it.id && leer_('Insumos').some(r => r.id === it.id);
+  if (!existe) {
+    exigir_(u, 'insumos');
+    const n = leer_('Insumos').map(r => +String(r.id).split('-')[1] || 0);
+    it.id = 'INSU-' + String((n.length ? Math.max(...n) : 0) + 1).padStart(3, '0');
+    if (it.activo === undefined) it.activo = true;
+  } else if (!puede_(u, 'insumos')) {
+    exigir_(u, 'insumos.stock');
+    Object.keys(it).forEach(k => { if (!['id', 'stock_actual', 'notas'].includes(k)) delete it[k]; });
+  }
+  return guardar_('Insumos', 'id', it);
+}
+/** Ajuste rápido de stock (+1 / -1): lo usa Santi al consumir o recibir insumos. */
+function apiStock(id, delta) {
+  const u = usuario_(); exigir_(u, 'insumos.stock');
+  const ins = leer_('Insumos').find(x => x.id === id); if (!ins) throw new Error('No encontré el insumo ' + id);
+  return guardar_('Insumos', 'id', { id, stock_actual: Math.max(0, (+ins.stock_actual || 0) + (+delta || 0)) });
 }

@@ -64,4 +64,11 @@ La app real corre en el mismo Apps Script de la hoja y usa las pestañas **Inven
 4. Implementar → **Nueva implementación** → Aplicación web · Ejecutar como: **Usuario que accede** · Acceso: **Cualquier usuario con cuenta de Google**.
 5. Abre la URL de esa implementación agregando `?app=admin` al final. Guárdala como acceso directo en el celular.
 
+
+### Qué incluye la app
+
+- **Ingresos ligados a la reserva:** cada pago toma el código de su reserva (`E33-2610M-P1`, `-P2`…). Sin reserva: `I-AAMMDD-01`. La reserva muestra lo pagado y lo que falta.
+- **Reportes:** reporte mensual de ingresos y gastos, agenda de 7 días y hoja de sesión imprimible (rider, pagos, checklist de cierre, firmas). Se imprimen desde el navegador o se guardan en PDF en la carpeta de Drive «E33 Reportes».
+- **Insumos y lista de compras:** catálogo en la pestaña **Insumos** con stock actual, mínimo y precio de referencia. Lo que baja del mínimo aparece en «Por reponer»; al agregarlo pasa a la lista y Pepe la aprueba. Al marcar una compra como comprada sube el stock y el precio de referencia se actualiza con el precio real.
+
 La implementación de la landing (Ejecutar como: yo · Acceso: cualquier usuario) sigue funcionando igual; son dos implementaciones del mismo proyecto.

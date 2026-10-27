@@ -125,6 +125,10 @@ tbody tr:hover{background:var(--panel-2)}
 td.code{font-family:var(--font-mono);font-size:13px;white-space:nowrap}
 td.muted{color:var(--dim)}
 td.r{text-align:right;font-family:var(--font-mono);font-size:13px;white-space:nowrap}
+.step.mini{display:inline-flex;align-items:center;border:1px solid var(--rule);border-radius:var(--r-pill);overflow:hidden}
+.step.mini button{width:30px;height:28px;border:0;background:transparent;cursor:pointer;font-size:16px}
+.step.mini button:hover{background:var(--panel-3)}
+.step.mini output{min-width:30px;text-align:center;font-family:var(--font-mono);font-size:13px}
 .sum{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .sum .pill{font-size:13px;padding:5px 12px}
 
@@ -147,6 +151,14 @@ td.r{text-align:right;font-family:var(--font-mono);font-size:13px;white-space:no
 .steps i.on{background:var(--paper)}
 .steps i.cur{background:var(--red)}
 .lbl{color:var(--dim);font-size:13px;margin-bottom:6px;display:block}
+.pays{background:var(--panel-2);border-radius:var(--r-md);overflow:hidden}
+.pay{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--rule);padding:10px 14px;cursor:pointer;font-size:14px}
+.pay:hover{background:var(--panel-3)}
+.pay .mono{color:var(--red)}
+.pay span:nth-child(2){color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.paysum{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;font-size:14px;flex-wrap:wrap}
+.paysum .due{color:var(--red);font-weight:600}
+.pays .note{padding:10px 14px;border-bottom:1px solid var(--rule)}
 .form{display:flex;flex-direction:column;gap:14px}
 .form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--dim)}
 .form input,.form select,.form textarea{background:var(--ink);border:1px solid var(--rule);border-radius:var(--r-sm);padding:10px 12px;color:var(--paper);font-size:15px}
@@ -161,13 +173,19 @@ td.r{text-align:right;font-family:var(--font-mono);font-size:13px;white-space:no
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--paper);color:var(--ink);border-radius:var(--r-pill);padding:10px 18px;z-index:40;font-weight:600;font-size:14px;max-width:calc(100% - 32px)}
 .loading{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--dim)}
 
+/* Impresión */
+#print{display:none}
+.pv{font-size:12px}
+.pv .hd,.pv table,.pv h1,.pv h2{color:#0A0A0A}
+@media print{ body{background:#fff} .app,.tabbar,.drawer,.scrim,.toast{display:none!important} #print{display:block!important} }
+
 /* Mobile */
 .tabbar{display:none}
 @media (max-width:820px){
   .app{grid-template-columns:1fr}
   .side{display:none}
   main{padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
-  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);border-top:1px solid var(--rule);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);border-top:1px solid var(--rule);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
   .tabbar button{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;color:var(--dim);font-size:11px;cursor:pointer;position:relative}
   .tabbar .ic{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--dim)}
   .tabbar button[aria-current="page"]{color:var(--paper)}
@@ -204,7 +222,7 @@ const DEMO_USERS = [
   { email:"pepe@entr3t3nimiento.com", nombre:"Pepe", rol:"admin" },
   { email:"isiselinor@entr3t3nimiento.com", nombre:"Isis", rol:"operaciones" },
   { email:"santi@entr3t3nimiento.com", nombre:"Santi", rol:"local" } ];
-const PERM = { admin:["*"], operaciones:["reservas","inventario","inventario.estado","compras.solicitar","compras.registrar","ingresos","reservas.sesion"], local:["reservas.sesion","inventario.estado","compras.solicitar"] };
+const PERM = { admin:["*"], operaciones:["reservas","inventario","inventario.estado","compras.solicitar","compras.registrar","ingresos","reservas.sesion","insumos","insumos.stock"], local:["reservas.sesion","inventario.estado","compras.solicitar","insumos.stock"] };
 const dISO = (d) => { const x = new Date(); x.setDate(x.getDate()+d); return x.toISOString().slice(0,10); };
 const DB = {
   user: DEMO_USERS[1],
@@ -219,34 +237,49 @@ const DB = {
     { id:"C-2", fecha:dISO(-6), item:"Cables XLR 5 m (×2)", categoria:"Cables", proveedor:"Tienda local", monto:90000, moneda:"COP", solicitado_por:"Isis", estado:"Comprada", aprobado_por:"Pepe", comprobante:"", notas:"" },
     { id:"C-3", fecha:dISO(-35), item:"Limpieza y mantenimiento aire acondicionado", categoria:"Mantenimiento", proveedor:"Técnico", monto:250000, moneda:"COP", solicitado_por:"Santi", estado:"Comprada", aprobado_por:"Pepe", comprobante:"", notas:"" } ],
   ingresos: [
-    { id:"I-1", fecha:dISO(-6), concepto:"Sesión completa", reserva_id:"E33-2010T", cliente:"Ejemplo · Sara V.", monto:150, moneda:"USD", metodo:"Transferencia", comprobante:"", registrado_por:"Isis", notas:"" },
-    { id:"I-2", fecha:dISO(-3), concepto:"Anticipo 50 %", reserva_id:"E33-2410N", cliente:"Ejemplo · Dúo Norte", monto:30, moneda:"USD", metodo:"Nequi", comprobante:"", registrado_por:"Isis", notas:"" },
-    { id:"I-3", fecha:dISO(-38), concepto:"Sesión completa", reserva_id:"", cliente:"Ejemplo · Cliente anterior", monto:1200000, moneda:"COP", metodo:"Efectivo", comprobante:"", registrado_por:"Santi", notas:"" } ]
+    { id:"E33-2010T-P1", fecha:dISO(-6), concepto:"Sesión completa", reserva_id:"E33-2010T", cliente:"Ejemplo · Sara V.", monto:150, moneda:"USD", metodo:"Transferencia", comprobante:"", registrado_por:"Isis", notas:"" },
+    { id:"E33-2410N-P1", fecha:dISO(-3), concepto:"Anticipo 50 %", reserva_id:"E33-2410N", cliente:"Ejemplo · Dúo Norte", monto:30, moneda:"USD", metodo:"Nequi", comprobante:"", registrado_por:"Isis", notas:"" },
+    { id:"I-260919-01", fecha:dISO(-38), concepto:"Sesión completa", reserva_id:"", cliente:"Ejemplo · Cliente anterior", monto:1200000, moneda:"COP", metodo:"Efectivo", comprobante:"", registrado_por:"Santi", notas:"" } ]
 };
 const MOCK = {
   apiInicio(){ return JSON.parse(JSON.stringify({ usuario:DB.user, permisos:PERM[DB.user.rol], config:{ trm:3158.43, trmFecha:"26/10/2026", capacidad:6 },
-    solicitudes:DB.solicitudes, inventario:DB.inventario, compras:DB.compras, ingresos:DB.ingresos, eventos:[], prefijos:PREFIJOS_DEMO })); },
+    solicitudes:DB.solicitudes, inventario:DB.inventario, compras:DB.compras, ingresos:DB.ingresos, insumos:DB.insumos, eventos:[], prefijos:PREFIJOS_DEMO })); },
   apiReservaEstado(id, estado){ chk(estado==="Realizada"?"reservas.sesion":"reservas"); const r = DB.solicitudes.find(x=>x.id===id); r.estado = estado; return {...r}; },
   apiInventarioGuardar(it){ const ex = DB.inventario.find(x=>x.codigo===it.codigo);
     if (!ex) chk("inventario"); else if (!can("inventario")) { chk("inventario.estado"); Object.keys(it).forEach(k=>{ if(!["codigo","estado","ubicacion","ultima_revision","observaciones"].includes(k)) delete it[k]; }); }
     if (!ex){ const p = PREFIJOS_DEMO[it.categoria]; const n = DB.inventario.filter(x=>x.codigo.startsWith(p+"-")).map(x=>+x.codigo.split("-")[1]); it.codigo = p+"-"+String((n.length?Math.max(...n):0)+1).padStart(3,"0"); DB.inventario.push(it); return {...it}; }
     Object.assign(ex, it); return {...ex}; },
-  apiCompraGuardar(c){ if (!c.id){ chk("compras.solicitar"); c.id = "C-"+Date.now(); c.fecha = dISO(0); c.estado = "Solicitada"; c.solicitado_por = DB.user.nombre; DB.compras.unshift(c); return {...c}; }
+  apiCompraGuardar(c){ if (!c.id){ chk("compras.solicitar"); const pre = "C-"+new Date().toISOString().slice(2,10).replaceAll("-","")+"-"; const n = DB.compras.map(x=>String(x.id)).filter(x=>x.startsWith(pre)).map(x=>+x.slice(pre.length)||0); c.id = pre+String(Math.max(0,...n)+1).padStart(2,"0"); c.fecha = dISO(0); c.estado = "Solicitada"; c.solicitado_por = DB.user.nombre; DB.compras.unshift(c); return {...c}; }
     const p = DB.compras.find(x=>x.id===c.id);
     if (c.estado==="Aprobada"||c.estado==="Rechazada"){ chk("compras.aprobar"); c.aprobado_por = DB.user.nombre; }
     else { chk("compras.registrar"); if (c.estado==="Comprada" && p.estado!=="Aprobada") throw new Error("Primero debe estar aprobada"); }
-    Object.assign(p, c); return {...p}; },
-  apiIngresoGuardar(i){ chk("ingresos"); if (!i.id){ i.id = "I-"+Date.now(); i.registrado_por = DB.user.nombre; DB.ingresos.unshift(i); } else Object.assign(DB.ingresos.find(x=>x.id===i.id), i);
+    const was = p.estado; Object.assign(p, c);
+    if (c.estado==="Comprada" && was!=="Comprada" && p.insumo_id){ const ins = DB.insumos.find(x=>x.id===p.insumo_id); const q = +p.cantidad||0;
+      if (ins && q){ ins.stock_actual = (+ins.stock_actual||0) + q; const tc = p.moneda==="USD" ? p.monto*3158.43 : +p.monto; if (tc) ins.precio_ref_cop = Math.round(tc/q); } }
+    return {...p}; },
+  apiInsumoGuardar(it){ const ex = DB.insumos.find(x=>x.id===it.id);
+    if (!ex){ chk("insumos"); const n = DB.insumos.map(x=>+String(x.id).split("-")[1]||0); it.id = "INSU-"+String(Math.max(0,...n)+1).padStart(3,"0"); it.activo = true; DB.insumos.push(it); return {...it}; }
+    if (!can("insumos")){ chk("insumos.stock"); Object.keys(it).forEach(k=>{ if(!["id","stock_actual","notas"].includes(k)) delete it[k]; }); }
+    Object.assign(ex, it); return {...ex}; },
+  apiStock(id, d){ chk("insumos.stock"); const x = DB.insumos.find(i=>i.id===id); x.stock_actual = Math.max(0,(+x.stock_actual||0)+d); return {...x}; },
+  apiGuardarPDF(){ return null; },
+  apiIngresoGuardar(i){ chk("ingresos"); if (!i.id){ i.id = idIngreso(i.reserva_id); i.registrado_por = DB.user.nombre; DB.ingresos.unshift(i); } else Object.assign(DB.ingresos.find(x=>x.id===i.id), i);
     if (i.reserva_id && i.es_anticipo){ const r = DB.solicitudes.find(x=>x.id===i.reserva_id); if (r && ["Nueva","Tentativa"].includes(r.estado)) r.estado = "Anticipo recibido"; } return {...i}; }
 };
+function idIngreso(res){
+  const ids = DB.ingresos.map(x=>String(x.id));
+  if (res){ if (!DB.solicitudes.some(s=>s.id===res)) throw new Error("No existe la reserva "+res); const n = ids.filter(x=>x.startsWith(res+"-P")).map(x=>+x.split("-P").pop()||0); return res+"-P"+((n.length?Math.max(...n):0)+1); }
+  const pre = "I-"+new Date().toISOString().slice(2,10).replaceAll("-","")+"-"; const n = ids.filter(x=>x.startsWith(pre)).map(x=>+x.slice(pre.length)||0); return pre+String((n.length?Math.max(...n):0)+1).padStart(2,"0");
+}
 const PREFIJOS_DEMO = { "Monitoreo":"MON","Micrófonos":"MIC","Audífonos":"AUD","Instrumentos":"INS","Cables":"CAB","Adaptadores":"ADP","Soportes":"SOP","Accesorios":"ACC","Energía":"ENE","Red":"RED","Mobiliario":"MOB","Hospitalidad":"HOS" };
 const can = a => { const p = PERM[DB.user.rol]; return p.includes("*") || p.includes(a); };
 const chk = a => { if (!can(a)) throw new Error("Tu rol ("+DB.user.rol+") no permite esta acción."); };
 DB.inventario = [{"codigo": "MON-001", "codigo_anterior": "M001", "equipo": "Monitor de estudio", "categoria": "Monitoreo", "marca": "ADAM Audio", "modelo": "A77H", "serie": "CF4700113", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable de poder, cable XLR", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MON-002", "codigo_anterior": "M002", "equipo": "Monitor de estudio", "categoria": "Monitoreo", "marca": "ADAM Audio", "modelo": "A77H", "serie": "CF4700114", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable de poder, cable XLR", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MON-003", "codigo_anterior": "B001", "equipo": "Subwoofer", "categoria": "Monitoreo", "marca": "KRK", "modelo": "S10.4 G", "serie": "HBNS015135", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable de poder", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Limpiar carcasa"}, {"codigo": "MIC-001", "codigo_anterior": "MC001", "equipo": "Micrófono de válvula", "categoria": "Micrófonos", "marca": "Telefunken", "modelo": "TF51", "serie": "3749", "estado": "Nuevo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Fuente de poder, cable caja–mic", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MIC-002", "codigo_anterior": "MC002", "equipo": "Micrófono de condensador", "categoria": "Micrófonos", "marca": "MXL", "modelo": "2006", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Falta base (shock mount)"}, {"codigo": "AUD-001", "codigo_anterior": "D001", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "ICON", "modelo": "HP-360", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Probar"}, {"codigo": "AUD-002", "codigo_anterior": "D002", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "Beyerdynamic", "modelo": "DT 990 PRO LE", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "AUD-003", "codigo_anterior": "D003", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "Audio-Technica", "modelo": "ATH-M50x", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "AUD-004", "codigo_anterior": "D004", "equipo": "Audífonos", "categoria": "Audífonos", "marca": "Audio-Technica", "modelo": "AVC200", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Probar"}, {"codigo": "INS-001", "codigo_anterior": "MD001", "equipo": "Teclado MIDI", "categoria": "Instrumentos", "marca": "Alesis", "modelo": "V49", "serie": "BA1906161704923", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Cable USB", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "INS-002", "codigo_anterior": "MS001", "equipo": "Controlador", "categoria": "Instrumentos", "marca": "Native Instruments", "modelo": "Maschine JAM", "serie": "MAJ06021825383AA", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "Comparte cable con INS-001", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-001", "codigo_anterior": "C001", "equipo": "Cable XLR", "categoria": "Cables", "marca": "REAN", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-002", "codigo_anterior": "C002", "equipo": "Cable de línea TS", "categoria": "Cables", "marca": "Fender", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "De colores"}, {"codigo": "CAB-003", "codigo_anterior": "C003", "equipo": "Cable de línea TRS", "categoria": "Cables", "marca": "Proel", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-004", "codigo_anterior": "C004", "equipo": "Cable de línea TRS", "categoria": "Cables", "marca": "Proel", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-005", "codigo_anterior": "C005", "equipo": "Cable USB-C a USB-C", "categoria": "Cables", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "CAB-006", "codigo_anterior": "C006", "equipo": "Cable XLR", "categoria": "Cables", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Negro, dos cintas en los extremos"}, {"codigo": "CAB-007", "codigo_anterior": "C007", "equipo": "Cable de poder", "categoria": "Cables", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ADP-001", "codigo_anterior": "A001", "equipo": "Adaptador múltiple USB-C", "categoria": "Adaptadores", "marca": "Infinito", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ADP-002", "codigo_anterior": "A002", "equipo": "Adaptador USB-C", "categoria": "Adaptadores", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ADP-003", "codigo_anterior": "A003", "equipo": "Adaptador doble plug", "categoria": "Adaptadores", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "SOP-001", "codigo_anterior": "BM001", "equipo": "Base de micrófono", "categoria": "Soportes", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "SOP-002", "codigo_anterior": "BM002", "equipo": "Base de micrófono", "categoria": "Soportes", "marca": "König & Meyer", "modelo": "", "serie": "", "estado": "Fuera de servicio", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Reparar o descartar"}, {"codigo": "SOP-003", "codigo_anterior": "BM003", "equipo": "Base de micrófono", "categoria": "Soportes", "marca": "König & Meyer", "modelo": "", "serie": "702332", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "SOP-004", "codigo_anterior": "AC003", "equipo": "Soporte de micrófono", "categoria": "Soportes", "marca": "Scala", "modelo": "", "serie": "", "estado": "Nuevo", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "No corresponde a ningún mic del estudio"}, {"codigo": "SOP-005", "codigo_anterior": "BM004", "equipo": "Base de monitor", "categoria": "Soportes", "marca": "Jamstands", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Sin uso"}, {"codigo": "SOP-006", "codigo_anterior": "BM005", "equipo": "Base de monitor", "categoria": "Soportes", "marca": "Jamstands", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Depósito", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Sin uso"}, {"codigo": "ACC-001", "codigo_anterior": "AC001", "equipo": "Antipop", "categoria": "Accesorios", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ACC-002", "codigo_anterior": "AC002", "equipo": "Antipop", "categoria": "Accesorios", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": true, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "ENE-001", "codigo_anterior": "E001", "equipo": "Regleta", "categoria": "Energía", "marca": "Avelec", "modelo": "", "serie": "F62372345", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Negra"}, {"codigo": "ENE-002", "codigo_anterior": "E002", "equipo": "Regleta", "categoria": "Energía", "marca": "Avelec", "modelo": "", "serie": "D42144288", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Blanca"}, {"codigo": "ENE-003", "codigo_anterior": "E003", "equipo": "Regleta industrial", "categoria": "Energía", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Detrás de la mesa de control; alimenta monitores"}, {"codigo": "ENE-004", "codigo_anterior": "E004", "equipo": "Extensión", "categoria": "Energía", "marca": "Halux", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Amarilla"}, {"codigo": "RED-001", "codigo_anterior": "TP001", "equipo": "Router / repetidor", "categoria": "Red", "marca": "TP-Link", "modelo": "", "serie": "", "estado": "Revisar", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Confirmar modelo y función"}, {"codigo": "MOB-001", "codigo_anterior": "S001", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-002", "codigo_anterior": "S002", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-003", "codigo_anterior": "S003", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-004", "codigo_anterior": "S004", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-005", "codigo_anterior": "S005", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-006", "codigo_anterior": "S006", "equipo": "Silla alta", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Fuera del estudio"}, {"codigo": "MOB-007", "codigo_anterior": "S007", "equipo": "Sillón", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-008", "codigo_anterior": "S008", "equipo": "Silla de cuero", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-009", "codigo_anterior": "S009", "equipo": "Silla de diseño", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-010", "codigo_anterior": "S010", "equipo": "Silla de diseño", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-011", "codigo_anterior": "MM001", "equipo": "Mesa de control", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-012", "codigo_anterior": "MM002", "equipo": "Mesa de centro", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "4 libros del BIME y una historieta"}, {"codigo": "MOB-013", "codigo_anterior": "MM003", "equipo": "Barra", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Teléfono antiguo decorativo"}, {"codigo": "MOB-014", "codigo_anterior": "MM004", "equipo": "Barra de hosting", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-015", "codigo_anterior": "D001", "equipo": "Vitrina", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Máquina de escribir, cámara Brownie, amplificador de madera, radio antiguo"}, {"codigo": "MOB-016", "codigo_anterior": "D002", "equipo": "Cajón acústico móvil", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Sala de control", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "MOB-017", "codigo_anterior": "D003", "equipo": "Organizador de madera", "categoria": "Mobiliario", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": "Decorativo"}, {"codigo": "HOS-001", "codigo_anterior": "J005", "equipo": "Jarra calentadora", "categoria": "Hospitalidad", "marca": "Cuisinart", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "HOS-002", "codigo_anterior": "D001", "equipo": "Dispensador de agua", "categoria": "Hospitalidad", "marca": "Electrolux", "modelo": "ED30SRBL", "serie": "52804395", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}, {"codigo": "HOS-003", "codigo_anterior": "N001", "equipo": "Nevera", "categoria": "Hospitalidad", "marca": "", "modelo": "", "serie": "", "estado": "Operativo", "ubicacion": "Lounge", "visible_rider": false, "incluye": "", "foto": "", "fecha_compra": "", "valor_cop": "", "ultima_revision": "", "observaciones": ""}];
+DB.insumos = [{"id": "INSU-001", "insumo": "Pilas AA", "categoria": "Estudio", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 4000, "stock_actual": 8, "stock_minimo": 6, "frecuencia": "Mensual", "notas": "Controles, micrófonos inalámbricos", "activo": true}, {"id": "INSU-002", "insumo": "Pilas 9V", "categoria": "Estudio", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 12000, "stock_actual": 2, "stock_minimo": 2, "frecuencia": "Mensual", "notas": "Pedales y cajas DI", "activo": true}, {"id": "INSU-003", "insumo": "Cinta gaffer negra", "categoria": "Estudio", "unidad": "rollo", "proveedor_habitual": "", "precio_ref_cop": 45000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Trimestral", "notas": "Fijar cables al piso", "activo": true}, {"id": "INSU-004", "insumo": "Cinta de enmascarar", "categoria": "Estudio", "unidad": "rollo", "proveedor_habitual": "", "precio_ref_cop": 6000, "stock_actual": 2, "stock_minimo": 2, "frecuencia": "Mensual", "notas": "Rotular canales y cables", "activo": true}, {"id": "INSU-005", "insumo": "Marcadores permanentes", "categoria": "Oficina", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 4000, "stock_actual": 3, "stock_minimo": 3, "frecuencia": "Trimestral", "notas": "", "activo": true}, {"id": "INSU-006", "insumo": "Alcohol isopropílico", "categoria": "Limpieza", "unidad": "litro", "proveedor_habitual": "", "precio_ref_cop": 25000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Trimestral", "notas": "Limpieza de equipos y contactos", "activo": true}, {"id": "INSU-007", "insumo": "Paños de microfibra", "categoria": "Limpieza", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 15000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Trimestral", "notas": "Pantallas y monitores", "activo": true}, {"id": "INSU-008", "insumo": "Toallitas desinfectantes", "categoria": "Limpieza", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 12000, "stock_actual": 2, "stock_minimo": 2, "frecuencia": "Mensual", "notas": "Rejillas de micrófono y audífonos", "activo": true}, {"id": "INSU-009", "insumo": "Espumas antiviento para micrófono", "categoria": "Estudio", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 20000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Semestral", "notas": "Repuesto higiénico por sesión", "activo": true}, {"id": "INSU-010", "insumo": "Almohadillas de repuesto para audífonos", "categoria": "Estudio", "unidad": "par", "proveedor_habitual": "", "precio_ref_cop": 60000, "stock_actual": 0, "stock_minimo": 1, "frecuencia": "Semestral", "notas": "M50x / DT 990", "activo": true}, {"id": "INSU-011", "insumo": "Cuerdas de guitarra", "categoria": "Estudio", "unidad": "juego", "proveedor_habitual": "", "precio_ref_cop": 35000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Ocasional", "notas": "Para artistas que no traen repuesto", "activo": true}, {"id": "INSU-012", "insumo": "Memorias USB 32 GB", "categoria": "Estudio", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 20000, "stock_actual": 3, "stock_minimo": 3, "frecuencia": "Mensual", "notas": "Entrega de sesiones", "activo": true}, {"id": "INSU-013", "insumo": "Bombillos tipo Edison E27", "categoria": "Mantenimiento", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 15000, "stock_actual": 2, "stock_minimo": 2, "frecuencia": "Trimestral", "notas": "Lámpara de rueda del estudio", "activo": true}, {"id": "INSU-014", "insumo": "Agua en botellón", "categoria": "Hospitalidad", "unidad": "botellón", "proveedor_habitual": "", "precio_ref_cop": 12000, "stock_actual": 2, "stock_minimo": 2, "frecuencia": "Semanal", "notas": "Dispensador Electrolux", "activo": true}, {"id": "INSU-015", "insumo": "Café molido", "categoria": "Hospitalidad", "unidad": "libra", "proveedor_habitual": "", "precio_ref_cop": 28000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-016", "insumo": "Azúcar y endulzante", "categoria": "Hospitalidad", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 8000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-017", "insumo": "Vasos reutilizables o compostables", "categoria": "Hospitalidad", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 15000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-018", "insumo": "Servilletas", "categoria": "Hospitalidad", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 6000, "stock_actual": 2, "stock_minimo": 2, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-019", "insumo": "Papel higiénico", "categoria": "Limpieza", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 25000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-020", "insumo": "Jabón de manos", "categoria": "Limpieza", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 10000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-021", "insumo": "Toallas de papel", "categoria": "Limpieza", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 12000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-022", "insumo": "Bolsas de basura", "categoria": "Limpieza", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 8000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-023", "insumo": "Limpiador multiusos", "categoria": "Limpieza", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 12000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-024", "insumo": "Ambientador", "categoria": "Limpieza", "unidad": "unidad", "proveedor_habitual": "", "precio_ref_cop": 15000, "stock_actual": 1, "stock_minimo": 1, "frecuencia": "Mensual", "notas": "", "activo": true}, {"id": "INSU-025", "insumo": "Snacks para sesiones", "categoria": "Hospitalidad", "unidad": "paquete", "proveedor_habitual": "", "precio_ref_cop": 30000, "stock_actual": 0, "stock_minimo": 2, "frecuencia": "Semanal", "notas": "Opcional según sesión", "activo": true}, {"id": "INSU-026", "insumo": "Hielo", "categoria": "Hospitalidad", "unidad": "bolsa", "proveedor_habitual": "", "precio_ref_cop": 6000, "stock_actual": 0, "stock_minimo": 0, "frecuencia": "Por sesión", "notas": "Comprar el día de la sesión", "activo": true}];
 
 /* ============ Estado y utilidades ============ */
 let D = null, VIEW = "tablero";
-const F = { res:"activas", inv:"todos", invq:"", com:"abiertas", ing:"mes" };
+const F = { comTab:"lista", res:"activas", inv:"todos", invq:"", com:"abiertas", ing:"mes", rep:new Date().toISOString().slice(0,7) };
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const P = a => D.permisos.includes("*") || D.permisos.includes(a);
@@ -263,15 +296,21 @@ const pillRes = e => ({ "Nueva":"p-nueva","Tentativa":"p-tentativa","Anticipo re
 const pillInv = e => ({ "Nuevo":"p-ok","Operativo":"p-ok","Revisar":"p-warn","Fuera de servicio":"p-off" }[e] || "");
 const pillCom = e => ({ "Solicitada":"p-nueva","Aprobada":"p-anticipo","Comprada":"p-realizada","Rechazada":"p-cancelada" }[e] || "");
 const ageH = s => s ? (Date.now() - new Date(s).getTime()) / 36e5 : 0;
+const pagosDe = id => D.ingresos.filter(i=>i.reserva_id===id).sort((a,b)=>String(a.id)<String(b.id)?-1:1);
+const pagadoUSD = id => pagosDe(id).reduce((a,i)=>a + (i.moneda==="USD" ? +i.monto : (+i.monto||0)/D.config.trm), 0);
 function toast(m){ let t = $(".toast"); if (!t){ t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status"); document.body.appendChild(t); } t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(()=>t.hidden = true, 2400); }
 async function act(p, okMsg){ try { const r = await p; if (okMsg) toast(okMsg); return r; } catch(e){ toast(e.message || "No se pudo guardar"); throw e; } }
 
 /* ============ Navegación ============ */
-const VIEWS = [ ["tablero","Tablero"], ["reservas","Reservas"], ["inventario","Inventario"], ["compras","Compras"], ["ingresos","Ingresos"] ];
+const VIEWS = [ ["tablero","Tablero"], ["reservas","Reservas"], ["inventario","Inventario"], ["compras","Compras"], ["ingresos","Ingresos"], ["reportes","Reportes"] ];
 function badges(){ return {
   reservas: D.solicitudes.filter(s=>s.estado==="Nueva").length,
   inventario: D.inventario.filter(i=>["Revisar","Fuera de servicio"].includes(i.estado)).length,
-  compras: P("compras.aprobar") ? D.compras.filter(c=>c.estado==="Solicitada").length : 0 }; }
+  compras: (P("compras.aprobar") ? D.compras.filter(c=>c.estado==="Solicitada").length : 0) + porReponer().length }; }
+function abiertas(){ return D.compras.filter(c=>["Solicitada","Aprobada"].includes(c.estado)); }
+function porReponer(){ const ab = new Set(abiertas().map(c=>c.insumo_id).filter(Boolean));
+  return (D.insumos||[]).filter(i => (i.activo===true||i.activo==="TRUE"||i.activo===undefined) && +i.stock_minimo>0 && +i.stock_actual < +i.stock_minimo && !ab.has(i.id)); }
+const sugerido = i => Math.max(1, (+i.stock_minimo||0)*2 - (+i.stock_actual||0));
 function renderNav(){
   const b = badges();
   const btn = ([k,l]) => `<button type="button" data-view="${k}" aria-current="${VIEW===k?"page":"false"}"><span class="ic"></span>${l}${b[k]?`<span class="badge">${b[k]}</span>`:""}</button>`;
@@ -289,7 +328,7 @@ function demoBar(){
 /* ============ Vistas ============ */
 function render(){
   const m = $("#main");
-  m.innerHTML = demoBar() + ({ tablero:vTablero, reservas:vReservas, inventario:vInventario, compras:vCompras, ingresos:vIngresos }[VIEW])();
+  m.innerHTML = demoBar() + ({ tablero:vTablero, reservas:vReservas, inventario:vInventario, compras:vCompras, ingresos:vIngresos, reportes:vReportes }[VIEW])();
 }
 
 function monthKey(s){ return String(s||"").slice(0,7); }
@@ -308,6 +347,7 @@ function vTablero(){
     ...nuevas.map(s=>({ t:`Responder a ${s.artista}`, s:`Solicitud ${s.id} · ${fdate(s.fecha)} · ${ageH(s.recibido)>24?"más de 24 h esperando":"recibida hace "+Math.max(1,Math.round(ageH(s.recibido)))+" h"}`, hot:ageH(s.recibido)>24, go:`reserva:${s.id}`, tag:"Reserva" })),
     ...pend.map(s=>({ t:`Esperando anticipo de ${s.artista}`, s:`${s.id} · ${usd(Math.ceil((+s.total_usd||0)/2))} · ${fdate(s.fecha)}`, go:`reserva:${s.id}`, tag:"Anticipo" })),
     ...(P("compras.aprobar") ? porAprobar.map(c=>({ t:`Aprobar compra: ${c.item}`, s:`${c.solicitado_por} · ${money(c.monto,c.moneda)}`, go:`compra:${c.id}`, tag:"Compra" })) : []),
+    ...(porReponer().length ? [{ t:`Reponer ${porReponer().length} insumo${porReponer().length===1?"":"s"}`, s:porReponer().slice(0,4).map(i=>i.insumo).join(", ")+(porReponer().length>4?"…":""), go:"view:compras", tag:"Insumos" }] : []),
     ...revisar.map(i=>({ t:`${i.estado}: ${i.equipo} ${i.marca?"· "+i.marca:""}`, s:`${i.codigo}${i.observaciones?" · "+i.observaciones:""}`, go:`inv:${i.codigo}`, tag:"Equipo" }))
   ];
   return `
@@ -353,8 +393,8 @@ function vReservas(){
   const list = D.solicitudes.filter(grupos[F.res]).sort((a,b)=>String(a.fecha)<String(b.fecha)?-1:1);
   return `<div class="top"><div><h1>Reservas</h1><p>Solicitudes que llegan desde la landing. Cambiar el estado actualiza el calendario.</p></div></div>
   <div class="tools"><div class="chips">${Object.keys(grupos).map(k=>`<button type="button" class="chip" data-f="res:${k}" aria-pressed="${F.res===k}">${names[k]}<span class="n">${D.solicitudes.filter(grupos[k]).length}</span></button>`).join("")}</div></div>
-  <div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Artista</th><th>Formato</th><th>Personas</th><th style="text-align:right">Total</th><th>Estado</th></tr></thead><tbody>
-  ${list.length ? list.map(s=>`<tr data-open="reserva:${s.id}"><td><b>${fdate(s.fecha)}</b><br><span class="note">${FRANJA[s.franja]||"Por definir"}</span></td><td>${s.estado==="Nueva"&&ageH(s.recibido)>24?'<span class="flag"></span>':""}${esc(s.artista)}<br><span class="note mono">${esc(s.id)}</span></td><td class="muted">${MODO[s.modo]||s.modo}${s.ingeniero==="Sí"?" · ingeniero":""}</td><td class="muted">${s.personas||"—"}</td><td class="r">${usd(+s.total_usd||0)}</td><td><span class="pill ${pillRes(s.estado)}">${esc(s.estado)}</span></td></tr>`).join("") : `<tr><td colspan="6" class="muted">No hay reservas en este filtro.</td></tr>`}
+  <div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Artista</th><th>Formato</th><th>Personas</th><th style="text-align:right">Total</th><th style="text-align:right">Pagado</th><th>Estado</th></tr></thead><tbody>
+  ${list.length ? list.map(s=>`<tr data-open="reserva:${s.id}"><td><b>${fdate(s.fecha)}</b><br><span class="note">${FRANJA[s.franja]||"Por definir"}</span></td><td>${s.estado==="Nueva"&&ageH(s.recibido)>24?'<span class="flag"></span>':""}${esc(s.artista)}<br><span class="note mono">${esc(s.id)}</span></td><td class="muted">${MODO[s.modo]||s.modo}${s.ingeniero==="Sí"?" · ingeniero":""}</td><td class="muted">${s.personas||"—"}</td><td class="r">${usd(+s.total_usd||0)}</td><td class="r">${pagadoUSD(s.id)?usd(pagadoUSD(s.id)):"—"}</td><td><span class="pill ${pillRes(s.estado)}">${esc(s.estado)}</span></td></tr>`).join("") : `<tr><td colspan="7" class="muted">No hay reservas en este filtro.</td></tr>`}
   </tbody></table></div>`;
 }
 
@@ -372,14 +412,46 @@ function vInventario(){
 }
 
 function vCompras(){
+  const tabs = `<div class="chips" style="margin-bottom:16px">${[["lista","Lista de compras"],["insumos","Insumos"],["historial","Historial"]].map(([k,l])=>`<button type="button" class="chip" data-f="comTab:${k}" aria-pressed="${F.comTab===k}">${l}</button>`).join("")}</div>`;
+  const mk = today().slice(0,7), mes = D.compras.filter(c=>c.estado==="Comprada"&&monthKey(c.fecha)===mk).reduce((a,c)=>a+toCOP(c.monto,c.moneda),0);
+  const top = `<div class="top"><div><h1>Compras</h1><p>Gastado este mes: ${cop(mes)}. Lo que se compra suma al stock y al control de gastos.</p></div>${P("compras.solicitar")?'<button class="btn pri" type="button" data-open="compra:new">+ Agregar a la lista</button>':""}</div>`;
+  return top + tabs + ({ lista:vLista, insumos:vInsumos, historial:vHistorial }[F.comTab])();
+}
+function vLista(){
+  const rep = porReponer(), ab = abiertas().sort((a,b)=>a.estado<b.estado?1:-1);
+  const est = ab.reduce((a,c)=>a+toCOP(c.monto,c.moneda),0);
+  const sol = ab.filter(c=>c.estado==="Solicitada");
+  return `<div class="grid2">
+  <div class="card"><div class="card-h"><h2>En la lista</h2><span>${ab.length} ítems · estimado ${cop(est)}</span></div><div class="card-b">
+    ${ab.length ? ab.map(c=>`<button type="button" class="row" data-open="compra:${esc(c.id)}"><span><b>${esc(c.item)}${+c.cantidad?` × ${esc(c.cantidad)}`:""}</b><small>${esc(c.solicitado_por)} · ${fdate(c.fecha)}${c.proveedor?" · "+esc(c.proveedor):""}</small></span><span class="r"><span class="amt">${money(+c.monto||0,c.moneda)}</span><span class="pill ${pillCom(c.estado)}">${esc(c.estado)}</span></span></button>`).join("") : `<div class="empty">La lista está vacía.</div>`}
+    ${sol.length && P("compras.aprobar") ? `<div style="padding:12px 18px;border-top:1px solid var(--rule);display:flex;justify-content:flex-end"><button class="btn pri" type="button" id="aprobar-todo">Aprobar ${sol.length} solicitud${sol.length===1?"":"es"} · ${cop(sol.reduce((a,c)=>a+toCOP(c.monto,c.moneda),0))}</button></div>` : ""}
+  </div></div>
+  <div class="card"><div class="card-h"><h2>Por reponer</h2><span>Stock por debajo del mínimo</span></div><div class="card-b">
+    ${rep.length ? rep.map(i=>`<div class="row" style="cursor:default"><span><b>${esc(i.insumo)}</b><small>Quedan ${esc(i.stock_actual)} ${esc(i.unidad)} · mínimo ${esc(i.stock_minimo)} · ref. ${cop(+i.precio_ref_cop||0)} c/u</small></span><span class="r">${P("compras.solicitar")?`<button class="btn sm" type="button" data-add="${esc(i.id)}">Agregar ${sugerido(i)}</button>`:""}</span></div>`).join("") : `<div class="empty">Nada por reponer.</div>`}
+    ${rep.length>1 && P("compras.solicitar") ? `<div style="padding:12px 18px;border-top:1px solid var(--rule);display:flex;justify-content:flex-end"><button class="btn light" type="button" id="add-all">Agregar todo · ${cop(rep.reduce((a,i)=>a+sugerido(i)*(+i.precio_ref_cop||0),0))}</button></div>` : ""}
+  </div></div></div>`;
+}
+function vInsumos(){
+  const l = (D.insumos||[]).slice().sort((a,b)=>(a.categoria+a.insumo).localeCompare(b.categoria+b.insumo));
+  const st = P("insumos.stock");
+  return `<div class="tools"><span class="note">${l.length} insumos. Usa − y + para registrar lo que se consume o llega.</span><span style="flex:1"></span>${P("insumos")?'<button class="btn" type="button" data-open="insu:new">+ Nuevo insumo</button>':""}</div>
+  <div class="tbl-wrap"><table><thead><tr><th>Insumo</th><th>Categoría</th><th>Stock</th><th>Mínimo</th><th style="text-align:right">Precio ref.</th><th>Frecuencia</th></tr></thead><tbody>
+  ${l.map(i=>{ const low = +i.stock_minimo>0 && +i.stock_actual < +i.stock_minimo;
+    return `<tr data-open="insu:${esc(i.id)}"><td>${low?'<span class="flag"></span>':""}${esc(i.insumo)}<br><span class="note mono">${esc(i.id)}</span></td><td class="muted">${esc(i.categoria)}</td>
+    <td><div class="step mini">${st?`<button type="button" data-stk="${esc(i.id)}|-1" aria-label="Restar">−</button>`:""}<output class="num">${esc(i.stock_actual)}</output>${st?`<button type="button" data-stk="${esc(i.id)}|1" aria-label="Sumar">+</button>`:""}</div></td>
+    <td class="muted">${esc(i.stock_minimo)} ${esc(i.unidad)}</td><td class="r">${cop(+i.precio_ref_cop||0)}</td><td class="muted">${esc(i.frecuencia||"—")}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+}
+function vHistorial(){
   const g = { abiertas:c=>["Solicitada","Aprobada"].includes(c.estado), compradas:c=>c.estado==="Comprada", rechazadas:c=>c.estado==="Rechazada", todas:()=>true };
   const n = { abiertas:"Abiertas", compradas:"Compradas", rechazadas:"Rechazadas", todas:"Todas" };
   const list = D.compras.filter(g[F.com]).sort((a,b)=>String(a.fecha)>String(b.fecha)?-1:1);
-  const mk = today().slice(0,7), mes = D.compras.filter(c=>c.estado==="Comprada"&&monthKey(c.fecha)===mk).reduce((a,c)=>a+toCOP(c.monto,c.moneda),0);
-  return `<div class="top"><div><h1>Compras</h1><p>Solicitud → aprobación de Pepe → compra con comprobante. Gastado este mes: ${cop(mes)}</p></div>${P("compras.solicitar")?'<button class="btn pri" type="button" data-open="compra:new">+ Solicitar compra</button>':""}</div>
+  const mk = today().slice(0,7), porCat = {};
+  D.compras.filter(c=>c.estado==="Comprada"&&monthKey(c.fecha)===mk).forEach(c=>{ porCat[c.categoria||"Otro"] = (porCat[c.categoria||"Otro"]||0) + toCOP(c.monto,c.moneda); });
+  return `<div class="sum">${Object.entries(porCat).map(([k,v])=>`<span class="pill">${esc(k)} · ${cop(v)}</span>`).join("") || '<span class="note">Sin gastos este mes.</span>'}</div>
   <div class="tools"><div class="chips">${Object.keys(g).map(k=>`<button type="button" class="chip" data-f="com:${k}" aria-pressed="${F.com===k}">${n[k]}<span class="n">${D.compras.filter(g[k]).length}</span></button>`).join("")}</div></div>
   <div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Compra</th><th>Solicitó</th><th style="text-align:right">Monto</th><th>Estado</th></tr></thead><tbody>
-  ${list.length ? list.map(c=>`<tr data-open="compra:${c.id}"><td class="muted">${fdate(c.fecha)}</td><td>${esc(c.item)}<br><span class="note">${esc(c.categoria||"")}${c.proveedor?" · "+esc(c.proveedor):""}</span></td><td class="muted">${esc(c.solicitado_por)}</td><td class="r">${money(+c.monto||0,c.moneda)}</td><td><span class="pill ${pillCom(c.estado)}">${esc(c.estado)}</span></td></tr>`).join("") : `<tr><td colspan="5" class="muted">No hay compras en este filtro.</td></tr>`}
+  ${list.length ? list.map(c=>`<tr data-open="compra:${c.id}"><td class="muted">${fdate(c.fecha)}</td><td>${esc(c.item)}${+c.cantidad?` × ${esc(c.cantidad)}`:""}<br><span class="note">${esc(c.categoria||"")}${c.proveedor?" · "+esc(c.proveedor):""}</span></td><td class="muted">${esc(c.solicitado_por)}</td><td class="r">${money(+c.monto||0,c.moneda)}</td><td><span class="pill ${pillCom(c.estado)}">${esc(c.estado)}</span></td></tr>`).join("") : `<tr><td colspan="5" class="muted">No hay compras en este filtro.</td></tr>`}
   </tbody></table></div>`;
 }
 
@@ -390,9 +462,111 @@ function vIngresos(){
   const tot = list.reduce((a,i)=>a+toCOP(i.monto,i.moneda),0);
   return `<div class="top"><div><h1>Ingresos</h1><p>Total ${F.ing==="mes"?"del mes":"histórico"}: ${cop(tot)} COP (USD convertidos a TRM ${D.config.trm.toLocaleString("es-CO")})</p></div>${P("ingresos")?'<button class="btn pri" type="button" data-open="ing:new">+ Registrar ingreso</button>':""}</div>
   <div class="tools"><div class="chips"><button type="button" class="chip" data-f="ing:mes" aria-pressed="${F.ing==="mes"}">Este mes</button><button type="button" class="chip" data-f="ing:todos" aria-pressed="${F.ing==="todos"}">Todos</button></div></div>
-  <div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Cliente</th><th>Método</th><th style="text-align:right">Monto</th></tr></thead><tbody>
-  ${list.length ? list.map(i=>`<tr data-open="ing:${i.id}"><td class="muted">${fdate(i.fecha)}</td><td>${esc(i.concepto)}${i.reserva_id?`<br><span class="note mono">${esc(i.reserva_id)}</span>`:""}</td><td class="muted">${esc(i.cliente||"—")}</td><td class="muted">${esc(i.metodo)}</td><td class="r">${money(+i.monto||0,i.moneda)}</td></tr>`).join("") : `<tr><td colspan="5" class="muted">Sin ingresos en este periodo.</td></tr>`}
+  <div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Fecha</th><th>Concepto</th><th>Cliente</th><th>Método</th><th style="text-align:right">Monto</th></tr></thead><tbody>
+  ${list.length ? list.map(i=>`<tr data-open="ing:${i.id}"><td class="code">${esc(i.id)}</td><td class="muted">${fdate(i.fecha)}</td><td>${esc(i.concepto)}${i.reserva_id?`<br><span class="note">Reserva ${esc(i.reserva_id)}</span>`:`<br><span class="note">Sin reserva</span>`}</td><td class="muted">${esc(i.cliente||"—")}</td><td class="muted">${esc(i.metodo)}</td><td class="r">${money(+i.monto||0,i.moneda)}</td></tr>`).join("") : `<tr><td colspan="6" class="muted">Sin ingresos en este periodo.</td></tr>`}
   </tbody></table></div>`;
+}
+
+/* ============ Reportes ============ */
+function datosMes(mk){
+  const ing = D.ingresos.filter(i=>monthKey(i.fecha)===mk).sort((a,b)=>String(a.fecha)<String(b.fecha)?-1:1);
+  const gas = D.compras.filter(c=>c.estado==="Comprada" && monthKey(c.fecha)===mk).sort((a,b)=>String(a.fecha)<String(b.fecha)?-1:1);
+  const ses = D.solicitudes.filter(s=>monthKey(s.fecha)===mk && ["Anticipo recibido","Confirmada","Realizada"].includes(s.estado));
+  const tIng = ing.reduce((a,i)=>a+toCOP(i.monto,i.moneda),0), tGas = gas.reduce((a,c)=>a+toCOP(c.monto,c.moneda),0);
+  const porMet = {}; ing.forEach(i=>{ porMet[i.metodo] = (porMet[i.metodo]||0) + toCOP(i.monto,i.moneda); });
+  const usdIn = ing.filter(i=>i.moneda==="USD").reduce((a,i)=>a+(+i.monto||0),0), copIn = ing.filter(i=>i.moneda!=="USD").reduce((a,i)=>a+(+i.monto||0),0);
+  return { ing, gas, ses, tIng, tGas, porMet, usdIn, copIn };
+}
+const mesLargo = mk => new Date(mk+"-15").toLocaleDateString("es-CO",{month:"long",year:"numeric"});
+function vReportes(){
+  const meses = [...new Set([today().slice(0,7), ...D.ingresos.map(i=>monthKey(i.fecha)), ...D.compras.map(c=>monthKey(c.fecha))].filter(Boolean))].sort().reverse();
+  const r = datosMes(F.rep);
+  const semana = D.solicitudes.filter(s=>["Anticipo recibido","Confirmada","Tentativa","Nueva"].includes(s.estado) && s.fecha>=today() && s.fecha<=new Date(Date.now()+7*864e5).toISOString().slice(0,10));
+  return `<div class="top"><div><h1>Reportes</h1><p>Para imprimir o guardar en PDF. ${LIVE?"Los PDF quedan en la carpeta «E33 Reportes» de Drive.":"En la app real, Imprimir abre el diálogo del navegador y PDF lo guarda en Drive."}</p></div></div>
+  <div class="grid2">
+    <div class="card"><div class="card-h"><h2>Ingresos del mes</h2>
+      <select class="search" style="flex:0 0 auto" id="rep-mes" aria-label="Mes">${meses.map(m=>`<option value="${m}" ${m===F.rep?"selected":""}>${mesLargo(m)}</option>`).join("")}</select></div>
+      <div class="card-b" style="padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+        <div class="kpis" style="margin:0;grid-template-columns:repeat(3,minmax(0,1fr))">
+          <div class="kpi"><span class="l">Ingresos</span><span class="v num" style="font-size:30px">${cop(r.tIng)}</span><span class="s">${r.ing.length} pagos</span></div>
+          <div class="kpi"><span class="l">Gastos</span><span class="v num" style="font-size:30px">${cop(r.tGas)}</span><span class="s">${r.gas.length} compras</span></div>
+          <div class="kpi ${r.tIng-r.tGas<0?"neg":""}"><span class="l">Balance</span><span class="v num" style="font-size:30px">${cop(r.tIng-r.tGas)}</span><span class="s">${r.ses.length} sesiones</span></div>
+        </div>
+        <div class="note">Por método: ${Object.entries(r.porMet).map(([m,v])=>`${esc(m)} ${cop(v)}`).join(" · ") || "—"}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn light" type="button" data-print="mes">Imprimir reporte</button><button class="btn" type="button" data-pdf="mes">Guardar PDF</button></div>
+      </div></div>
+    <div class="card"><div class="card-h"><h2>Sesiones</h2><span>Hojas para el estudio</span></div>
+      <div class="card-b">
+        <div style="padding:14px 18px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--rule)"><button class="btn light" type="button" data-print="semana">Imprimir agenda de 7 días</button><button class="btn" type="button" data-pdf="semana">Guardar PDF</button></div>
+        ${semana.length ? semana.sort((a,b)=>a.fecha<b.fecha?-1:1).map(s=>`<div class="row" style="cursor:default"><span><b>${esc(s.artista)}</b><small>${fdate(s.fecha)} · ${FRANJA[s.franja]||""} · ${esc(s.id)}</small></span><span class="r"><button class="btn sm" type="button" data-print="sesion:${esc(s.id)}">Hoja de sesión</button></span></div>`).join("") : `<div class="empty">No hay sesiones en los próximos 7 días.</div>`}
+      </div></div>
+  </div>`;
+}
+
+/* Documentos imprimibles (blanco, A4) */
+const PRINT_CSS = `@page{size:A4;margin:16mm}body{font-family:Inter,Arial,sans-serif;color:#0A0A0A;font-size:11pt;margin:0}
+h1{font-family:'Big Shoulders Display','Arial Narrow',sans-serif;font-weight:900;font-size:30pt;margin:0 0 2mm;line-height:1}
+h2{font-family:'Big Shoulders Display','Arial Narrow',sans-serif;font-weight:800;font-size:15pt;margin:7mm 0 2mm;border-bottom:2px solid #0A0A0A;padding-bottom:1mm}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0A0A0A;padding-bottom:3mm;margin-bottom:5mm}
+.hd .m{font-family:'JetBrains Mono',monospace;font-size:8.5pt;text-align:right;color:#4A4A4A}.brand{font-family:'Big Shoulders Display','Arial Narrow',sans-serif;font-weight:900;letter-spacing:.2em;font-size:10pt}
+table{width:100%;border-collapse:collapse;font-size:9.5pt}th{text-align:left;font-weight:600;color:#4A4A4A;border-bottom:1px solid #0A0A0A;padding:2mm 1.5mm}td{border-bottom:1px solid #D4D4D4;padding:2mm 1.5mm;vertical-align:top}
+td.r,th.r{text-align:right;font-family:'JetBrains Mono',monospace}.tot td{font-weight:700;border-top:2px solid #0A0A0A;border-bottom:0}
+.k{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin:4mm 0}.k div{border:1px solid #0A0A0A;padding:3mm}.k span{display:block;color:#4A4A4A;font-size:8.5pt}.k b{font-size:15pt}
+.kv{display:grid;grid-template-columns:38mm 1fr;gap:1.5mm 4mm}.kv dt{color:#4A4A4A}.kv dd{margin:0}
+.box{border:1px solid #D4D4D4;padding:3mm;min-height:12mm;white-space:pre-wrap}.chk{list-style:none;padding:0;margin:0;columns:2}.chk li{padding:1.3mm 0}.chk li::before{content:"☐  "}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:12mm;margin-top:14mm}.sig div{border-top:1px solid #0A0A0A;padding-top:1.5mm;font-size:9pt;color:#4A4A4A}.red{color:#E4172B}.foot{margin-top:8mm;font-size:8pt;color:#6B6B6B}`;
+function docHead(t, sub){ return `<div class="hd"><div><div class="brand">ENTR3T3NIMIENTO · ESTUDIO E33</div><h1>${t}</h1><div>${sub}</div></div><div class="m">Generado ${new Date().toLocaleString("es-CO")}<br>por ${esc(D.usuario.nombre)}<br>TRM ${D.config.trm.toLocaleString("es-CO")} (${esc(D.config.trmFecha)})</div></div>`; }
+function docMes(mk){
+  const r = datosMes(mk);
+  return docHead("Reporte de ingresos", mesLargo(mk)) + `<div class="k"><div><span>Ingresos (COP)</span><b>${cop(r.tIng)}</b></div><div><span>Gastos (COP)</span><b>${cop(r.tGas)}</b></div><div><span>Balance</span><b>${cop(r.tIng-r.tGas)}</b></div></div>
+  <div>Recibido en USD: ${usd(r.usdIn)} · en COP: ${cop(r.copIn)} · Sesiones del mes: ${r.ses.length}</div>
+  <h2>Ingresos</h2><table><thead><tr><th>Código</th><th>Fecha</th><th>Concepto</th><th>Cliente</th><th>Método</th><th class="r">Monto</th><th class="r">COP</th></tr></thead><tbody>
+  ${r.ing.map(i=>`<tr><td>${esc(i.id)}</td><td>${fdate(i.fecha)}</td><td>${esc(i.concepto)}</td><td>${esc(i.cliente||"—")}</td><td>${esc(i.metodo)}</td><td class="r">${money(+i.monto||0,i.moneda)}</td><td class="r">${cop(toCOP(i.monto,i.moneda))}</td></tr>`).join("") || `<tr><td colspan="7">Sin ingresos.</td></tr>`}
+  <tr class="tot"><td colspan="6">Total</td><td class="r">${cop(r.tIng)}</td></tr></tbody></table>
+  <h2>Por método de pago</h2><table><tbody>${Object.entries(r.porMet).map(([m,v])=>`<tr><td>${esc(m)}</td><td class="r">${cop(v)}</td></tr>`).join("") || `<tr><td>—</td></tr>`}</tbody></table>
+  <h2>Gastos por categoría</h2><table><tbody>${(() => { const pc = {}; r.gas.forEach(c=>{ pc[c.categoria||"Otro"] = (pc[c.categoria||"Otro"]||0) + toCOP(c.monto,c.moneda); }); return Object.entries(pc).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r">${cop(v)}</td></tr>`).join("") || "<tr><td>—</td></tr>"; })()}</tbody></table>
+  <h2>Gastos</h2><table><thead><tr><th>Fecha</th><th>Compra</th><th>Proveedor</th><th>Aprobó</th><th class="r">COP</th></tr></thead><tbody>
+  ${r.gas.map(c=>`<tr><td>${fdate(c.fecha)}</td><td>${esc(c.item)}</td><td>${esc(c.proveedor||"—")}</td><td>${esc(c.aprobado_por||"—")}</td><td class="r">${cop(toCOP(c.monto,c.moneda))}</td></tr>`).join("") || `<tr><td colspan="5">Sin gastos.</td></tr>`}
+  <tr class="tot"><td colspan="4">Total</td><td class="r">${cop(r.tGas)}</td></tr></tbody></table>
+  <p class="foot">Montos en USD convertidos a COP con la TRM indicada. Precios sin IVA.</p>`;
+}
+function docSesion(id){
+  const s = D.solicitudes.find(x=>x.id===id); if (!s) return "";
+  const pag = pagadoUSD(s.id), tot = +s.total_usd||0;
+  const eq = String(s.rider_solicitado||"").split(/,\s*/).filter(Boolean);
+  return docHead("Hoja de sesión", `${esc(s.artista)} · <span class="red">${esc(s.id)}</span>`) + `<dl class="kv">
+    <dt>Fecha</dt><dd><b>${fdate(s.fecha)}</b> · ${FRANJA[s.franja]||"Por definir"}</dd><dt>Formato</dt><dd>${MODO[s.modo]||s.modo} · ${s.ingeniero==="Sí"?"con ingeniero":"sin ingeniero"}${+s.horas?` · ${s.horas} h`:""}</dd>
+    <dt>Personas</dt><dd>${s.personas||"—"}</dd><dt>Contacto</dt><dd>${esc(s.whatsapp)} · ${esc(s.correo)}</dd>
+    <dt>Pagos</dt><dd>Total ${usd(tot)} · pagado ${usd(pag)} · <b>${tot-pag>0?"saldo a cobrar "+usd(tot-pag):"pagada completa"}</b></dd><dt>Estado</dt><dd>${esc(s.estado)}</dd></dl>
+  <h2>Rider solicitado</h2><ul class="chk">${eq.map(x=>`<li>${esc(x)}</li>`).join("") || "<li>—</li>"}</ul>
+  <div style="margin-top:2mm">Si falta equipo: <b>${esc(s.si_falta_equipo||"—")}</b></div>
+  <h2>Notas del artista</h2><div class="box">${esc(s.notas||"")}</div>
+  <h2>Cierre de sesión</h2><ul class="chk"><li>Equipos revisados y en su lugar</li><li>Cables enrollados</li><li>Archivos entregados</li><li>Saldo cobrado</li><li>Sala limpia y luces apagadas</li><li>Novedades anotadas</li></ul>
+  <h2>Novedades</h2><div class="box" style="min-height:28mm"></div>
+  <div class="sig"><div>Responsable del estudio</div><div>Artista</div></div>`;
+}
+function docSemana(){
+  const hasta = new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+  const l = D.solicitudes.filter(s=>["Anticipo recibido","Confirmada","Tentativa","Nueva"].includes(s.estado) && s.fecha>=today() && s.fecha<=hasta).sort((a,b)=>a.fecha<b.fecha?-1:1);
+  return docHead("Agenda del estudio", `${fdate(today())} — ${fdate(hasta)}`) + `<table><thead><tr><th>Fecha</th><th>Franja</th><th>Artista</th><th>Formato</th><th>Personas</th><th>Estado</th><th class="r">Saldo</th></tr></thead><tbody>
+  ${l.map(s=>{ const f = Math.max(0,(+s.total_usd||0)-pagadoUSD(s.id)); return `<tr><td>${fdate(s.fecha)}</td><td>${FRANJA[s.franja]||"—"}</td><td><b>${esc(s.artista)}</b><br>${esc(s.id)}</td><td>${MODO[s.modo]||s.modo}${s.ingeniero==="Sí"?" + ing.":""}</td><td>${s.personas||"—"}</td><td>${esc(s.estado)}</td><td class="r">${f?usd(f):"—"}</td></tr>`; }).join("") || `<tr><td colspan="7">Sin sesiones.</td></tr>`}</tbody></table>`;
+}
+function docFor(k){ if (k==="mes") return [docMes(F.rep), `E33 Ingresos ${F.rep}`]; if (k==="semana") return [docSemana(), `E33 Agenda ${today()}`]; const id = k.split(":")[1]; return [docSesion(id), `E33 Hoja de sesion ${id}`]; }
+function printDoc(k){
+  const [body] = docFor(k);
+  let pv = $("#print"); if (!pv){ pv = document.createElement("div"); pv.id = "print"; document.body.appendChild(pv); }
+  pv.innerHTML = `<style>${PRINT_CSS.replace(/body\{/,"#print{")}</style>${body}`;
+  if (LIVE){ window.print(); return; }
+  openDrawer(head("Vista de impresión", "En la app real se abre el diálogo de impresión del navegador.") + `<div class="dr-b" style="background:#fff;color:#0A0A0A"><div class="pv">${pv.innerHTML}</div></div><div class="dr-f"><button class="btn" type="button" data-close>Cerrar</button></div>`);
+  $("#drawer").style.width = "min(820px,100%)";
+}
+async function pdfDoc(k, btn){
+  const [body, name] = docFor(k);
+  const html = `<!doctype html><html><head><meta charset="utf-8"><style>${PRINT_CSS}</style></head><body>${body}</body></html>`;
+  btn.disabled = true;
+  try { const r = await act(call("apiGuardarPDF", name, html));
+    if (r && r.url){ toast("PDF guardado en Drive"); window.open(r.url, "_blank"); } else toast("En la vista previa no se guardan PDF");
+  } finally { btn.disabled = false; }
 }
 
 /* ============ Paneles de detalle ============ */
@@ -411,11 +585,15 @@ function drReserva(id){
     <dl class="kv"><dt>Fecha</dt><dd>${fdate(s.fecha)} · ${FRANJA[s.franja]||"Por definir"}</dd><dt>Formato</dt><dd>${MODO[s.modo]||s.modo} · ${s.ingeniero==="Sí"?"con ingeniero":"sin ingeniero"}${+s.horas?` · ${s.horas} h`:""}</dd>
     <dt>Personas</dt><dd>${s.personas||"—"}${+s.personas>D.config.capacidad?" · usar lounge y terraza":""}</dd><dt>Total</dt><dd>${usd(+s.total_usd||0)} · anticipo ${usd(Math.ceil((+s.total_usd||0)/2))}</dd>
     <dt>WhatsApp</dt><dd>${esc(s.whatsapp)}${wa?` · <a href="https://wa.me/${wa}" target="_blank" rel="noopener">abrir</a>`:""}</dd><dt>Correo</dt><dd>${esc(s.correo)}</dd></dl>
+    <div><span class="lbl">Pagos de esta reserva</span>${(() => { const ps = pagosDe(s.id), pag = pagadoUSD(s.id), tot = +s.total_usd||0, falta = Math.max(0, tot - pag);
+      return `<div class="pays">${ps.length ? ps.map(p=>`<button type="button" class="pay" data-open="ing:${esc(p.id)}"><span class="mono">${esc(p.id)}</span><span>${esc(p.concepto)} · ${fdate(p.fecha)}</span><b class="num">${money(+p.monto||0,p.moneda)}</b></button>`).join("") : `<div class="note">Sin pagos registrados.</div>`}
+      <div class="paysum"><span>Pagado <b class="num">${usd(pag)}</b> de ${usd(tot)}</span><span class="${falta>0?"due":""}">${falta>0?`Falta ${usd(falta)}`:"Pagada completa"}</span></div></div>`; })()}</div>
     <div><span class="lbl">Rider que pidió</span><div class="block">${esc(s.rider_solicitado||"—")}</div></div>
     <div><span class="lbl">Si falta equipo</span><div class="block">${esc(s.si_falta_equipo||"—")}</div></div>
     ${s.notas?`<div><span class="lbl">Notas</span><div class="block">${esc(s.notas)}</div></div>`:""}
     ${s.resumen?`<div><span class="lbl">Resumen de la solicitud</span><div class="block mono">${esc(s.resumen)}</div></div>`:""}
   </div><div class="dr-f">
+    <button class="btn" type="button" data-print="sesion:${s.id}">Hoja de sesión</button>
     ${P("reservas") && !["Realizada","Cancelada"].includes(s.estado)?`<button class="btn" type="button" data-res="${s.id}|Cancelada">Cancelar</button>`:""}
     ${P("ingresos") && ["Nueva","Tentativa","Anticipo recibido","Confirmada"].includes(s.estado)?`<button class="btn" type="button" data-open="ing:new:${s.id}">Registrar pago</button>`:""}
     ${canNext?`<button class="btn pri" type="button" data-res="${s.id}|${next[0]}">${next[1]}</button>`:""}
@@ -448,8 +626,10 @@ function drCompra(id){
   openDrawer(head(nuevo?"Solicitar compra":esc(c.item), nuevo?"Pepe recibe un aviso para aprobarla":`${esc(c.id)} · ${fdate(c.fecha)} · pidió ${esc(c.solicitado_por)}`) + `<div class="dr-b">
     ${nuevo?"":`<div><span class="lbl">Estado</span><span class="pill ${pillCom(c.estado)}">${esc(c.estado)}</span>${c.aprobado_por?` <span class="note">· ${c.estado==="Rechazada"?"rechazó":"aprobó"} ${esc(c.aprobado_por)}</span>`:""}</div>`}
     <form class="form" id="f-com">
+      ${nuevo ? `<label>Del catálogo de insumos<select id="c-ins"><option value="">Otro (escribir abajo)</option>${(D.insumos||[]).map(i=>`<option value="${esc(i.id)}">${esc(i.insumo)} · ${cop(+i.precio_ref_cop||0)} / ${esc(i.unidad)}</option>`).join("")}</select></label>` : ""}
       <label>Qué hay que comprar<input id="c-item" value="${esc(c.item||"")}" ${ro} required></label>
-      <div class="two"><label>Categoría<select id="c-cat" ${ro}>${["Equipo","Cables","Micrófonos","Mantenimiento","Hospitalidad","Mobiliario","Otro"].map(o=>`<option ${o===c.categoria?"selected":""}>${o}</option>`).join("")}</select></label><label>Proveedor<input id="c-prov" value="${esc(c.proveedor||"")}" ${nuevo||c.estado==="Aprobada"?"":"disabled"}></label></div>
+      <div class="two"><label>Cantidad<input id="c-cant" type="number" min="1" value="${esc(c.cantidad||1)}" ${ro}></label><label>Precio unitario (ref.)<input id="c-pu" type="number" min="0" step="500" value="${esc(c.precio_unit||"")}" ${ro}></label></div>
+      <div class="two"><label>Categoría<select id="c-cat" ${ro}>${["Equipo","Cables","Micrófonos","Estudio","Limpieza","Mantenimiento","Hospitalidad","Oficina","Mobiliario","Otro"].map(o=>`<option ${o===c.categoria?"selected":""}>${o}</option>`).join("")}</select></label><label>Proveedor<input id="c-prov" value="${esc(c.proveedor||"")}" ${nuevo||c.estado==="Aprobada"?"":"disabled"}></label></div>
       <div class="two"><label>${nuevo?"Monto estimado":"Monto"}<input id="c-monto" type="number" min="0" step="1000" value="${esc(c.monto||"")}" ${nuevo||c.estado==="Aprobada"?"":"disabled"}></label><label>Moneda<select id="c-mon" ${nuevo||c.estado==="Aprobada"?"":"disabled"}><option ${c.moneda==="COP"?"selected":""}>COP</option><option ${c.moneda==="USD"?"selected":""}>USD</option></select></label></div>
       ${!nuevo && c.estado==="Aprobada" ? `<label>Link del comprobante<input id="c-comp" type="url" placeholder="Foto o PDF en Drive" value="${esc(c.comprobante||"")}"></label>` : (c.comprobante?`<label>Comprobante<a href="${esc(c.comprobante)}" target="_blank" rel="noopener">${esc(c.comprobante)}</a></label>`:"")}
       <label>Para qué / notas<textarea id="c-notas" rows="3" ${ro}>${esc(c.notas||"")}</textarea></label>
@@ -459,6 +639,27 @@ function drCompra(id){
     ${!nuevo && c.estado==="Solicitada" && !P("compras.aprobar") ? `<span class="note">Esperando aprobación de administración.</span>` : ""}
     ${!nuevo && c.estado==="Aprobada" && P("compras.registrar") ? `<button class="btn pri" type="button" data-com="${c.id}|Comprada">Marcar como comprada</button>` : ""}
   </div>`);
+  if (nuevo){
+    const sync = () => { const q = +$("#c-cant").value||0, pu = +$("#c-pu").value||0; if (q && pu) $("#c-monto").value = q*pu; };
+    $("#c-cant").addEventListener("input", sync); $("#c-pu").addEventListener("input", sync);
+    $("#c-ins").addEventListener("change", () => { const i = D.insumos.find(x=>x.id===$("#c-ins").value); if (!i) return;
+      $("#c-item").value = i.insumo; $("#c-pu").value = i.precio_ref_cop||""; $("#c-cant").value = sugerido(i); $("#c-prov").value = i.proveedor_habitual||"";
+      const cat = $("#c-cat"); [...cat.options].forEach(o=>{ if (o.text===i.categoria) cat.value = o.text; }); sync(); });
+  }
+}
+
+function drInsumo(id){
+  const nuevo = id === "new", i = nuevo ? { categoria:"Estudio", unidad:"unidad", stock_actual:0, stock_minimo:1, frecuencia:"Mensual" } : D.insumos.find(x=>x.id===id); if (!i) return;
+  const full = P("insumos"), dis = k => full || (P("insumos.stock") && ["stock_actual","notas"].includes(k)) ? "" : "disabled";
+  openDrawer(head(nuevo?"Nuevo insumo":esc(i.insumo), nuevo?"Se agrega al catálogo del estudio":esc(i.id)) + `<div class="dr-b"><form class="form">
+    <label>Insumo<input id="n-nom" value="${esc(i.insumo||"")}" ${dis("insumo")}></label>
+    <div class="two"><label>Categoría<select id="n-cat" ${dis("categoria")}>${["Estudio","Limpieza","Hospitalidad","Mantenimiento","Oficina","Otro"].map(o=>`<option ${o===i.categoria?"selected":""}>${o}</option>`).join("")}</select></label><label>Unidad<input id="n-uni" value="${esc(i.unidad||"")}" ${dis("unidad")}></label></div>
+    <div class="two"><label>Stock actual<input id="n-stk" type="number" min="0" value="${esc(i.stock_actual)}" ${dis("stock_actual")}></label><label>Stock mínimo<input id="n-min" type="number" min="0" value="${esc(i.stock_minimo)}" ${dis("stock_minimo")}></label></div>
+    <div class="two"><label>Precio de referencia (COP)<input id="n-pre" type="number" min="0" step="500" value="${esc(i.precio_ref_cop||"")}" ${dis("precio_ref_cop")}></label><label>Frecuencia<select id="n-fre" ${dis("frecuencia")}>${["Por sesión","Semanal","Mensual","Trimestral","Semestral","Ocasional"].map(o=>`<option ${o===i.frecuencia?"selected":""}>${o}</option>`).join("")}</select></label></div>
+    <label>Proveedor habitual<input id="n-prov" value="${esc(i.proveedor_habitual||"")}" ${dis("proveedor_habitual")}></label>
+    <label>Notas<textarea id="n-not" rows="2" ${dis("notas")}>${esc(i.notas||"")}</textarea></label>
+    <p class="note">El precio de referencia se actualiza solo con el precio real de cada compra.</p>
+  </form></div><div class="dr-f"><button class="btn" type="button" data-close>Cancelar</button>${(full||P("insumos.stock"))&&!(nuevo&&!full)?`<button class="btn pri" type="button" id="save-insu" data-id="${nuevo?"":esc(i.id)}">Guardar</button>`:""}</div>`);
 }
 
 function drIngreso(arg){
@@ -471,24 +672,50 @@ function drIngreso(arg){
     <div class="two"><label>Fecha<input id="g-fecha" type="date" value="${esc(String(i.fecha).slice(0,10))}" ${ro}></label><label>Método<select id="g-met" ${ro}>${["Transferencia","Nequi","Daviplata","Efectivo","PayPal","Zelle","Otro"].map(o=>`<option ${o===i.metodo?"selected":""}>${o}</option>`).join("")}</select></label></div>
     <label>Concepto<input id="g-conc" value="${esc(i.concepto)}" ${ro} required placeholder="Anticipo, saldo, mezcla…"></label>
     <div class="two"><label>Monto<input id="g-monto" type="number" min="0" value="${esc(i.monto)}" ${ro} required></label><label>Moneda<select id="g-mon" ${ro}><option ${i.moneda==="USD"?"selected":""}>USD</option><option ${i.moneda==="COP"?"selected":""}>COP</option></select></label></div>
-    <div class="two"><label>Cliente<input id="g-cli" value="${esc(i.cliente||"")}" ${ro}></label><label>Reserva<input id="g-res" value="${esc(i.reserva_id||"")}" ${ro} placeholder="E33-…"></label></div>
+    <div class="two"><label>Cliente<input id="g-cli" value="${esc(i.cliente||"")}" ${ro}></label><label>Reserva<select id="g-res" ${ro} ${nuevo?"":"disabled"}><option value="">Sin reserva</option>${D.solicitudes.filter(s=>s.estado!=="Cancelada"||s.id===i.reserva_id).map(s=>`<option value="${esc(s.id)}" ${s.id===i.reserva_id?"selected":""}>${esc(s.id)} · ${esc(s.artista)}</option>`).join("")}</select></label></div>
     <label>Link del comprobante<input id="g-comp" type="url" value="${esc(i.comprobante||"")}" ${ro} placeholder="Foto o PDF en Drive"></label>
     ${r && ["Nueva","Tentativa"].includes(r.estado) ? '<label class="check"><input type="checkbox" id="g-ant" checked>Es el anticipo: pasar la reserva a "Anticipo recibido"</label>' : ""}
     <p class="note" id="g-cop"></p>
+    <p class="note">Código del ingreso: <b class="mono" id="g-id" style="color:var(--paper)">${nuevo?"":esc(i.id)}</b></p>
   </form></div><div class="dr-f"><button class="btn" type="button" data-close>Cerrar</button>${P("ingresos")?`<button class="btn pri" type="button" id="save-ing" data-id="${nuevo?"":esc(i.id)}">Guardar</button>`:""}</div>`);
+  const prevId = () => { if (!nuevo) return; const res = $("#g-res").value, ids = D.ingresos.map(x=>String(x.id));
+    if (res){ const n = ids.filter(x=>x.startsWith(res+"-P")).map(x=>+x.split("-P").pop()||0); $("#g-id").textContent = res+"-P"+((n.length?Math.max(...n):0)+1); }
+    else $("#g-id").textContent = "I-AAMMDD-NN (se asigna al guardar)";
+    const s = D.solicitudes.find(x=>x.id===res); if (s && !$("#g-cli").value) $("#g-cli").value = s.artista; };
+  $("#g-res").addEventListener("change", prevId); prevId();
   const upd = () => { const m = +$("#g-monto").value||0; $("#g-cop").textContent = $("#g-mon").value==="USD" ? `≈ ${cop(m*D.config.trm)} COP con TRM ${D.config.trm.toLocaleString("es-CO")}` : ""; };
   $("#g-monto").addEventListener("input", upd); $("#g-mon").addEventListener("change", upd); upd();
 }
 
 /* ============ Eventos ============ */
+async function addInsumo(i){
+  const q = sugerido(i), pu = +i.precio_ref_cop||0;
+  const s = await act(call("apiCompraGuardar", { item:i.insumo, categoria:i.categoria, proveedor:i.proveedor_habitual||"", monto:q*pu, moneda:"COP", notas:"Reposición de stock", insumo_id:i.id, cantidad:q, precio_unit:pu }));
+  replace(D.compras, "id", s); return s;
+}
 function replace(list, key, obj){ const k = list.findIndex(x=>x[key]===obj[key]); if (k>=0) list[k] = obj; else list.unshift(obj); }
 document.addEventListener("click", async e => {
   const v = e.target.closest("[data-view]"); if (v){ go(v.dataset.view); return; }
+  const stk = e.target.closest("[data-stk]");
+  if (stk){ e.stopPropagation(); const [id, d] = stk.dataset.stk.split("|"); try { const s = await act(call("apiStock", id, +d)); replace(D.insumos, "id", s); renderNav(); render(); } catch(_){} return; }
+  const ad = e.target.closest("[data-add]");
+  if (ad){ const i = D.insumos.find(x=>x.id===ad.dataset.add); ad.disabled = true; try { await addInsumo(i); toast(i.insumo + " agregado a la lista"); renderNav(); render(); } catch(_){ ad.disabled = false; } return; }
+  if (e.target.id === "add-all"){ e.target.disabled = true; const l = porReponer(); try { for (const i of l) await addInsumo(i); toast(l.length + " insumos agregados a la lista"); renderNav(); render(); } catch(_){ e.target.disabled = false; } return; }
+  if (e.target.id === "aprobar-todo"){ e.target.disabled = true; const l = D.compras.filter(c=>c.estado==="Solicitada");
+    try { for (const c of l){ const s = await act(call("apiCompraGuardar", { ...c, estado:"Aprobada" })); replace(D.compras, "id", s); } toast(l.length + " compras aprobadas"); renderNav(); render(); } catch(_){ e.target.disabled = false; } return; }
+  if (e.target.id === "save-insu"){ const id = e.target.dataset.id;
+    const it = { id, insumo:$("#n-nom").value.trim(), categoria:$("#n-cat").value, unidad:$("#n-uni").value.trim(), stock_actual:+$("#n-stk").value||0, stock_minimo:+$("#n-min").value||0,
+      precio_ref_cop:+$("#n-pre").value||0, frecuencia:$("#n-fre").value, proveedor_habitual:$("#n-prov").value.trim(), notas:$("#n-not").value.trim() };
+    if (!id) delete it.id; if (!it.insumo){ toast("Escribe el nombre del insumo"); return; }
+    e.target.disabled = true; try { const s = await act(call("apiInsumoGuardar", it), id ? "Insumo actualizado" : "Insumo creado"); replace(D.insumos, "id", s); renderNav(); render(); closeDrawer(); } catch(_){ e.target.disabled = false; } return; }
+  const pr = e.target.closest("[data-print]"); if (pr){ printDoc(pr.dataset.print); return; }
+  const pd = e.target.closest("[data-pdf]"); if (pd){ pdfDoc(pd.dataset.pdf, pd); return; }
   if (e.target.closest("[data-close]") || e.target.id === "scrim"){ closeDrawer(); return; }
   const f = e.target.closest("[data-f]"); if (f){ const [k,val] = f.dataset.f.split(":"); F[k] = val; render(); return; }
   const o = e.target.closest("[data-open]");
   if (o){ const [t, ...rest] = o.dataset.open.split(":"); const id = rest.join(":");
-    if (t==="reserva") drReserva(id); if (t==="inv") drInv(id); if (t==="compra") drCompra(id); if (t==="ing") drIngreso(id); return; }
+    if (t==="view"){ go(id); return; }
+    if (t==="reserva") drReserva(id); if (t==="inv") drInv(id); if (t==="compra") drCompra(id); if (t==="ing") drIngreso(id); if (t==="insu") drInsumo(id); return; }
   const r = e.target.closest("[data-res]");
   if (r){ const [id, est] = r.dataset.res.split("|"); r.disabled = true;
     try { const s = await act(call("apiReservaEstado", id, est), "Reserva: " + est); replace(D.solicitudes, "id", s); renderNav(); render(); drReserva(id); } catch(_){ r.disabled = false; } return; }
@@ -496,7 +723,7 @@ document.addEventListener("click", async e => {
   if (c){ const [id, est] = c.dataset.com.split("|"); const prev = D.compras.find(x=>x.id===id); const obj = { ...prev, estado:est };
     if (est==="Comprada"){ obj.monto = +$("#c-monto").value||prev.monto; obj.moneda = $("#c-mon").value; obj.proveedor = $("#c-prov").value; obj.comprobante = ($("#c-comp")||{}).value||""; }
     c.disabled = true;
-    try { const s = await act(call("apiCompraGuardar", obj), "Compra " + est.toLowerCase()); replace(D.compras, "id", s); renderNav(); render(); closeDrawer(); } catch(_){ c.disabled = false; } return; }
+    try { const s = await act(call("apiCompraGuardar", obj), "Compra " + est.toLowerCase()); replace(D.compras, "id", s); if (est==="Comprada" && obj.insumo_id) D = await call("apiInicio"); renderNav(); render(); closeDrawer(); } catch(_){ c.disabled = false; } return; }
   if (e.target.id === "save-inv"){ const code = e.target.dataset.code;
     const it = { codigo:code||"", equipo:$("#i-equipo").value.trim(), categoria:$("#i-cat").value, marca:$("#i-marca").value.trim(), modelo:$("#i-modelo").value.trim(), serie:$("#i-serie").value.trim(),
       ubicacion:$("#i-ubic").value, estado:$("#i-estado").value, ultima_revision:$("#i-rev").value, incluye:$("#i-incluye").value.trim(), observaciones:$("#i-obs").value.trim(), visible_rider:$("#i-rider").checked };
@@ -504,7 +731,8 @@ document.addEventListener("click", async e => {
     if (!code) delete it.codigo;
     e.target.disabled = true;
     try { const s = await act(call("apiInventarioGuardar", it), code ? "Equipo actualizado" : "Equipo creado"); replace(D.inventario, "codigo", s); renderNav(); render(); closeDrawer(); } catch(_){ e.target.disabled = false; } return; }
-  if (e.target.id === "save-com"){ const obj = { item:$("#c-item").value.trim(), categoria:$("#c-cat").value, proveedor:$("#c-prov").value.trim(), monto:+$("#c-monto").value||0, moneda:$("#c-mon").value, notas:$("#c-notas").value.trim() };
+  if (e.target.id === "save-com"){ const obj = { item:$("#c-item").value.trim(), categoria:$("#c-cat").value, proveedor:$("#c-prov").value.trim(), monto:+$("#c-monto").value||0, moneda:$("#c-mon").value, notas:$("#c-notas").value.trim(),
+      insumo_id:($("#c-ins")||{}).value||"", cantidad:+$("#c-cant").value||1, precio_unit:+$("#c-pu").value||0 };
     if (!obj.item){ toast("Escribe qué hay que comprar"); return; }
     e.target.disabled = true;
     try { const s = await act(call("apiCompraGuardar", obj), "Solicitud enviada a aprobación"); replace(D.compras, "id", s); renderNav(); render(); closeDrawer(); } catch(_){ e.target.disabled = false; } return; }
@@ -518,7 +746,7 @@ document.addEventListener("click", async e => {
       renderNav(); render(); closeDrawer(); } catch(_){ e.target.disabled = false; } return; }
 });
 document.addEventListener("input", e => { if (e.target.id === "inv-q"){ F.invq = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#inv-q"); q.focus(); q.setSelectionRange(pos,pos); } });
-document.addEventListener("change", async e => { if (e.target.id === "demo-user"){ DB.user = DEMO_USERS[+e.target.value]; D = await call("apiInicio"); renderNav(); render(); toast("Ahora ves la app como " + DB.user.nombre); } });
+document.addEventListener("change", async e => { if (e.target.id === "rep-mes"){ F.rep = e.target.value; render(); return; } if (e.target.id === "demo-user"){ DB.user = DEMO_USERS[+e.target.value]; D = await call("apiInicio"); renderNav(); render(); toast("Ahora ves la app como " + DB.user.nombre); } });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
 
 /* ============ Inicio ============ */

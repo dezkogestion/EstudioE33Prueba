@@ -109,6 +109,7 @@ section{padding-block:80px;border-bottom:1px solid var(--rule)}
 
 /* Console */
 .desk{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:32px;align-items:start}
+.desk > *{min-width:0}
 @media (max-width:1080px){.desk{grid-template-columns:1fr}}
 .wiz-nav{list-style:none;margin:0 0 12px;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .wiz-nav button{width:100%;display:flex;align-items:center;gap:10px;background:transparent;border:0;border-top:3px solid var(--rule);padding:10px 2px 4px;cursor:pointer;text-align:left;color:var(--dim)}
@@ -116,7 +117,37 @@ section{padding-block:80px;border-bottom:1px solid var(--rule)}
 .wiz-nav .l{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wiz-nav button.done{border-top-color:var(--paper);color:var(--soft)}
 .wiz-nav button[aria-current="step"]{border-top-color:var(--red);color:var(--paper)}
-@media (max-width:640px){.wiz-nav .l{display:none}.wiz-nav button[aria-current="step"] .l{display:inline}.wiz-nav{grid-template-columns:repeat(5,auto);justify-content:start}}
+.wiz{scroll-margin-top:72px}
+.wiz-cap{display:none}
+@media (max-width:640px){
+  .wiz-nav{display:flex;justify-content:space-between;position:relative;margin-bottom:10px}
+  .wiz-nav::before{content:"";position:absolute;left:16px;right:16px;top:50%;height:2px;background:var(--rule)}
+  .wiz-nav li{position:relative;z-index:1}
+  .wiz-nav button{border:0;padding:0;width:34px;height:34px;border-radius:50%;justify-content:center;background:var(--ink);border:2px solid var(--rule)}
+  .wiz-nav .l{display:none}
+  .wiz-nav .n{font-size:13px;font-weight:700}
+  .wiz-nav button.done{border-color:var(--paper);background:var(--paper);color:var(--ink)}
+  .wiz-nav button[aria-current="step"]{border-color:var(--red);background:var(--red);color:var(--on-red)}
+  .wiz-cap{display:flex;flex-direction:column;gap:2px;margin-bottom:12px}
+  .wiz-cap b{font-size:16px}
+  .wiz-cap span{color:var(--dim);font-size:14px}
+  .wiz-foot{display:none!important}
+  .mod-h b{font-size:24px}
+  #consola{padding-bottom:110px}
+}
+.mbar{display:none}
+@media (max-width:640px){
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;gap:10px;align-items:stretch;background:var(--ink);border-top:1px solid var(--rule);
+    padding:10px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));box-shadow:0 -6px 18px var(--shade)}
+  .mbar[hidden]{display:none!important}
+  .mb-sum{background:transparent;border:1px solid var(--rule);padding:6px 10px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;cursor:pointer;min-width:0}
+  .mb-sum .mono{font-size:10px;color:var(--dim)}
+  .mb-sum b{font-family:var(--font-display);font-weight:900;font-size:24px;line-height:1}
+  .mb-next{flex:1;justify-content:center;padding:12px 10px;box-shadow:3px 3px 0 var(--red);font-size:11px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+@keyframes nudge{0%,100%{transform:none}30%{transform:translate(-3px,-3px);box-shadow:7px 7px 0 var(--red)}60%{transform:none}}
+.key.nudge{animation:nudge .6s ease 2}
 .mod{border:1px solid var(--rule);background:var(--panel);display:none}
 .mod.on{display:block}
 .wiz-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
@@ -380,6 +411,7 @@ footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;m
     <div class="desk">
       <div class="wiz">
         <ol class="wiz-nav" id="wiz-nav" aria-label="Pasos"></ol>
+        <div class="wiz-cap" id="wiz-cap" aria-live="polite"></div>
         <div class="mod" data-step="0">
           <div class="mod-h"><b data-t="w.0"></b><span class="mono" data-t="w.0s"></span></div>
           <div class="mod-b"><div class="transport" id="modes" role="group"></div><div class="toggles" style="margin-top:12px"><label class="tg" for="eng"><input type="checkbox" id="eng" checked><span class="sw"></span><span><b data-t="tg.eng"></b><small data-t="tg.eng2"></small></span></label></div></div>
@@ -474,6 +506,11 @@ footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;m
   </div></footer>
 </main>
 
+<div class="mbar" id="mbar" hidden>
+  <button type="button" class="mb-sum" id="mb-sum"><span class="mono" data-t="w.summary"></span><b class="num" id="mb-usd">USD 0</b></button>
+  <button type="button" class="key mb-next" id="mb-next"></button>
+</div>
+
 <div class="lb" id="lb" hidden><img id="lb-img" alt=""><button class="key" id="lb-x" type="button" data-t="ui.cerrar"></button></div>
 
 <div class="req" id="req" hidden role="dialog" aria-modal="true" aria-labelledby="req-t">
@@ -520,7 +557,7 @@ es:{
  "hero.cta1":"Arma tu sesión","hero.cta2":"Cómo reservar",
  "facts.desde":"Desde","facts.mic":"Micrófono","facts.mon":"Monitoreo",
  "camps.h":"Elige un punto de partida","camps.h2":"3 formatos",
- "cons.mk":"Consola","cons.mk2":"Paso a paso","cons.h":"Arma tu sesión","cons.p":"Cinco pasos cortos. A la derecha ves el resumen y el precio mientras eliges.","w.0":"Formato","w.0s":"Precios sin IVA","w.1":"Fecha y hora","w.2":"Quiénes vienen","w.3":"Equipo","w.4":"Mezcla y máster","w.prev":"Atrás","w.next":"Siguiente","w.done":"Revisar y enviar","w.of":"Paso {a} de {b}","tab.fotos":"Fotos","tab.rider":"Rider técnico",
+ "cons.mk":"Consola","cons.mk2":"Paso a paso","cons.h":"Arma tu sesión","cons.p":"Cinco pasos cortos. A la derecha ves el resumen y el precio mientras eliges.","w.0":"Formato","w.0s":"Precios sin IVA","w.1":"Fecha y hora","w.2":"Quiénes vienen","w.3":"Equipo","w.4":"Mezcla y máster","w.prev":"Atrás","w.next":"Siguiente","w.nextto":"Siguiente: {s}","w.summary":"Ver resumen","w.then":"Después: {s}","w.last":"Último paso","w.done":"Revisar y enviar","w.of":"Paso {a} de {b}","tab.fotos":"Fotos","tab.rider":"Rider técnico",
  "mod.a":"A · Formato","mod.a2":"USD sin / con ingeniero","mod.b":"B · Tiempo","mod.crew":"C · Crew","mod.c":"D · Canales","mod.d":"E · Post","mod.d2":"Por canción",
  "tg.eng":"Con ingeniero","tg.eng2":"Operación y captura","tg.night":"Horario nocturno","tg.night2":"22:00–06:00 · +25 %",
  "time.horas":"Horas","time.extra":"Horas extra","time.paq":"10 horas","time.paqtxt":"Se agendan por separado durante 60 días","time.pick":"Elige un espacio libre en la agenda de abajo","time.change":"cambiar","time.none":"Sin franja",
@@ -556,7 +593,7 @@ en:{
  "hero.cta1":"Build your session","hero.cta2":"How to book",
  "facts.desde":"From","facts.mic":"Microphone","facts.mon":"Monitoring",
  "camps.h":"Pick a starting point","camps.h2":"3 formats",
- "cons.mk":"Console","cons.mk2":"Step by step","cons.h":"Build your session","cons.p":"Five short steps. Your summary and price update on the right as you choose.","w.0":"Format","w.0s":"Prices without VAT","w.1":"Date and time","w.2":"Who's coming","w.3":"Gear","w.4":"Mixing and mastering","w.prev":"Back","w.next":"Next","w.done":"Review and send","w.of":"Step {a} of {b}","tab.fotos":"Photos","tab.rider":"Tech rider",
+ "cons.mk":"Console","cons.mk2":"Step by step","cons.h":"Build your session","cons.p":"Five short steps. Your summary and price update on the right as you choose.","w.0":"Format","w.0s":"Prices without VAT","w.1":"Date and time","w.2":"Who's coming","w.3":"Gear","w.4":"Mixing and mastering","w.prev":"Back","w.next":"Next","w.nextto":"Next: {s}","w.summary":"See summary","w.then":"Then: {s}","w.last":"Last step","w.done":"Review and send","w.of":"Step {a} of {b}","tab.fotos":"Photos","tab.rider":"Tech rider",
  "mod.a":"A · Format","mod.a2":"USD without / with engineer","mod.b":"B · Time","mod.crew":"C · Crew","mod.c":"D · Channels","mod.d":"E · Post","mod.d2":"Per song",
  "tg.eng":"With engineer","tg.eng2":"Session operation and capture","tg.night":"Night hours","tg.night2":"22:00–06:00 · +25 %",
  "time.horas":"Hours","time.extra":"Extra hours","time.paq":"10 hours","time.paqtxt":"Booked separately within 60 days","time.pick":"Pick an open slot in the schedule below","time.change":"change","time.none":"No slot",
@@ -703,8 +740,10 @@ function render(){
   const steps = [0,1,2,3,4].map(i => T("w."+i));
   $("#wiz-nav").innerHTML = steps.map((s,i)=>`<li><button type="button" data-step-go="${i}" aria-current="${i===S.step?"step":"false"}" class="${i<S.step?"done":""}"><span class="n">${i+1}</span><span class="l">${esc(s)}</span></button></li>`).join("");
   $("#w-prev").disabled = S.step === 0;
-  $("#w-next").textContent = S.step === 4 ? T("w.done") : T("w.next") + " →";
+  const nxt = S.step === 4 ? T("w.done") : T("w.nextto",{s:steps[S.step+1]}) + " →";
+  $("#w-next").textContent = nxt; $("#mb-next").textContent = nxt;
   $("#w-pos").textContent = T("w.of",{a:S.step+1,b:5});
+  $("#wiz-cap").innerHTML = `<b>${T("w.of",{a:S.step+1,b:5})} · ${esc(steps[S.step])}</b><span>${S.step<4 ? T("w.then",{s:esc(steps[S.step+1])}) : T("w.last")}</span>`;
 
   // crew
   $("#crew").innerHTML = DATA.crew.map(c => `<div class="send"><div><b>${esc(L(c,"label"))}</b><small>${esc(L(c,"desc"))}</small></div><div class="step"><button type="button" data-cr="${c.id}" data-d="-1" aria-label="− ${esc(L(c,"label"))}">−</button><output class="num">${S.crew[c.id]||0}</output><button type="button" data-cr="${c.id}" data-d="1" aria-label="+ ${esc(L(c,"label"))}">+</button></div></div>`).join("");
@@ -751,7 +790,7 @@ function render(){
   $("#fd-post").textContent = c.songs ? `${c.songs} ${c.songs>1?T("post.canciones"):T("post.cancion")}` : T("post.none");
   $("#fd-slot").textContent = S.mode==="paquete" ? T("f.paq") : sl || T("f.tbd");
   $("#lines").innerHTML = c.lines.map(([l,v])=>`<div class="ln"><span>${esc(l)}</span><span class="num">${fmtUSD(v)}</span></div>`).join("");
-  $("#t-usd").textContent = fmtUSD(c.usd);
+  $("#t-usd").textContent = fmtUSD(c.usd); $("#mb-usd").textContent = fmtUSD(c.usd);
   $("#t-cop").innerHTML = `≈ ${fmtCOP(c.usd*CONFIG.TRM)}<br>${T("f.anticipo")} ${fmtUSD(Math.ceil(c.usd/2))}`;
   $("#trm-note").textContent = T("f.trm",{t:CONFIG.TRM.toLocaleString("es-CO"),d:CONFIG.TRM_FECHA});
   $("#sh-id").textContent = sessionId();
@@ -810,7 +849,9 @@ function applyPreset(i){
   S.eq = new Set(p.eq); S.prod = { ...p.prod }; if (p.crew) S.crew = { ...p.crew };
   if (p.mode && DATA.tarifas[p.mode]){ S.mode = p.mode; S.extra = 0; S.night = false; }
 }
+function nudge(){ ["#w-next","#mb-next"].forEach(s => { const b = $(s); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); }); }
 document.addEventListener("click", e => {
+  if (e.target.closest(".mod [data-mode], .mod .rg:not(.busy), .mod [data-cr], .mod [data-eq], .mod [data-preset], .mod [data-pd]")) setTimeout(nudge, 0);
   const sg = e.target.closest("[data-step-go]");
   if (sg){ S.step = +sg.dataset.stepGo; render(); return; }
   const tb = e.target.closest("[data-tab]");
@@ -836,8 +877,17 @@ document.addEventListener("click", e => {
   const fig = e.target.closest(".fr");
   if (fig && fig.dataset.tipo !== "video"){ openLb(fig); return; }
 });
+function goNext(){ if (S.step < 4){ S.step++; render(); $(".wiz").scrollIntoView({block:"start"}); } else $("#go").click(); }
 $("#w-prev").addEventListener("click", () => { S.step = Math.max(0, S.step-1); render(); $(".wiz").scrollIntoView({block:"start"}); });
-$("#w-next").addEventListener("click", () => { if (S.step < 4){ S.step++; render(); $(".wiz").scrollIntoView({block:"start"}); } else $("#go").click(); });
+$("#w-next").addEventListener("click", goNext);
+$("#mb-next").addEventListener("click", goNext);
+$("#mb-sum").addEventListener("click", () => $(".sheet").scrollIntoView({block:"start"}));
+/* Barra fija en celular: visible solo mientras se arma la sesión */
+(function(){
+  const bar = $("#mbar"), wiz = $(".wiz");
+  if (!("IntersectionObserver" in window)) return;
+  new IntersectionObserver(([en]) => { bar.hidden = !en.isIntersecting; }, { rootMargin:"0px 0px -30% 0px" }).observe(wiz);
+})();
 $("#eng").addEventListener("change", e => { S.eng = e.target.checked; render(); });
 $("#night").addEventListener("change", e => { S.night = e.target.checked; render(); });
 $("#h-inc").addEventListener("click", () => { if (S.mode==="hora") S.hours = Math.min(DATA.tarifas.hora.max||12, S.hours+1); else S.extra = Math.min(8, S.extra+1); render(); });

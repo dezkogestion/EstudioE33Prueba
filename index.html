@@ -216,11 +216,46 @@ section{padding-block:80px;border-bottom:1px solid var(--rule)}
 .pr{border:1px solid var(--rule);background:transparent;padding:6px 12px;cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
 .pr:hover{border-color:var(--paper);color:var(--paper)}
 .pr[aria-pressed="true"]{background:var(--paper);border-color:var(--paper);color:var(--ink)}
-#gear{display:flex;flex-wrap:wrap;gap:4px 22px}
-.gcat{margin-top:16px}
-.gcat > .mono{display:block;color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-.gcat .strips{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
-.gcat .ch{width:108px}
+/* Cadena de señal: entra → se graba → sale, con cables que se encienden */
+.chain{position:relative;display:grid;grid-template-columns:1fr minmax(130px,180px) 1fr;gap:24px 64px;align-items:center;margin-top:18px}
+.chain .wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.chain .col{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px}
+.chain .col > .mono{color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+.chain .col > .mono b{display:block;color:var(--soft);font-family:var(--font-body);font-weight:400;font-size:13px;letter-spacing:0;text-transform:none;margin-top:2px}
+.jk{position:relative;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;border:1px solid var(--rule);background:var(--panel-2);padding:9px 12px;border-radius:var(--r-md);color:var(--soft);transition:border-color .15s,color .15s}
+.jk:hover{border-color:var(--dim)}
+.jk[aria-pressed="true"]{border-color:var(--paper);color:var(--paper)}
+.jk .led{flex:none;width:8px;height:8px;border-radius:50%;background:var(--red-dim)}
+.jk[aria-pressed="true"] .led{background:var(--red);box-shadow:0 0 8px var(--red)}
+.jk .tx{display:flex;flex-direction:column;min-width:0}
+.jk .tx b{font-family:var(--font-mono);font-size:12px;letter-spacing:.04em}
+.jk .tx small{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jk .port{position:absolute;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;border:2px solid var(--dim);background:var(--ink);transition:background .15s,border-color .15s}
+.col.in .jk .port{right:-6px}
+.col.out .jk .port{left:-6px}
+.jk[aria-pressed="true"] .port{background:var(--red);border-color:var(--red)}
+.core{position:relative;z-index:1;border:1px solid var(--rule);background:var(--panel);padding:16px 12px;border-radius:var(--r-lg);text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.core.live{border-color:var(--paper)}
+.core > .mono{color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.core b{font-size:13px;font-weight:400;color:var(--soft);line-height:1.4}
+.meter{display:flex;gap:3px;align-items:flex-end;height:26px}
+.meter i{width:5px;height:15%;background:var(--rule);border-radius:1px}
+.core.live .meter i{background:var(--red);animation:vu .9s ease-in-out infinite alternate}
+.core.live .meter i:nth-child(2){animation-delay:-.3s}.core.live .meter i:nth-child(3){animation-delay:-.6s}
+.core.live .meter i:nth-child(4){animation-delay:-.15s}.core.live .meter i:nth-child(5){animation-delay:-.45s}
+@keyframes vu{from{height:20%}to{height:100%}}
+.wire{fill:none;stroke:var(--rule);stroke-width:2;stroke-dasharray:3 5}
+.wire.on{stroke:var(--red);stroke-dasharray:none}
+.wire.flow{stroke:var(--on-red);stroke-width:2;stroke-dasharray:2 16;opacity:.7;animation:flow 1.1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-18}}
+.always{margin-top:18px;padding-top:12px;border-top:1px dashed var(--rule);font-size:13px;color:var(--dim);line-height:1.5}
+.always .mono{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+@media (max-width:640px){
+  .chain{grid-template-columns:1fr;gap:22px}
+  .chain .col{padding-left:24px}
+  .col.in .jk .port,.col.out .jk .port{right:auto;left:-19px}
+}
+@media (prefers-reduced-motion:reduce){.wire.flow{display:none}.core.live .meter i{animation:none;height:70%}}
 .strips{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:6px;margin-top:14px}
 .ch{position:relative;cursor:pointer;border:1px solid var(--rule);background:var(--panel-2);padding:8px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:border-color .15s}
 .ch:hover{border-color:var(--dim)}
@@ -657,7 +692,8 @@ es:{
  "time.horas":"Horas","time.extra":"Horas extra","time.paq":"10 horas","time.paqtxt":"Se agendan por separado durante 60 días","time.pick":"Elige un espacio libre en la agenda de abajo","time.change":"cambiar","time.none":"Sin franja",
  "crew.hint":"Cuéntanos cuántas personas vienen a la sesión para preparar el espacio.","crew.personas":"personas",
  "crew.ok":"Cómodo para la sala de control.","crew.lounge":"Más de {c} personas: usaremos también lounge y terraza.","crew.max":"Más de {m} personas: escríbenos antes para confirmar si podemos recibirlos.",
- "ch.hint":"Todo el equipo viene con la sala. Marca lo que vas a usar y lo dejamos conectado antes de que llegues. Si traes o necesitas algo más, cuéntalo en el último paso.","ch.free":"Libre","ch.act":"elegidos","ch.act1":"elegido",
+ "ch.hint":"Sigue el camino del sonido: elige con qué vas a grabar y cómo lo vas a escuchar, y lo dejamos conectado antes de que llegues. Todo viene con la sala. Si traes o necesitas algo más, cuéntalo en el último paso.",
+ "ch.in":"Entra","ch.in2":"Micrófonos e instrumentos","ch.core":"Se graba","ch.core2":"Interfaz y computadora de la sala","ch.out":"Sale","ch.out2":"Monitores y audífonos","ch.always":"Siempre en la sala, sin pedirlo","ch.free":"Libre","ch.act":"elegidos","ch.act1":"elegido",
  "post.hint":"Indica cuántas canciones llevan cada proceso. Las que llevan mezcla y máster pagan el precio combo; el resto se cobra por separado.",
  "post.cancion":"canción","post.combo":"Combo en {n} {c} · {p} c/u","post.ahorro":"ahorras {s}","post.canciones":"canciones","post.solomz":"Solo mezcla","post.soloms":"Solo máster","post.cb":"Mezcla + máster","post.none":"Sin post",
  "f.formato":"Formato","f.ing":"Ingeniero","f.crew":"Personas","f.post":"Mezcla y máster","f.slot":"Fecha","f.canales":"Equipo","f.siniva":"SIN IVA","f.go":"Revisar y enviar →",
@@ -708,7 +744,8 @@ en:{
  "time.horas":"Hours","time.extra":"Extra hours","time.paq":"10 hours","time.paqtxt":"Booked separately within 60 days","time.pick":"Pick an open slot in the schedule below","time.change":"change","time.none":"No slot",
  "crew.hint":"Tell us how many people are coming so we can set up the space.","crew.personas":"people",
  "crew.ok":"Comfortable for the control room.","crew.lounge":"More than {c} people: we'll also open the lounge and terrace.","crew.max":"More than {m} people: message us first to confirm we can host you.",
- "ch.hint":"All gear comes with the room. Tick what you'll use and we'll have it connected before you arrive. If you're bringing or need anything else, tell us in the last step.","ch.free":"Custom","ch.act":"selected","ch.act1":"selected",
+ "ch.hint":"Follow the sound: pick what you'll record with and how you'll listen, and we'll have it connected before you arrive. Everything comes with the room. If you're bringing or need anything else, tell us in the last step.",
+ "ch.in":"In","ch.in2":"Mics and instruments","ch.core":"Recorded","ch.core2":"The room's interface and computer","ch.out":"Out","ch.out2":"Monitors and headphones","ch.always":"Always in the room, no need to ask","ch.free":"Custom","ch.act":"selected","ch.act1":"selected",
  "post.hint":"Set how many songs get each process. Songs with both mixing and mastering get the combo price; the rest are charged separately.",
  "post.cancion":"song","post.combo":"Combo on {n} {c} · {p} each","post.ahorro":"you save {s}","post.canciones":"songs","post.solomz":"Mixing only","post.soloms":"Mastering only","post.cb":"Mix + master","post.none":"No post",
  "f.formato":"Format","f.ing":"Engineer","f.crew":"People","f.post":"Mixing & mastering","f.slot":"Date","f.canales":"Gear","f.siniva":"NO VAT","f.go":"Review and send →",
@@ -834,6 +871,29 @@ function renderCamps(){
   }).join("");
 }
 
+const lado = e => ({ mic:"in", in:"in", out:"out", hp:"out", core:"core" })[e.chain] || "acc";
+
+// Dibuja los cables entre cada equipo y el centro. En celular las columnas se apilan y el cable baja por un riel a la izquierda.
+function cables(){
+  const ch = $("#chain"); if (!ch) return;
+  const b = ch.getBoundingClientRect(); if (!b.width) return;
+  const R = el => { const r = el.getBoundingClientRect(); return { l:r.left-b.left, r:r.right-b.left, t:r.top-b.top, b:r.bottom-b.top, x:(r.left+r.right)/2-b.left, y:(r.top+r.bottom)/2-b.top }; };
+  const c = R(ch.querySelector(".core")), apilado = c.l < 24;
+  const off = [], on = [];
+  ch.querySelectorAll(".jk").forEach(j => {
+    const p = R(j.querySelector(".port")), entra = !!j.closest(".in");
+    let d;
+    if (apilado) d = entra ? `M${p.x} ${p.y} V${c.t}` : `M${p.x} ${c.b} V${p.y}`;
+    else if (entra){ const k = (c.l-p.x)/2; d = `M${p.x} ${p.y} C${p.x+k} ${p.y} ${c.l-k} ${c.y} ${c.l} ${c.y}`; }
+    else { const k = (p.x-c.r)/2; d = `M${c.r} ${c.y} C${c.r+k} ${c.y} ${p.x-k} ${p.y} ${p.x} ${p.y}`; }
+    (j.getAttribute("aria-pressed")==="true" ? on : off).push(d);
+  });
+  ch.querySelector(".wires").innerHTML = off.map(d=>`<path class="wire" d="${d}"/>`).join("") +
+    on.map(d=>`<path class="wire on" d="${d}"/><path class="wire flow" d="${d}"/>`).join("");
+}
+addEventListener("resize", cables);
+document.addEventListener("toggle", cables, true);
+
 function render(){
   const t = DATA.tarifas[S.mode];
   $("#modes").innerHTML = Object.entries(DATA.tarifas).map(([k,x]) =>
@@ -873,20 +933,23 @@ function render(){
   // channels
   $("#presets").innerHTML = DATA.presets.map((p,i)=>`<button type="button" class="pr" aria-pressed="${S.preset===i}" data-preset="${i}">${esc(L(p,"label"))}</button>`).join("") +
     `<button type="button" class="pr" aria-pressed="${S.preset===-1}" data-preset="-1">${T("ch.free")}</button>`;
-  // Agrupado por tipo (micrófonos, monitoreo…): con todo el inventario, una sola fila de canales sería ilegible.
-  const cats = [...new Set(DATA.equipos.map(e => L(e,"cat")))];
-  const tira = (e,i) =>
-    `<button type="button" class="ch" aria-pressed="${S.eq.has(e.id)}" data-eq="${esc(e.id)}" aria-label="${esc(L(e,"cat"))} ${esc(L(e,"name"))}">
-      <span class="cn"><span>CH ${pad(i+1)}</span><span class="led"></span></span>
-      <span class="knob" aria-hidden="true"></span>
-      <span class="scribble">${esc(shortOf(e))}</span>
-      <span class="fader" aria-hidden="true"><span class="cap"></span></span>
-      <span class="nm">${esc(L(e,"name"))}</span>
-      <span class="ct">${esc(L(e,"cat"))}</span>
-      ${e.qty>1?`<span class="q">×${e.qty}</span>`:""}
+  // Cadena de señal: lo que entra (mic, instrumentos), lo que graba (interfaz, computadora) y lo que sale (monitores, audífonos).
+  // Cables, bases y accesorios no se eligen: van al pie como «siempre en la sala».
+  const eqs = DATA.equipos.map(e => ({ ...e, lado: lado(e) }));
+  const de = k => eqs.filter(e => e.lado === k);
+  const qty = e => e.qty>1 ? ` ×${e.qty}` : "";
+  const jack = e =>
+    `<button type="button" class="jk" aria-pressed="${S.eq.has(e.id)}" data-eq="${esc(e.id)}" aria-label="${esc(L(e,"cat"))} ${esc(L(e,"name"))}">
+      <span class="led"></span><span class="tx"><b>${esc(shortOf(e))}${qty(e)}</b><small>${esc(L(e,"name"))}</small></span><span class="port" aria-hidden="true"></span>
     </button>`;
-  $("#gear").innerHTML = cats.map(c => `<div class="gcat"><span class="mono">${esc(c)}</span><div class="strips">${
-    DATA.equipos.map((e,i)=>[e,i]).filter(([e])=>L(e,"cat")===c).map(([e,i])=>tira(e,i)).join("")}</div></div>`).join("");
+  const nucleo = de("core"), acc = de("acc");
+  const vivo = eqs.some(e => (e.lado==="in"||e.lado==="out") && S.eq.has(e.id));
+  $("#gear").innerHTML = `<div class="chain" id="chain"><svg class="wires" aria-hidden="true"></svg>
+    <div class="col in"><span class="mono">${T("ch.in")}<b>${T("ch.in2")}</b></span>${de("in").map(jack).join("")}</div>
+    <div class="core${vivo?" live":""}"><span class="mono">${T("ch.core")}</span><b>${nucleo.length ? nucleo.map(e=>esc(L(e,"name"))).join("<br>") : T("ch.core2")}</b><span class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
+    <div class="col out"><span class="mono">${T("ch.out")}<b>${T("ch.out2")}</b></span>${de("out").map(jack).join("")}</div>
+  </div>` + (acc.length ? `<p class="always"><span class="mono">${T("ch.always")}</span>${acc.map(e=>esc(L(e,"name"))+qty(e)).join(" · ")}</p>` : "");
+  cables();
 
   // post
   $("#prod").innerHTML = DATA.produccion.filter(p => p.id !== "mixmaster").map(p =>
@@ -898,7 +961,7 @@ function render(){
     $("#combo").innerHTML = T("post.combo",{n:both,c:both>1?T("post.canciones"):T("post.cancion"),p:fmtUSD(cb.usd)}) + (sv>0?` · <b>${T("post.ahorro",{s:fmtUSD(sv)})}</b>`:""); }
 
   // sheet
-  const sel = DATA.equipos.map((e,i)=>({...e,n:i+1})).filter(e => S.eq.has(e.id));
+  const sel = DATA.equipos.filter(e => S.eq.has(e.id) && /^(in|out)$/.test(lado(e)));
   $("#ch-count").textContent = `${sel.length} ${sel.length===1?T("ch.act1"):T("ch.act")}`;
   $("#trk").textContent = sel.length ? sel.map(shortOf).join(" · ") : "—";
   const c = calc();

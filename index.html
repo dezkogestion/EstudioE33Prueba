@@ -78,6 +78,11 @@ h1,h2,h3{font-family:var(--font-display);font-weight:800;margin:0;text-wrap:bala
 .ctas{display:flex;gap:14px;flex-wrap:wrap}
 .camps{display:flex;flex-direction:column;border:1px solid var(--paper)}
 .camps-h{display:flex;justify-content:space-between;padding:10px 14px;background:var(--paper);color:var(--ink)}
+#camps .camp .gear{text-transform:none;letter-spacing:0;font-size:12px;line-height:1.45}
+.camps-p{margin:0;padding:12px 14px 14px;color:var(--soft);font-size:15px;line-height:1.45}
+.camp .cmeta{display:block;margin-top:4px;color:var(--paper);font-size:13px;font-weight:600}
+.camp .go span{font-size:13px;font-weight:600;margin-right:4px}
+@media (max-width:640px){.camp .go span{display:none}}
 .camp{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px;border-top:1px solid var(--rule);text-align:left;background:transparent;cursor:pointer;border-left:0;border-right:0;border-bottom:0;transition:background .15s}
 .camp:first-of-type{border-top:0}
 .camp:hover{background:var(--panel)}
@@ -211,6 +216,11 @@ section{padding-block:80px;border-bottom:1px solid var(--rule)}
 .pr{border:1px solid var(--rule);background:transparent;padding:6px 12px;cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
 .pr:hover{border-color:var(--paper);color:var(--paper)}
 .pr[aria-pressed="true"]{background:var(--paper);border-color:var(--paper);color:var(--ink)}
+#gear{display:flex;flex-wrap:wrap;gap:4px 22px}
+.gcat{margin-top:16px}
+.gcat > .mono{display:block;color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.gcat .strips{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.gcat .ch{width:108px}
 .strips{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:6px;margin-top:14px}
 .ch{position:relative;cursor:pointer;border:1px solid var(--rule);background:var(--panel-2);padding:8px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:border-color .15s}
 .ch:hover{border-color:var(--dim)}
@@ -520,7 +530,7 @@ footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;m
               <summary><span data-t="det.gear"></span><span class="mono" id="ch-count"></span></summary>
               <p class="hint" data-t="ch.hint"></p>
               <div class="presets" id="presets" role="group"></div>
-              <div class="strips" id="gear"></div>
+              <div id="gear"></div>
             </details>
             <details class="opt">
               <summary><span data-t="det.post"></span><span class="mono" id="post-n"></span></summary>
@@ -619,6 +629,11 @@ const THUMBS = {"control": "assets/img/thumbs/control.jpg", "sala": "assets/img/
 /* ===== Textos ES / EN ===== */
 const I18N = {
 es:{
+ "camps.go":"Empezar",
+ "camps.inc":"Incluye",
+ "camps.post":"con mezcla y máster",
+ "camps.desde":"desde",
+ "camps.p":"Elige una y te dejamos la sesión armada, con el equipo listo. Después eliges la fecha y cambias lo que quieras.",
  "f.h":"Tu sesión",
  "w.needdate":"Elige un día libre en la agenda, o toca «Todavía no tengo fecha».",
  "ag.nodate2":"Envía la solicitud igual y la coordinamos por WhatsApp.",
@@ -635,7 +650,7 @@ es:{
  "hero.lead":"<strong>Sala de grabación y producción en Medellín.</strong> Elige cómo trabajar, cuántos vienen y qué necesitas en sala. Dejamos todo conectado para que llegues a crear.",
  "hero.cta1":"Arma tu sesión","hero.cta2":"Cómo reservar",
  "facts.desde":"Desde","facts.mic":"Micrófono","facts.mon":"Monitoreo",
- "camps.h":"Elige un punto de partida","camps.h2":"3 formatos",
+ "camps.h":"¿No sabes por dónde empezar?","camps.h2":"Sesiones tipo",
  "cons.mk":"Consola","cons.mk2":"Paso a paso","cons.h":"Arma tu sesión","cons.p":"Cuatro pasos cortos. A la derecha ves el resumen y el precio mientras eliges.","w.0":"¿Qué sesión?","w.0s":"USD · sin IVA","w.1":"¿Cuándo?","w.2":"Detalles","w.3":"Tus datos","w.4":"Mezcla y máster","w.prev":"Atrás","w.next":"Siguiente","w.nextto":"Siguiente: {s}","w.summary":"Ver resumen","w.then":"Después: {s}","w.last":"Último paso","w.done":"Revisar y enviar","w.of":"Paso {a} de {b}","tab.fotos":"Fotos","tab.rider":"Rider técnico",
  "mod.a":"A · Formato","mod.a2":"USD sin / con ingeniero","mod.b":"B · Tiempo","mod.crew":"C · Crew","mod.c":"D · Canales","mod.d":"E · Post","mod.d2":"Por canción",
  "tg.eng":"Con ingeniero","tg.eng2":"Operación y captura","tg.night":"Horario nocturno","tg.night2":"22:00–06:00 · +25 %",
@@ -665,6 +680,11 @@ es:{
  "theme":"Cambiar tema"
 },
 en:{
+ "camps.go":"Start",
+ "camps.inc":"Includes",
+ "camps.post":"with mix & master",
+ "camps.desde":"from",
+ "camps.p":"Pick one and we'll set the session up for you, gear ready. Then choose a date and change anything you like.",
  "f.h":"Your session",
  "w.needdate":"Pick an open day in the schedule, or tap “I don't have a date yet”.",
  "ag.nodate2":"Send the request anyway and we'll set it up on WhatsApp.",
@@ -681,7 +701,7 @@ en:{
  "hero.lead":"<strong>Recording and production room in Medellín.</strong> Choose how you want to work, who's coming and what you need in the room. We'll have everything patched in so you can walk in and create.",
  "hero.cta1":"Build your session","hero.cta2":"How to book",
  "facts.desde":"From","facts.mic":"Microphone","facts.mon":"Monitoring",
- "camps.h":"Pick a starting point","camps.h2":"3 formats",
+ "camps.h":"Not sure where to start?","camps.h2":"Session types",
  "cons.mk":"Console","cons.mk2":"Step by step","cons.h":"Build your session","cons.p":"Four short steps. Your summary and price update on the right as you choose.","w.0":"Which session?","w.0s":"USD · no VAT","w.1":"When?","w.2":"Details","w.3":"Your details","w.4":"Mixing and mastering","w.prev":"Back","w.next":"Next","w.nextto":"Next: {s}","w.summary":"See summary","w.then":"Then: {s}","w.last":"Last step","w.done":"Review and send","w.of":"Step {a} of {b}","tab.fotos":"Photos","tab.rider":"Tech rider",
  "mod.a":"A · Format","mod.a2":"USD without / with engineer","mod.b":"B · Time","mod.crew":"C · Crew","mod.c":"D · Channels","mod.d":"E · Post","mod.d2":"Per song",
  "tg.eng":"With engineer","tg.eng2":"Session operation and capture","tg.night":"Night hours","tg.night2":"22:00–06:00 · +25 %",
@@ -806,9 +826,11 @@ function slotLabel(){
 
 function renderCamps(){
   const head = $("#camps").firstElementChild.outerHTML;
-  $("#camps").innerHTML = head + DATA.presets.map((p,i)=>{
-    const eq = p.eq.map(id => DATA.equipos.find(e=>e.id===id)).filter(Boolean).map(shortOf).join(" · ");
-    return `<button type="button" class="camp" data-camp="${i}"><img src="${THUMBS[p.img]||THUMBS.control}" alt=""><span><b>${esc(L(p,"label"))}</b><p>${esc(L(p,"desc"))}</p><span class="gear">${esc(eq)}</span></span><span class="go" aria-hidden="true">→</span></button>`;
+  $("#camps").innerHTML = head + `<p class="camps-p">${T("camps.p")}</p>` + DATA.presets.map((p,i)=>{
+    const eq = p.eq.map(id => DATA.equipos.find(e=>e.id===id)).filter(Boolean).map(e=>L(e,"name")).join(" · ");
+    const t = DATA.tarifas[p.mode] || DATA.tarifas.bloque;
+    const post = (p.prod.mezcla||p.prod.master) ? " · " + T("camps.post") : "";
+    return `<button type="button" class="camp" data-camp="${i}"><img src="${THUMBS[p.img]||THUMBS.control}" alt=""><span><b>${esc(L(p,"label"))}</b><p>${esc(L(p,"desc"))}</p><span class="cmeta">${esc(L(t,"label"))} · ${T("camps.desde")} ${fmtUSD(t.con)}${post}</span><span class="gear">${T("camps.inc")}: ${esc(eq)}</span></span><span class="go"><span>${T("camps.go")}</span> →</span></button>`;
   }).join("");
 }
 
@@ -851,7 +873,9 @@ function render(){
   // channels
   $("#presets").innerHTML = DATA.presets.map((p,i)=>`<button type="button" class="pr" aria-pressed="${S.preset===i}" data-preset="${i}">${esc(L(p,"label"))}</button>`).join("") +
     `<button type="button" class="pr" aria-pressed="${S.preset===-1}" data-preset="-1">${T("ch.free")}</button>`;
-  $("#gear").innerHTML = DATA.equipos.map((e,i) =>
+  // Agrupado por tipo (micrófonos, monitoreo…): con todo el inventario, una sola fila de canales sería ilegible.
+  const cats = [...new Set(DATA.equipos.map(e => L(e,"cat")))];
+  const tira = (e,i) =>
     `<button type="button" class="ch" aria-pressed="${S.eq.has(e.id)}" data-eq="${esc(e.id)}" aria-label="${esc(L(e,"cat"))} ${esc(L(e,"name"))}">
       <span class="cn"><span>CH ${pad(i+1)}</span><span class="led"></span></span>
       <span class="knob" aria-hidden="true"></span>
@@ -860,7 +884,9 @@ function render(){
       <span class="nm">${esc(L(e,"name"))}</span>
       <span class="ct">${esc(L(e,"cat"))}</span>
       ${e.qty>1?`<span class="q">×${e.qty}</span>`:""}
-    </button>`).join("");
+    </button>`;
+  $("#gear").innerHTML = cats.map(c => `<div class="gcat"><span class="mono">${esc(c)}</span><div class="strips">${
+    DATA.equipos.map((e,i)=>[e,i]).filter(([e])=>L(e,"cat")===c).map(([e,i])=>tira(e,i)).join("")}</div></div>`).join("");
 
   // post
   $("#prod").innerHTML = DATA.produccion.filter(p => p.id !== "mixmaster").map(p =>
